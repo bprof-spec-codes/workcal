@@ -12,11 +12,11 @@ All communication must be done via MS Teams's official channels and group chats,
 Development must be made accordingly to the SCRUM rules and roles. Each team member is responsible for his role and his work. Based on this, sprints must be involved during development.
 
 ## Using boards
-Under each repository there will be the Projects tab, where the boards will be maintained. Each board will represent 1 sprint, where the tickets will be moved from one board's backlog to another board's backlog (there is no better option at this time at GitHub) as we move from one sprint to another.
+Under each repository there will be the Projects tab, where the board will be maintained. Since GitHub board can't handle sprints (as part of SCRUM), we will use the following concept:
 
 Columns to be used:
-- `Backlog`
-- `To Do`
+- `Backlog` --> contains all tasks are listed for the full project
+- `To Do` --> contains all tasks which are selected for the given sprint
 - `In Progress`
 - `In Testing` (optionally)
 - `Done`
