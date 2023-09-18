@@ -1,8 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿//using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
+using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
+using Volo.Abp.ObjectExtending;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
@@ -27,6 +30,14 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
         builder.ConfigureSettingManagement();
         builder.ConfigureAuditLogging();
         builder.ConfigureIdentity();
+
+
+        //ObjectExtensionManager.Instance
+        //    .MapEfCoreProperty<IdentityUser, string>(
+        //    "SocialSecurityNumber", (
+        //        entityBuilder, propertyBuilder
+        //        ) => { propertyBuilder.HasMaxLength(32); }
+        //        );
         builder.ConfigureOpenIddict();
         builder.ConfigureFeatureManagement();
         builder.ConfigureTenantManagement();
