@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
       [endDayHour]="19">
     </dx-scheduler>
   `,
-  styleUrls: ['./scheduler.component.css']
+  styleUrls: ['./scheduler.component.scss']
 })
 export class SchedulerComponent  {
   events: any[] = [

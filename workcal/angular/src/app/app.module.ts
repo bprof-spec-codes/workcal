@@ -18,6 +18,7 @@ import { FeatureManagementModule } from '@abp/ng.feature-management';
 import { AbpOAuthModule } from '@abp/ng.oauth';
 import { DxSchedulerModule } from 'devextreme-angular';
 import { SchedulerComponent } from './scheduler/scheduler.component';
+import { CalendarViewComponent } from './calendar-view/calendar-view.component';
 
 
 @NgModule({
@@ -26,6 +27,7 @@ import { SchedulerComponent } from './scheduler/scheduler.component';
     BrowserAnimationsModule,
     AppRoutingModule,
     DxSchedulerModule,
+    CalendarViewComponent,
     CoreModule.forRoot({
       environment,
       registerLocaleFn: registerLocale(),
@@ -41,7 +43,7 @@ import { SchedulerComponent } from './scheduler/scheduler.component';
     FeatureManagementModule.forRoot(),
 
   ],
-  declarations: [AppComponent, SchedulerComponent,SchedulerComponent],
+  declarations: [AppComponent, SchedulerComponent,SchedulerComponent, CalendarViewComponent],
   providers: [APP_ROUTE_PROVIDER],
   bootstrap: [AppComponent],
 })
