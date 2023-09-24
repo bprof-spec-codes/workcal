@@ -17,6 +17,7 @@ import { APP_ROUTE_PROVIDER } from './route.provider';
 import { FeatureManagementModule } from '@abp/ng.feature-management';
 import { AbpOAuthModule } from '@abp/ng.oauth';
 import { DxSchedulerModule } from 'devextreme-angular';
+import { SchedulerComponent } from './scheduler/scheduler.component';
 
 
 @NgModule({
@@ -40,7 +41,7 @@ import { DxSchedulerModule } from 'devextreme-angular';
     FeatureManagementModule.forRoot(),
 
   ],
-  declarations: [AppComponent],
+  declarations: [AppComponent, SchedulerComponent,SchedulerComponent],
   providers: [APP_ROUTE_PROVIDER],
   bootstrap: [AppComponent],
 })
