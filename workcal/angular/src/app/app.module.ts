@@ -16,12 +16,15 @@ import { AppComponent } from './app.component';
 import { APP_ROUTE_PROVIDER } from './route.provider';
 import { FeatureManagementModule } from '@abp/ng.feature-management';
 import { AbpOAuthModule } from '@abp/ng.oauth';
+import { DxSchedulerModule } from 'devextreme-angular';
+
 
 @NgModule({
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
+    DxSchedulerModule,
     CoreModule.forRoot({
       environment,
       registerLocaleFn: registerLocale(),
@@ -35,6 +38,7 @@ import { AbpOAuthModule } from '@abp/ng.oauth';
     ThemeLeptonXModule.forRoot(),
     SideMenuLayoutModule.forRoot(),
     FeatureManagementModule.forRoot(),
+
   ],
   declarations: [AppComponent],
   providers: [APP_ROUTE_PROVIDER],
