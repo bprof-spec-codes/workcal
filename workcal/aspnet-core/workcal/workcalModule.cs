@@ -46,6 +46,7 @@ using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace workcal;
 
@@ -130,6 +131,13 @@ public class workcalModule : AbpModule
         {
             context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
         }
+
+        Configure<AbpAspNetCoreMvcOptions>(options =>
+        {
+            options.ConventionalControllers.Create(typeof(workcalModule).Assembly);
+        });
+
+      
 
         ConfigureAuthentication(context);
         ConfigureBundles();
