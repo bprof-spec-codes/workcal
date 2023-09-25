@@ -20,8 +20,7 @@ namespace workcal.Services
         {
             var eventEntity = new Event
             {
-                // Id = GuidGenerator.Create(),
-
+               // Id = GuidGenerator.Create(),
                 Name = input.Name,
                 StartTime = input.StartTime,
                 EndTime = input.EndTime,
@@ -36,5 +35,31 @@ namespace workcal.Services
             var eventEntity = await _eventRepository.GetAsync(id);
             return ObjectMapper.Map<Event, EventDto>(eventEntity);
         }
+
+        // Implementation for getting all events
+        public async Task<List<EventDto>> GetAllAsync()
+        {
+            var events = await _eventRepository.GetListAsync();
+            return ObjectMapper.Map<List<Event>, List<EventDto>>(events);
+        }
+
+        // Implementation for deleting an event by id
+        public async Task DeleteAsync(Guid id)
+        {
+            await _eventRepository.DeleteAsync(id);
+        }
+
+        // Implementation for updating an event
+        public async Task UpdateAsync(Guid id, CreateEventDto input)
+        {
+            var eventEntity = await _eventRepository.GetAsync(id);  // Retrieve the existing event
+            eventEntity.Name = input.Name;  // Update fields
+            eventEntity.StartTime = input.StartTime;
+            eventEntity.EndTime = input.EndTime;
+            eventEntity.Location = input.Location;
+
+            await _eventRepository.UpdateAsync(eventEntity);  // Update the event in the repository
+        }
     }
+
 }

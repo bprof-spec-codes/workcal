@@ -11,13 +11,11 @@ namespace workcal.Services
     {
         private readonly IRepository<Label, Guid> _labelRepository;
 
-        // Dependency injection for IRepository
         public LabelAppService(IRepository<Label, Guid> labelRepository)
         {
             _labelRepository = labelRepository;
         }
 
-        // Create new Label
         public async Task CreateAsync(CreateLabelDto input)
         {
             var label = new Label
@@ -25,17 +23,36 @@ namespace workcal.Services
                // Id = GuidGenerator.Create(),
                 Name = input.Name,
                 Color = input.Color
-                // EventId = input.EventId if you wish to associate it during creation
             };
-
             await _labelRepository.InsertAsync(label);
         }
 
-        // Get a Label by Id
         public async Task<LabelDto> GetAsync(Guid id)
         {
             var label = await _labelRepository.GetAsync(id);
             return ObjectMapper.Map<Label, LabelDto>(label);
+        }
+
+        // Implementation for getting all labels
+        public async Task<List<LabelDto>> GetAllAsync()
+        {
+            var labels = await _labelRepository.GetListAsync();
+            return ObjectMapper.Map<List<Label>, List<LabelDto>>(labels);
+        }
+
+        // Implementation for deleting a label by id
+        public async Task DeleteAsync(Guid id)
+        {
+            await _labelRepository.DeleteAsync(id);
+        }
+
+        // Implementation for updating a label
+        public async Task UpdateAsync(Guid id, CreateLabelDto input)
+        {
+            var label = await _labelRepository.GetAsync(id);  // Retrieve the existing label
+            label.Name = input.Name;  // Update fields
+            label.Color = input.Color;
+            await _labelRepository.UpdateAsync(label);  // Update the label in the repository
         }
     }
 
