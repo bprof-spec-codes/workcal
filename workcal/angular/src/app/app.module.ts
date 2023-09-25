@@ -17,8 +17,11 @@ import { APP_ROUTE_PROVIDER } from './route.provider';
 import { FeatureManagementModule } from '@abp/ng.feature-management';
 import { AbpOAuthModule } from '@abp/ng.oauth';
 import { DxSchedulerModule } from 'devextreme-angular';
+<<<<<<< HEAD
 import { SchedulerComponent } from './scheduler/scheduler.component';
 import { CalendarViewComponent } from './calendar-view/calendar-view.component';
+=======
+>>>>>>> parent of 1a32203 (sheduler component)
 
 
 @NgModule({
@@ -43,7 +46,11 @@ import { CalendarViewComponent } from './calendar-view/calendar-view.component';
     FeatureManagementModule.forRoot(),
 
   ],
+<<<<<<< HEAD
   declarations: [AppComponent, SchedulerComponent,SchedulerComponent, CalendarViewComponent],
+=======
+  declarations: [AppComponent],
+>>>>>>> parent of 1a32203 (sheduler component)
   providers: [APP_ROUTE_PROVIDER],
   bootstrap: [AppComponent],
 })

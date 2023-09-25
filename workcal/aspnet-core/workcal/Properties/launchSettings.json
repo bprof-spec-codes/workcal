@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "https://localhost:44380",
+      "applicationUrl": "https://localhost:44387",
       "sslPort": 44387
     }
   },
@@ -18,7 +18,7 @@
     "workcal": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:44380",
+      "applicationUrl": "https://localhost:44387",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
