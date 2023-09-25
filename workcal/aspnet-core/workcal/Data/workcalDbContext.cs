@@ -1,9 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
+using Volo.Abp.Data;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
+using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
+using Volo.Abp.ObjectExtending;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
@@ -39,11 +43,30 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
 
         /* Configure your own entities here */
 
-        builder.Entity<Event>()
-              .HasOne(e => e.Label)
-              .WithMany(l => l.Events)
-              .HasForeignKey(e => e.LabelId);
+        builder.Entity<Event>().HasMany(e=> e.Labels)
+            .WithOne(o=>o.Event)
+            .HasForeignKey(p => p.Id)
+            .OnDelete(DeleteBehavior.Cascade);
 
+        ObjectExtensionManager.Instance
+            .AddOrUpdate<IdentityUser>(options => { options.AddOrUpdateProperty<ICollection<EventsUsers>>("Events"); });
+
+
+        builder.Entity<EventsUsers>()
+                    .HasOne(ur => ur.Event)
+                    .WithMany(u => u.EventUsers)
+                    .HasForeignKey(ur => ur.UserId);
+        /*
+        builder.Entity<EventsUsers>()
+            .HasOne(ur => ur.User)
+            .WithMany(r => (ICollection<EventsUsers>)r.ExtraProperties["Events"])
+            .HasForeignKey(ur => ur.EventId);
+        */
+
+        builder.Entity<EventsUsers>(b => {
+            b.ToTable("EventsUsers"); b.ConfigureByConvention();
+            b.HasOne(x => x.User).WithMany().HasForeignKey("Id"); b.HasOne(x => x.Event).WithMany(x => x.EventUsers).HasForeignKey("Id");
+        });
     }
 
 }

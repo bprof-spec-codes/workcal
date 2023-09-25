@@ -1,29 +1,33 @@
 ﻿using workcal.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Volo.Abp.Domain.Entities;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
+using Volo.Abp.Identity;
 
 namespace workcal.Entities
 {
-    public class Event : IEntity
+    public class Event : BasicAggregateRoot<Guid>
     {
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public Guid LabelId { get; set; }
-        public Label Label { get; set; }
+
         public string Location { get; set; }
 
-        public Guid WorkerId { get; set; }
+        [ValidateNever]
+        [JsonIgnore]
+        public List<Label> Labels { get; set; }
 
-        public Guid ManagerId { get; set; }
+        [ValidateNever]
+        [JsonIgnore]
+        public ICollection<EventsUsers> EventUsers { get; set; }
 
-        public object[] GetKeys()
-        {
-            return ((IEntity)Label).GetKeys();
-        }
+    
+
     }
 
 }
