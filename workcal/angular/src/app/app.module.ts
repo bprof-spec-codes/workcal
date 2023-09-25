@@ -20,8 +20,6 @@ import { DxSchedulerModule } from 'devextreme-angular';
 <<<<<<< HEAD
 import { SchedulerComponent } from './scheduler/scheduler.component';
 import { CalendarViewComponent } from './calendar-view/calendar-view.component';
-=======
->>>>>>> parent of 1a32203 (sheduler component)
 
 
 @NgModule({
@@ -30,7 +28,6 @@ import { CalendarViewComponent } from './calendar-view/calendar-view.component';
     BrowserAnimationsModule,
     AppRoutingModule,
     DxSchedulerModule,
-    CalendarViewComponent,
     CoreModule.forRoot({
       environment,
       registerLocaleFn: registerLocale(),
@@ -46,11 +43,7 @@ import { CalendarViewComponent } from './calendar-view/calendar-view.component';
     FeatureManagementModule.forRoot(),
 
   ],
-<<<<<<< HEAD
   declarations: [AppComponent, SchedulerComponent,SchedulerComponent, CalendarViewComponent],
-=======
-  declarations: [AppComponent],
->>>>>>> parent of 1a32203 (sheduler component)
   providers: [APP_ROUTE_PROVIDER],
   bootstrap: [AppComponent],
 })
