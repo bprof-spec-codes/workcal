@@ -21,9 +21,12 @@ import { DxSchedulerModule } from 'devextreme-angular';
 import { CalendarPageComponent } from './calendar-page/calendar-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { HttpClientModule } from '@angular/common/http';
+
 
 @NgModule({
   imports: [
+    HttpClientModule,
     MatButtonModule,
     MatToolbarModule,
     BrowserModule,
