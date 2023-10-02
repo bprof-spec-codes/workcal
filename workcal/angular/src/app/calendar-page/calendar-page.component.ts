@@ -5,10 +5,14 @@ import { EventDto } from '../models/event-dto.model'; // Create this model
 @Component({
   selector: 'app-calendar-page',
   templateUrl: './calendar-page.component.html',
-  styleUrls: ['./calendar-page.component.css']
+  styleUrls: ['./calendar-page.component.scss']
 })
 export class CalendarPageComponent implements OnInit {
-  events: EventDto[];
+  events: EventDto[] = [];
+  schedulerEvents: any[] = []; // For DevExtreme Scheduler
+
+  currentDate: Date = new Date();
+  currentView: string = 'day';
 
   constructor(private eventApiService: EventApiService) { }
 
@@ -19,10 +23,16 @@ export class CalendarPageComponent implements OnInit {
   fetchEvents(): void {
     this.eventApiService.getAllEvents().subscribe(data => {
       this.events = data;
-      // Now, 'this.events' contains all events fetched from the backend.
-      // You can bind it to your DevExtreme scheduler component.
+      this.schedulerEvents = data.map(event => ({
+        startDate: event.startTime,
+        endDate: event.endTime,
+        text: event.name,
+        location: event.location
+      }));
     });
   }
+
+
   createEvent(newEvent: EventDto): void {
     this.eventApiService.createEvent(newEvent).subscribe(data => {
       this.events.push(data);
