@@ -20,6 +20,9 @@ export class CalendarPageComponent implements OnInit {
     this.fetchEvents();
   }
 
+
+
+
   fetchEvents(): void {
     this.eventApiService.getAllEvents().subscribe(data => {
       this.events = data;
@@ -67,7 +70,7 @@ export class CalendarPageComponent implements OnInit {
       name: appointmentData.text, // Replace with the correct field name if it's different
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
-      location: ''//appointmentData.location // Replace with the correct field name if it's different
+      location: appointmentData.location || ''
     };
 
     console.log("Prepared payload for adding:", newEvent);  // Debug line to check prepared payload
@@ -77,12 +80,15 @@ export class CalendarPageComponent implements OnInit {
 
 
   onEventUpdating(event): void {
+
+    const appointmentData = event.appointmentData;
+
     const updatedEvent: EventDto = {
       id: event.id,
       name: event.text,
       startTime: event.startDate,
       endTime: event.endDate,
-      location: event.location
+      location: ''//event.location
     };
     console.log('Updating event:', updatedEvent);  // Debug line
     this.updateEvent(updatedEvent);
@@ -91,6 +97,28 @@ export class CalendarPageComponent implements OnInit {
   onEventDeleting(event): void {
     console.log('Deleting event with ID:', event.id);  // Debug line
     this.deleteEvent(event.id);
+  }
+
+
+  onAppointmentFormOpening(data: any): void {
+    const form = data.form;
+
+    // Add a new data field for location
+    form.itemOption('mainGroup', {
+      items: [
+        ...form.itemOption('mainGroup').items,
+        {
+          dataField: 'location',
+          editorType: 'dxTextBox',
+          editorOptions: {
+            placeholder: 'Enter location...'
+          },
+          label: {
+            text: 'Location'
+          }
+        }
+      ]
+    });
   }
 
 
