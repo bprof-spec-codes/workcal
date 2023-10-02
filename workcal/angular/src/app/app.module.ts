@@ -19,10 +19,13 @@ import { AbpOAuthModule } from '@abp/ng.oauth';
 import { SchedulerComponent } from './scheduler/scheduler.component';
 import { DxSchedulerModule } from 'devextreme-angular';
 import { CalendarPageComponent } from './calendar-page/calendar-page.component';
-
+import { MatButtonModule } from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 @NgModule({
   imports: [
+    MatButtonModule,
+    MatToolbarModule,
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
