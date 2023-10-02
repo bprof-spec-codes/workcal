@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { EventApiService } from '../event-api.service';
-import { EventDto } from '../models/event-dto.model'; // Create this model
+import { EventDto } from '../models/event-dto.model';
 
 @Component({
   selector: 'app-calendar-page',
@@ -104,9 +104,20 @@ export class CalendarPageComponent implements OnInit {
     this.updateEvent(updatedEvent);
   }
 
-  onEventDeleting(event): void {
-    console.log('Deleting event with ID:', event.id);  // Debug line
-    this.deleteEvent(event.id);
+  onEventDeleting(event: any): void {
+    const appointmentData = event.appointmentData;
+
+    // Verify if the id is present
+    if (!appointmentData.id) {
+      console.error("Event ID is missing, cannot delete");
+      event.cancel = true; // Prevents the deletion if id is missing
+      return;
+    }
+
+    console.log("Prepared id for deleting:", appointmentData.id);  // Debug line to check prepared id
+
+    // Assuming deleteEvent() sends a request to delete the event by id
+    this.deleteEvent(appointmentData.id);
   }
 
 
@@ -132,5 +143,4 @@ export class CalendarPageComponent implements OnInit {
   }
 
 
-  // Implement similar methods for creating, updating, and deleting events.
 }
