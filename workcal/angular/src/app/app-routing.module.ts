@@ -1,7 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { CalendarPageComponent } from './calendar-page/calendar-page.component';
+
 
 const routes: Routes = [
+  { path: 'calendar', component: CalendarPageComponent },
+
   {
     path: '',
     pathMatch: 'full',

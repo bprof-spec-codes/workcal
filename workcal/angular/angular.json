@@ -35,6 +35,7 @@
                 "inject": false,
                 "bundleName": "bootstrap-dim"
               },
+              "node_modules/devextreme/dist/css/dx.light.css",
               {
                 "input": "node_modules/@volo/ngx-lepton-x.lite/assets/css/ng-bundle.css",
                 "inject": false,
@@ -105,6 +106,7 @@
                 "inject": true,
                 "bundleName": "ngx-datatable-material"
               },
+              "node_modules/devextreme/dist/css/dx.light.css",
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "src/styles.scss"
             ],
