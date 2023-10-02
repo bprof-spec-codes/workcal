@@ -58,6 +58,41 @@ export class CalendarPageComponent implements OnInit {
     });
   }
 
+  onEventAdding(event): void {
+    // Access the correct appointmentData object
+    const appointmentData = event.appointmentData;
+
+    const newEvent: EventDto = {
+      id: '',  // Replace with a proper UUID or let your backend handle it
+      name: appointmentData.text, // Replace with the correct field name if it's different
+      startTime: new Date(appointmentData.startDate),
+      endTime: new Date(appointmentData.endDate),
+      location: ''//appointmentData.location // Replace with the correct field name if it's different
+    };
+
+    console.log("Prepared payload for adding:", newEvent);  // Debug line to check prepared payload
+    this.createEvent(newEvent);
+  }
+
+
+
+  onEventUpdating(event): void {
+    const updatedEvent: EventDto = {
+      id: event.id,
+      name: event.text,
+      startTime: event.startDate,
+      endTime: event.endDate,
+      location: event.location
+    };
+    console.log('Updating event:', updatedEvent);  // Debug line
+    this.updateEvent(updatedEvent);
+  }
+
+  onEventDeleting(event): void {
+    console.log('Deleting event with ID:', event.id);  // Debug line
+    this.deleteEvent(event.id);
+  }
+
 
   // Implement similar methods for creating, updating, and deleting events.
 }
