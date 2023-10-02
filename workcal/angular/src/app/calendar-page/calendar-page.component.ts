@@ -27,6 +27,7 @@ export class CalendarPageComponent implements OnInit {
     this.eventApiService.getAllEvents().subscribe(data => {
       this.events = data;
       this.schedulerEvents = data.map(event => ({
+        id:event.id,
         startDate: event.startTime,
         endDate: event.endTime,
         text: event.name,
@@ -80,17 +81,26 @@ export class CalendarPageComponent implements OnInit {
 
 
   onEventUpdating(event): void {
+    console.log("Event update object:", event); // Debug line
+    const appointmentData = event.newData;
+    const appointmentDataold = event.oldData;
 
-    const appointmentData = event.appointmentData;
+    if (!appointmentDataold.id) {
+      console.error("Event ID is missing, cannot update");
+      return;
+    }
 
     const updatedEvent: EventDto = {
-      id: event.id,
-      name: event.text,
-      startTime: event.startDate,
-      endTime: event.endDate,
-      location: ''//event.location
+      id: appointmentDataold.id,
+      name: appointmentData.text,
+      startTime: new Date(appointmentData.startDate),
+      endTime: new Date(appointmentData.endDate),
+      location: appointmentData.location || ''
     };
-    console.log('Updating event:', updatedEvent);  // Debug line
+
+    console.log("Prepared payload for updating:", updatedEvent);  // Debug line to check prepared payload
+
+    // Assuming updateEvent() sends the updated event to the backend
     this.updateEvent(updatedEvent);
   }
 
