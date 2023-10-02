@@ -38,26 +38,32 @@ export class CalendarPageComponent implements OnInit {
 
 
   createEvent(newEvent: EventDto): void {
-    this.eventApiService.createEvent(newEvent).subscribe(data => {
-      this.events.push(data);
-      // Optionally, refresh the Scheduler to show the new event
-    });
+    this.eventApiService.createEvent(newEvent).subscribe(
+      () => {
+        console.log('Event created successfully.');
+        this.fetchEvents(); // Refresh events after creating
+      },
+      (error) => {
+        console.error('Error creating event:', error);
+      }
+    );
   }
   updateEvent(eventToUpdate: EventDto): void {
-    this.eventApiService.updateEvent(eventToUpdate.id, eventToUpdate).subscribe(() => {
-      const index = this.events.findIndex(event => event.id === eventToUpdate.id);
-      if (index !== -1) {
-        this.events[index] = eventToUpdate;
-        // Optionally, refresh the Scheduler to reflect the update
-      }
-    });
+    this.eventApiService.updateEvent(eventToUpdate.id, eventToUpdate).subscribe( () => {
+      console.log('Event updated successfully.');
+      this.fetchEvents(); // Refresh events after updating
+    },
+    (error) => {
+      console.error('Error updating event:', error);
+    }
+  );
   }
   deleteEvent(eventId: string): void {
     this.eventApiService.deleteEvent(eventId).subscribe(() => {
       const index = this.events.findIndex(event => event.id === eventId);
       if (index !== -1) {
         this.events.splice(index, 1);
-        // Optionally, refresh the Scheduler to reflect the deletion
+
       }
     });
   }
@@ -67,8 +73,8 @@ export class CalendarPageComponent implements OnInit {
     const appointmentData = event.appointmentData;
 
     const newEvent: EventDto = {
-      id: '',  // Replace with a proper UUID or let your backend handle it
-      name: appointmentData.text, // Replace with the correct field name if it's different
+      id: '',
+      name: appointmentData.text,
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || ''
