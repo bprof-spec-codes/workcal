@@ -20,11 +20,15 @@ namespace workcal.Services
         {
             var eventEntity = new Event
             {
-               // Id = GuidGenerator.Create(),
                 Name = input.Name,
                 StartTime = input.StartTime,
                 EndTime = input.EndTime,
-                Location = input.Location
+                Location = input.Location,
+                Labels = input.Labels.Select(label => new Label
+                {
+                    Name = label.Name,
+                    Color = label.Color
+                }).ToList()
             };
 
             await _eventRepository.InsertAsync(eventEntity);

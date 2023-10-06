@@ -1,5 +1,5 @@
 ﻿using System;
-
+using workcal.Entities;
 
 namespace workcal.Services.Dtos
 
@@ -11,5 +11,7 @@ namespace workcal.Services.Dtos
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string Location { get; set; }
+        public List<Label> Labels { get; set; }
+
     }
 }

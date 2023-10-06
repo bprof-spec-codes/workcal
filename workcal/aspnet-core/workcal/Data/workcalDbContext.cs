@@ -45,7 +45,7 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
 
         builder.Entity<Event>().HasMany(e=> e.Labels)
             .WithOne(o=>o.Event)
-            .HasForeignKey(p => p.Id)
+            .HasForeignKey(p => p.EventId)
             .OnDelete(DeleteBehavior.Cascade);
 
         ObjectExtensionManager.Instance

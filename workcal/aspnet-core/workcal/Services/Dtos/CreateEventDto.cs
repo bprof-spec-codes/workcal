@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using workcal.Entities;
 
 namespace workcal.Services.Dtos
 {
@@ -15,5 +16,7 @@ namespace workcal.Services.Dtos
         public DateTime EndTime { get; set; }
 
         public string Location { get; set; }
+
+        public List<CreateLabelDto> Labels { get; set; }
     }
 }

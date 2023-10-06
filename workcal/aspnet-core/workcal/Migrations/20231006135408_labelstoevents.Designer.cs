@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Volo.Abp.EntityFrameworkCore;
 using workcal.Data;
@@ -12,9 +13,11 @@ using workcal.Data;
 namespace workcal.Migrations
 {
     [DbContext(typeof(workcalDbContext))]
-    partial class workcalDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231006135408_labelstoevents")]
+    partial class labelstoevents
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1687,8 +1690,6 @@ namespace workcal.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EventId");
-
                     b.ToTable("Labels");
                 });
 
@@ -1857,7 +1858,7 @@ namespace workcal.Migrations
                 {
                     b.HasOne("workcal.Entities.Event", "Event")
                         .WithMany("Labels")
-                        .HasForeignKey("EventId")
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -11,8 +11,7 @@ namespace workcal.Services.Dtos
         [Required]
         public string Color { get; set; }
 
-        // Optionally, you can add EventId if you wish to associate it during creation
-        public Guid EventId { get; set; }
+      
     }
 
 }
