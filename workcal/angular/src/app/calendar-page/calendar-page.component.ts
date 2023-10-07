@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { EventApiService } from '../event-api.service';
-import { EventDto } from '../models/event-dto.model';
+import { EventDto  } from '../models/event-dto.model';
 
 @Component({
   selector: 'app-calendar-page',
@@ -11,13 +11,23 @@ export class CalendarPageComponent implements OnInit {
   events: EventDto[] = [];
   schedulerEvents: any[] = []; // For DevExtreme Scheduler
 
+  selectedEvent: EventDto;
+
   currentDate: Date = new Date();
   currentView: string = 'day';
+// Define some example labels with names and colors
+defaultLabels: Array<{ name: string, color: string }> = [
+  { name: 'Meeting', color: '#FF0000' },
+  { name: 'Workshop', color: '#00FF00' },
+  { name: 'Conference', color: '#0000FF' },
+  { name: 'Webinar', color: '#FFFF00' }
+];
 
   constructor(private eventApiService: EventApiService) { }
 
   ngOnInit(): void {
     this.fetchEvents();
+
   }
 
 
@@ -31,7 +41,8 @@ export class CalendarPageComponent implements OnInit {
         startDate: event.startTime,
         endDate: event.endTime,
         text: event.name,
-        location: event.location
+        location: event.location,
+        labels: event.labels
       }));
     });
   }
@@ -77,7 +88,8 @@ export class CalendarPageComponent implements OnInit {
       name: appointmentData.text,
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
-      location: appointmentData.location || ''
+      location: appointmentData.location || '',
+      labels: appointmentData.labels || []
     };
 
     console.log("Prepared payload for adding:", newEvent);  // Debug line to check prepared payload
@@ -101,7 +113,8 @@ export class CalendarPageComponent implements OnInit {
       name: appointmentData.text,
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
-      location: appointmentData.location || ''
+      location: appointmentData.location || '',
+      labels: appointmentData.labels || []
     };
 
     console.log("Prepared payload for updating:", updatedEvent);  // Debug line to check prepared payload
@@ -130,7 +143,13 @@ export class CalendarPageComponent implements OnInit {
   onAppointmentFormOpening(data: any): void {
     const form = data.form;
 
-    // Add a new data field for location
+    // Debugging: Check if labels data is available
+    console.log('Selected Event Labels:', this.selectedEvent?.labels);  // Debug line
+
+    // Safely check if labels exist before mapping
+    const labelNames = this.selectedEvent?.labels?.map(l => l.name) || [];
+
+    // Add a new data field for location and labels
     form.itemOption('mainGroup', {
       items: [
         ...form.itemOption('mainGroup').items,
@@ -143,10 +162,28 @@ export class CalendarPageComponent implements OnInit {
           label: {
             text: 'Location'
           }
+        },
+        {
+          dataField: 'labels',
+          editorType: 'dxTagBox',
+          editorOptions: {
+            dataSource: this.defaultLabels,
+            displayExpr: 'name',
+            valueExpr: 'name',
+            itemTemplate: function(itemData, _, itemElement) {
+              itemElement.textContent = itemData.name;
+              itemElement.style.backgroundColor = itemData.color;
+            },
+            placeholder: 'Add labels...'
+          },
+          label: {
+            text: 'Labels'
+          }
         }
       ]
     });
   }
+
 
 
 }

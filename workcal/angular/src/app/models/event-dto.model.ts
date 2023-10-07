@@ -6,6 +6,7 @@ export class EventDto {
   startTime: Date;
   endTime: Date;
   location: string;
+  labels: LabelDto[] = [];  // Initialize to empty array
 
   constructor(
     id: string = '',
@@ -20,4 +21,10 @@ export class EventDto {
     this.endTime = endTime;
     this.location = location;
   }
+}
+
+export class LabelDto {
+  id?: string;
+  name: string;
+  color: string;
 }

@@ -26,6 +26,7 @@ namespace workcal.Services
                 Location = input.Location,
                 Labels = input.Labels.Select(label => new Label
                 {
+                    EventId = label.EventId,
                     Name = label.Name,
                     Color = label.Color
                 }).ToList()

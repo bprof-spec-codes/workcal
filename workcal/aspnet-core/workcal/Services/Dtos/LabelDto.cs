@@ -7,6 +7,8 @@ namespace workcal.Services.Dtos
     {
         public string Name { get; set; }
         public string Color { get; set; }
+
+        public Guid EventId { get; set; }
     }
 
 }

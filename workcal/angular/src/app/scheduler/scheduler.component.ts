@@ -1,19 +1,18 @@
+/* eslint-disable @angular-eslint/no-empty-lifecycle-method */
 import { Component, OnInit } from '@angular/core';
+import { EventDto } from '../models/event-dto.model';
 
 @Component({
   selector: 'app-scheduler',
   template: `
-    <dx-scheduler
-      [dataSource]="events"
-      [currentDate]="currentDate"
-      [startDayHour]="9"
-      [endDayHour]="19"
-      (onAppointmentFormOpening)="onAppointmentFormOpening($event)">
-    </dx-scheduler>
+
   `,
   styleUrls: ['./scheduler.component.scss']
 })
 export class SchedulerComponent implements OnInit {
+  schedulerEvents: any[]; // Already mapped from EventDto
+  selectedEvent: EventDto;
+
   events: any[] = [
     {
       text: "Test Event 1",
@@ -28,7 +27,27 @@ export class SchedulerComponent implements OnInit {
     // Initialization logic here
   }
 
-  onAppointmentFormOpening(data: any) {
-    // Modify or handle the appointment form here
+  onAppointmentFormOpening(data: any): void {
+    const form = data.form;
+
+    // ... Existing code to add location field
+
+    // Add a new data field for labels
+    form.itemOption('mainGroup', {
+      items: [
+        ...form.itemOption('mainGroup').items,
+        {
+          dataField: 'labels',
+          editorType: 'dxTagBox',
+          editorOptions: {
+            items: this.selectedEvent.labels.map(l => l.name),
+            placeholder: 'Add labels...'
+          },
+          label: {
+            text: 'Labels'
+          }
+        }
+      ]
+    });
   }
 }

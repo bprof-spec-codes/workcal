@@ -20,7 +20,7 @@ namespace workcal.Services
         {
             var label = new Label
             {
-               // Id = GuidGenerator.Create(),
+                EventId = input.EventId,
                 Name = input.Name,
                 Color = input.Color
             };
@@ -52,6 +52,8 @@ namespace workcal.Services
             var label = await _labelRepository.GetAsync(id);  // Retrieve the existing label
             label.Name = input.Name;  // Update fields
             label.Color = input.Color;
+            label.EventId = input.EventId;
+
             await _labelRepository.UpdateAsync(label);  // Update the label in the repository
         }
     }

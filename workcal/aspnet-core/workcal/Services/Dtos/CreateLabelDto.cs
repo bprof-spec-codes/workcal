@@ -11,7 +11,9 @@ namespace workcal.Services.Dtos
         [Required]
         public string Color { get; set; }
 
-      
+        [Required]
+        public Guid EventId { get; set; }
+
     }
 
 }
