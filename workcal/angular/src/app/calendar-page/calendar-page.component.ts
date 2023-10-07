@@ -80,8 +80,12 @@ defaultLabels: Array<{ name: string, color: string }> = [
   }
 
   onEventAdding(event): void {
-    // Access the correct appointmentData object
     const appointmentData = event.appointmentData;
+
+    // Prepare label data
+    const selectedLabels = this.defaultLabels.filter(label =>
+      appointmentData.labels?.includes(label.name)
+    );
 
     const newEvent: EventDto = {
       id: '',
@@ -89,39 +93,43 @@ defaultLabels: Array<{ name: string, color: string }> = [
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
-      labels: appointmentData.labels || []
+      labels: selectedLabels  // Include selected label data
     };
 
-    console.log("Prepared payload for adding:", newEvent);  // Debug line to check prepared payload
+    console.log("Prepared payload for adding:", newEvent);
     this.createEvent(newEvent);
   }
 
 
 
-  onEventUpdating(event): void {
-    console.log("Event update object:", event); // Debug line
-    const appointmentData = event.newData;
-    const appointmentDataold = event.oldData;
 
-    if (!appointmentDataold.id) {
+  onEventUpdating(event): void {
+    const appointmentData = event.newData;
+    const appointmentDataOld = event.oldData;
+
+    if (!appointmentDataOld.id) {
       console.error("Event ID is missing, cannot update");
       return;
     }
 
+    // Prepare label data
+    const selectedLabels = this.defaultLabels.filter(label =>
+      appointmentData.labels?.includes(label.name)
+    );
+
     const updatedEvent: EventDto = {
-      id: appointmentDataold.id,
+      id: appointmentDataOld.id,
       name: appointmentData.text,
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
-      labels: appointmentData.labels || []
+      labels: selectedLabels  // Include selected label data
     };
 
-    console.log("Prepared payload for updating:", updatedEvent);  // Debug line to check prepared payload
-
-    // Assuming updateEvent() sends the updated event to the backend
+    console.log("Prepared payload for updating:", updatedEvent);
     this.updateEvent(updatedEvent);
   }
+
 
   onEventDeleting(event: any): void {
     const appointmentData = event.appointmentData;
