@@ -27,4 +27,5 @@ export class LabelDto {
   id?: string;
   name: string;
   color: string;
+  eventId?: string;
 }

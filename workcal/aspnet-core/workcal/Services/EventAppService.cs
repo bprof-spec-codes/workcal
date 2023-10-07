@@ -4,6 +4,7 @@ using Volo.Abp.Application.Services;
 using workcal.Entities;
 using workcal.Services.Dtos;
 using Volo.Abp.Domain.Repositories;
+using Microsoft.IdentityModel.Tokens;
 
 namespace workcal.Services
 {
@@ -18,21 +19,29 @@ namespace workcal.Services
 
         public async Task CreateAsync(CreateEventDto input)
         {
-            var eventEntity = new Event
-            {
-                Name = input.Name,
-                StartTime = input.StartTime,
-                EndTime = input.EndTime,
-                Location = input.Location,
-                Labels = input.Labels.Select(label => new Label
-                {
-                    EventId = label.EventId,
-                    Name = label.Name,
-                    Color = label.Color
-                }).ToList()
-            };
+            
 
-            await _eventRepository.InsertAsync(eventEntity);
+                var eventEntity = new Event
+                {
+                    Name = input.Name,
+                    StartTime = input.StartTime,
+                    EndTime = input.EndTime,
+                    Location = input.Location,
+                    Labels = input.Labels.Select(label => new Label
+                    {
+
+                        EventId = label.EventId,
+                        Name = label.Name,
+                        Color = label.Color
+                    }).ToList()
+                };
+                await _eventRepository.InsertAsync(eventEntity);
+
+            
+
+
+
+
         }
 
         public async Task<EventDto> GetAsync(Guid id)

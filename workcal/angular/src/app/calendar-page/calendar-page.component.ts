@@ -7,6 +7,8 @@ import { EventDto  } from '../models/event-dto.model';
   templateUrl: './calendar-page.component.html',
   styleUrls: ['./calendar-page.component.scss']
 })
+
+
 export class CalendarPageComponent implements OnInit {
   events: EventDto[] = [];
   schedulerEvents: any[] = []; // For DevExtreme Scheduler
@@ -18,10 +20,18 @@ export class CalendarPageComponent implements OnInit {
 // Define some example labels with names and colors
 defaultLabels: Array<{ name: string, color: string }> = [
   { name: 'Meeting', color: '#FF0000' },
-  { name: 'Workshop', color: '#00FF00' },
+  { name: 'Workshop', color: '#00FF00'},
   { name: 'Conference', color: '#0000FF' },
-  { name: 'Webinar', color: '#FFFF00' }
+  { name: 'Webinar', color: '#FFFF00'}
 ];
+IdLabels: Array<{ name: string, color: string,eventId: string }> = [
+  { name: 'Meeting', color: '#FF0000' ,eventId:'' },
+  { name: 'Workshop', color: '#00FF00',eventId:'' },
+  { name: 'Conference', color: '#0000FF',eventId:'' },
+  { name: 'Webinar', color: '#FFFF00',eventId:'' }
+];
+
+
 
   constructor(private eventApiService: EventApiService) { }
 
@@ -50,15 +60,18 @@ defaultLabels: Array<{ name: string, color: string }> = [
 
   createEvent(newEvent: EventDto): void {
     this.eventApiService.createEvent(newEvent).subscribe(
-      () => {
+      (response) => {  // Assuming the backend returns the created event with an id
         console.log('Event created successfully.');
-        this.fetchEvents(); // Refresh events after creating
+        // Fetch updated events after creating, which will now include the new event with its id
+        this.fetchEvents();
       },
       (error) => {
         console.error('Error creating event:', error);
       }
     );
   }
+
+
   updateEvent(eventToUpdate: EventDto): void {
     this.eventApiService.updateEvent(eventToUpdate.id, eventToUpdate).subscribe( () => {
       console.log('Event updated successfully.');
@@ -87,6 +100,10 @@ defaultLabels: Array<{ name: string, color: string }> = [
       appointmentData.labels?.includes(label.name)
     );
 
+
+
+
+
     const newEvent: EventDto = {
       id: '',
       name: appointmentData.text,
@@ -113,17 +130,22 @@ defaultLabels: Array<{ name: string, color: string }> = [
     }
 
     // Prepare label data
+  /*  const selectedLabels = this.IdLabels.filter(label =>
+      appointmentData.labels?.includes(label.name)
+    ).map(label => {
+      label.eventId = appointmentDataOld.id;  // Add EventId to each selected label
+      return label;
+    });*/
     const selectedLabels = this.defaultLabels.filter(label =>
       appointmentData.labels?.includes(label.name)
     );
-
     const updatedEvent: EventDto = {
       id: appointmentDataOld.id,
       name: appointmentData.text,
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
-      labels: selectedLabels  // Include selected label data
+      labels: selectedLabels  // Include selected label data with EventId
     };
 
     console.log("Prepared payload for updating:", updatedEvent);
