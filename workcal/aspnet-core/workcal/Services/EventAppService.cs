@@ -5,43 +5,48 @@ using workcal.Entities;
 using workcal.Services.Dtos;
 using Volo.Abp.Domain.Repositories;
 using Microsoft.IdentityModel.Tokens;
+using AutoMapper.Internal.Mappers;
+
 
 namespace workcal.Services
 {
     public class EventAppService : ApplicationService, IEventAppService
     {
         private readonly IRepository<Event, Guid> _eventRepository;
+        private readonly IRepository<Label, Guid> _labelRepository;
 
-        public EventAppService(IRepository<Event, Guid> eventRepository)
+        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository)
         {
             _eventRepository = eventRepository;
+            _labelRepository = labelRepository;
         }
 
         public async Task CreateAsync(CreateEventDto input)
         {
-            
+            // Create and Save Event
+            var eventEntity = new Event
+            {
+                Name = input.Name,
+                StartTime = input.StartTime,
+                EndTime = input.EndTime,
+                Location = input.Location,
+            };
+            await _eventRepository.InsertAsync(eventEntity);
 
-                var eventEntity = new Event
+            // Now that the event is created and has an ID, we can create labels
+            if (input.Labels != null && input.Labels.Count > 0)
+            {
+                foreach (var label in input.Labels)
                 {
-                    Name = input.Name,
-                    StartTime = input.StartTime,
-                    EndTime = input.EndTime,
-                    Location = input.Location,
-                    Labels = input.Labels.Select(label => new Label
+                    var labelEntity = new Label
                     {
-
-                        EventId = label.EventId,
+                        EventId = eventEntity.Id, // Assign the newly created Event's ID
                         Name = label.Name,
                         Color = label.Color
-                    }).ToList()
-                };
-                await _eventRepository.InsertAsync(eventEntity);
-
-            
-
-
-
-
+                    };
+                    await _labelRepository.InsertAsync(labelEntity); // Assuming _labelRepository is your label repository
+                }
+            }
         }
 
         public async Task<EventDto> GetAsync(Guid id)
