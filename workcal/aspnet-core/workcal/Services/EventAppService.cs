@@ -6,6 +6,7 @@ using workcal.Services.Dtos;
 using Volo.Abp.Domain.Repositories;
 using Microsoft.IdentityModel.Tokens;
 using AutoMapper.Internal.Mappers;
+using Microsoft.EntityFrameworkCore;  
 
 
 namespace workcal.Services
@@ -58,7 +59,10 @@ namespace workcal.Services
         // Implementation for getting all events
         public async Task<List<EventDto>> GetAllAsync()
         {
-            var events = await _eventRepository.GetListAsync();
+            var events = await _eventRepository
+                .WithDetails(e => e.Labels)  // Include Labels in the query.
+                .ToListAsync();
+
             return ObjectMapper.Map<List<Event>, List<EventDto>>(events);
         }
 

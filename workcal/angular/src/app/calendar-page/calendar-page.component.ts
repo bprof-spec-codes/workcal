@@ -47,15 +47,16 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     this.eventApiService.getAllEvents().subscribe(data => {
       this.events = data;
       this.schedulerEvents = data.map(event => ({
-        id:event.id,
+        id: event.id,
         startDate: event.startTime,
         endDate: event.endTime,
         text: event.name,
         location: event.location,
-        labels: event.labels
+        labels: event.labels  // Ensure that this field exists and is populated
       }));
     });
   }
+
 
 
   createEvent(newEvent: EventDto): void {

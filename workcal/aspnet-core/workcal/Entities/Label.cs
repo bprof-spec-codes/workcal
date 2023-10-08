@@ -1,4 +1,7 @@
-﻿using Volo.Abp.Domain.Entities;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Volo.Abp.Domain.Entities;
 
 namespace workcal.Entities
 {
@@ -8,6 +11,9 @@ namespace workcal.Entities
         public string Color { get; set; }  // Hex or RGB code for label color
         public Guid EventId { get; set; } // Foreign key
 
+        [NotMapped]
+        [ValidateNever]
+        [JsonIgnore]
         public Event Event { get; set; }  // Navigation property
 
 

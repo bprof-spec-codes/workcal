@@ -13,5 +13,19 @@
   (onAppointmentDeleting)="onEventDeleting($event)"
   (onAppointmentFormOpening)="onAppointmentFormOpening($event)"
 >
+  <!-- Custom Template for Appointments -->
+  <div *dxTemplate="let data of 'item'">
+    <div class="appointment-template">
+      <div class="appointment-title">{{ data.text }}</div>
+      <div class="appointment-labels">
+        <div *ngFor="let label of data.labels"
+             class="appointment-label"
+             [ngStyle]="{'background-color': label.color}">
+          {{ label.name }}
+        </div>
+      </div>
+    </div>
+  </div>
 </dx-scheduler>
+
 </div>
