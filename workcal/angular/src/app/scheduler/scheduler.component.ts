@@ -10,7 +10,7 @@ import { EventDto } from '../models/event-dto.model';
   styleUrls: ['./scheduler.component.scss']
 })
 export class SchedulerComponent implements OnInit {
-  schedulerEvents: any[]; // Already mapped from EventDto
+  schedulerEvents: any[];
   selectedEvent: EventDto;
 
   events: any[] = [
@@ -24,15 +24,13 @@ export class SchedulerComponent implements OnInit {
   currentDate: Date = new Date(2023, 9, 24);
 
   ngOnInit(): void {
-    // Initialization logic here
+
   }
 
   onAppointmentFormOpening(data: any): void {
     const form = data.form;
 
-    // ... Existing code to add location field
 
-    // Add a new data field for labels
     form.itemOption('mainGroup', {
       items: [
         ...form.itemOption('mainGroup').items,

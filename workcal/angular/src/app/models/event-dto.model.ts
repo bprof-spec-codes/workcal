@@ -6,7 +6,7 @@ export class EventDto {
   startTime: Date;
   endTime: Date;
   location: string;
-  labels: LabelDto[] = [];  // Initialize to empty array
+  labels: LabelDto[] = [];
 
   constructor(
     id: string = '',

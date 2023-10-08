@@ -12,20 +12,71 @@
   (onAppointmentUpdating)="onEventUpdating($event)"
   (onAppointmentDeleting)="onEventDeleting($event)"
   (onAppointmentFormOpening)="onAppointmentFormOpening($event)"
+  appointmentTemplate="appointment-template"
 >
-  <!-- Custom Template for Appointments -->
-  <div *dxTemplate="let data of 'item'">
-    <div class="appointment-template">
-      <div class="appointment-title">{{ data.text }}</div>
-      <div class="appointment-labels">
-        <div *ngFor="let label of data.labels"
-             class="appointment-label"
-             [ngStyle]="{'background-color': label.color}">
-          {{ label.name }}
-        </div>
-      </div>
-    </div>
+
+<dxi-view
+type="day"
+[cellDuration]="60">
+</dxi-view>
+<dxi-view
+type="week"
+[cellDuration]="60">
+</dxi-view>
+<dxi-view
+type="month"
+[cellDuration]="60">
+</dxi-view>
+
+<div *dxTemplate="let data of 'appointmentTooltip'">
+
+  <div>
+    <ng-container *ngFor="let label of data.appointmentData.labels">
+      <span [style.backgroundColor]="label.color"
+            style="color: white; padding: 2px; margin-right: 2px;">
+        {{label.name}}
+      </span>
+    </ng-container>
   </div>
+</div>
+
+
+
+<div *dxTemplate="let model of 'appointment-template'">
+  <div style="height: 100%; width: 100%;">
+
+    <div class="dx-scheduler-appointment-title">
+      {{ model.appointmentData.text }}
+
+    </div>
+
+
+
+    <div class="dx-scheduler-appointment-content-date" >
+      {{ (model.targetedAppointmentData.startDate | date : "shortTime")
+      + " - " +
+      (model.targetedAppointmentData.endDate | date : "shortTime") }}
+    </div>
+
+    <div class=" dx-scheduler-appointment-content-details">
+      <ng-container *ngFor="let label of model.appointmentData.labels">
+        <span [style.backgroundColor]="label.color"
+              style="color: white; padding: 4px; margin-right: 4px;">
+          {{label.name}}
+        </span>
+      </ng-container>
+    </div>
+
+
+
+
+  </div>
+</div>
+
+
+
 </dx-scheduler>
+
+
 
 </div>

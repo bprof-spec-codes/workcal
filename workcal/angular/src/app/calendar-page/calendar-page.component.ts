@@ -17,7 +17,7 @@ export class CalendarPageComponent implements OnInit {
 
   currentDate: Date = new Date();
   currentView: string = 'day';
-// Define some example labels with names and colors
+
 defaultLabels: Array<{ name: string, color: string }> = [
   { name: 'Meeting', color: '#FF0000' },
   { name: 'Workshop', color: '#00FF00'},
@@ -52,7 +52,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
         endDate: event.endTime,
         text: event.name,
         location: event.location,
-        labels: event.labels  // Ensure that this field exists and is populated
+        labels: event.labels
       }));
     });
   }
@@ -61,9 +61,9 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
   createEvent(newEvent: EventDto): void {
     this.eventApiService.createEvent(newEvent).subscribe(
-      (response) => {  // Assuming the backend returns the created event with an id
+      (response) => { //Assume backind id
         console.log('Event created successfully.');
-        // Fetch updated events after creating, which will now include the new event with its id
+        // Fetch updated events after creating
         this.fetchEvents();
       },
       (error) => {
@@ -76,7 +76,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   updateEvent(eventToUpdate: EventDto): void {
     this.eventApiService.updateEvent(eventToUpdate.id, eventToUpdate).subscribe( () => {
       console.log('Event updated successfully.');
-      this.fetchEvents(); // Refresh events after updating
+      this.fetchEvents(); // Refresh
     },
     (error) => {
       console.error('Error updating event:', error);
@@ -111,7 +111,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
-      labels: selectedLabels  // Include selected label data
+      labels: selectedLabels  //  label
     };
 
     console.log("Prepared payload for adding:", newEvent);
@@ -130,7 +130,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       return;
     }
 
-    // Prepare label data
+    //  label data
   /*  const selectedLabels = this.IdLabels.filter(label =>
       appointmentData.labels?.includes(label.name)
     ).map(label => {
@@ -146,7 +146,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
-      labels: selectedLabels  // Include selected label data with EventId
+      labels: selectedLabels  //  selected
     };
 
     console.log("Prepared payload for updating:", updatedEvent);
@@ -160,13 +160,12 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     // Verify if the id is present
     if (!appointmentData.id) {
       console.error("Event ID is missing, cannot delete");
-      event.cancel = true; // Prevents the deletion if id is missing
+      event.cancel = true; //  if id is missing
       return;
     }
 
-    console.log("Prepared id for deleting:", appointmentData.id);  // Debug line to check prepared id
+    console.log("Prepared id for deleting:", appointmentData.id);
 
-    // Assuming deleteEvent() sends a request to delete the event by id
     this.deleteEvent(appointmentData.id);
   }
 
@@ -174,13 +173,13 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   onAppointmentFormOpening(data: any): void {
     const form = data.form;
 
-    // Debugging: Check if labels data is available
-    console.log('Selected Event Labels:', this.selectedEvent?.labels);  // Debug line
+    //  labels data
+    console.log('Selected Event Labels:', this.selectedEvent?.labels);
 
-    // Safely check if labels exist before mapping
+    // labels exist
     const labelNames = this.selectedEvent?.labels?.map(l => l.name) || [];
 
-    // Add a new data field for location and labels
+    // location and labels
     form.itemOption('mainGroup', {
       items: [
         ...form.itemOption('mainGroup').items,
