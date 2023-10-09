@@ -1,12 +1,13 @@
 <div>
   <h1>Calendar Page</h1>
   <dx-scheduler
+
   [dataSource]="schedulerEvents"
   [currentDate]="currentDate"
   [startDayHour]="6"
   [endDayHour]="22"
   [views]="['day', 'week', 'workWeek', 'month']"
-  [currentView]="currentView"
+  [currentView]="'week'"
   [timeZone]="'UTC'"
   (onAppointmentAdding)="onEventAdding($event)"
   (onAppointmentUpdating)="onEventUpdating($event)"

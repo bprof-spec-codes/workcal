@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { EventApiService } from '../event-api.service';
 import { EventDto  } from '../models/event-dto.model';
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule } from 'devextreme-angular';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-calendar-page',
@@ -36,14 +37,19 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 ];
 
 
-
-  constructor(private eventApiService: EventApiService) { }
+  constructor(private eventApiService: EventApiService,private router: Router)
+  {   this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.onSameUrlNavigation = 'reload';}
 
   ngOnInit(): void {
     this.fetchEvents();
 
   }
 
+  refreshPage() {
+    // This will refresh the page seamlessly
+    this.router.navigate([this.router.url]);
+  }
 
 
 
@@ -74,7 +80,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
         console.error('Error creating event:', error);
       }
     );
-    this.fetchEvents();
+    this.refreshPage();
 
   }
 
