@@ -1,0 +1,21 @@
+# docker-compose.yml
+version: '3.8'  # Specifies the Docker Compose file version
+
+services:  # Defines the services to run in the Docker container
+  mssql-server:  # Name of the service
+    image: mcr.microsoft.com/mssql/server:2022-latest  # The Docker image to use for SQL Server
+    environment:  # Sets environment variables for the SQL Server service
+      SA_PASSWORD: "testPassw0rd"  # The password for the 'sa' user
+      ACCEPT_EULA: "Y"  # Accepts the End User License Agreement
+
+    ports:  # Maps ports from the host machine to the container
+      - "1433:1433"  # Maps port 1433 on the host to port 1433 on the container
+
+    volumes:  # Specifies volumes to persist data and load existing .mdf and .ldf files
+      - mssql-data:/var/opt/mssql  # Maps a named volume to the SQL Server data directory
+      - ./data:/var/opt/mssql/data  # Maps the 'data' folder from the host to the container's data directory
+      - ./log:/var/opt/mssql/log  # Maps the 'log' folder from the host to the container's log directory
+      - ./secrets:/var/opt/mssql/secrets  # Maps the 'secrets' folder from the host to the container's secrets directory
+
+volumes:  # Defines the named volumes
+  mssql-data:  # Name of the volume
