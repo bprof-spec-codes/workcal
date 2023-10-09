@@ -34,7 +34,7 @@ namespace workcal.Services
             };
             await _eventRepository.InsertAsync(eventEntity);
 
-            // Now that the event is created and has an ID, we can create labels
+            //  ID,  create labels
             if (input.Labels != null && input.Labels.Count > 0)
             {
                 foreach (var label in input.Labels)
@@ -76,41 +76,75 @@ namespace workcal.Services
         // Implementation for updating an event
         public async Task UpdateAsync(Guid id, CreateEventDto input)
         {
+            // Fetch the existing event along with its labels
             var eventEntity = await _eventRepository.WithDetails(e => e.Labels).FirstOrDefaultAsync(i => i.Id == id);
-            // Retrieve the existing event
 
-            // Update fields
+            if (eventEntity == null)
+            {
+                // Handle not found error
+                return;
+            }
+
+            // Update basic fields
             eventEntity.Name = input.Name;
             eventEntity.StartTime = input.StartTime;
             eventEntity.EndTime = input.EndTime;
             eventEntity.Location = input.Location;
+            await _eventRepository.UpdateAsync(eventEntity);
 
-            // Assume you have a way to fetch existing labels for the event.
-            var existingLabels = eventEntity.Labels;
+            // A dictionary for quick lookup of existing labels
+            var existingLabelsDict = eventEntity.Labels.ToDictionary(l => l.Name, l => l);
 
-            // Find labels to be added
-            var labelsToAdd = input.Labels.Where(il => !existingLabels.Any(el => el.Name == il.Name)).ToList();
-            foreach (var label in labelsToAdd)
+            // Create a list to hold the final set of labels
+            var finalLabels = new List<Label>();
+
+            foreach (var oldLabel in eventEntity.Labels)
             {
-                existingLabels.Add(new Label
+
+                await _labelRepository.DeleteAsync(oldLabel); 
+               }
+
+            foreach (var inputLabel in input.Labels)
+            {
+                if (existingLabelsDict.TryGetValue(inputLabel.Name, out var existingLabel))
                 {
-                    Name = label.Name,
-                    Color = label.Color,
-                    EventId = id
-                });
+                    // Update the existing label if needed
+                    existingLabel.Color = inputLabel.Color;
+                    // finalLabels.Add(existingLabel);
+
+
+                    await _labelRepository.InsertAsync(new Label
+                    {
+                        Name = inputLabel.Name,
+                        Color = inputLabel.Color,
+                        EventId = id
+                    });
+                }
+                else
+                {
+                    // Create a new label
+                    /*  finalLabels.Add(new Label
+                      {
+                          Name = inputLabel.Name,
+                          Color = inputLabel.Color,
+                          EventId = id
+                      });*/
+
+                    await _labelRepository.InsertAsync(new Label
+                    {
+                        Name = inputLabel.Name,
+                        Color = inputLabel.Color,
+                        EventId = id
+                    });
+                }
             }
 
-            // Find labels to be deleted
-            var labelsToDelete = existingLabels.Where(el => !input.Labels.Any(il => il.Name == el.Name)).ToList();
-            foreach (var label in labelsToDelete)
-            {
-                existingLabels.Remove(label);
-            }
+            // Set the final set of labels and save changes outside of the loop
+           // eventEntity.Labels = finalLabels;
 
-            eventEntity.Labels = existingLabels;
-
-            await _eventRepository.UpdateAsync(eventEntity);  // Update the event in the repository
         }
+
+
 
     }
 
