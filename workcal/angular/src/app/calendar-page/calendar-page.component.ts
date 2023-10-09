@@ -74,6 +74,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
         console.error('Error creating event:', error);
       }
     );
+    this.fetchEvents();
+
   }
 
 
@@ -85,7 +87,10 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     (error) => {
       console.error('Error updating event:', error);
     }
+
   );
+  this.fetchEvents();
+
   }
   deleteEvent(eventId: string): void {
     this.eventApiService.deleteEvent(eventId).subscribe(() => {
@@ -95,6 +100,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
       }
     });
+    this.fetchEvents();
+
   }
 
   onEventAdding(event): void {
@@ -120,6 +127,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
     console.log("Prepared payload for adding:", newEvent);
     this.createEvent(newEvent);
+    this.fetchEvents();
+
   }
 
 
@@ -135,6 +144,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       appointmentData.labels = this.draggedEventLabels;
       this.updateEvent(appointmentData);
     }
+    this.fetchEvents();
+
   }
 
   onEventUpdating(event): void {
@@ -173,6 +184,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     console.log("Prepared payload for updating:", updatedEvent);
     this.updateEvent(updatedEvent);
     this.labelsInteractedWith = false;
+    this.fetchEvents();
 
   }
 
@@ -191,6 +203,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     console.log("Prepared id for deleting:", appointmentData.id);
 
     this.deleteEvent(appointmentData.id);
+    this.fetchEvents();
+
   }
 
 // Class-level variable to hold the flag
@@ -201,12 +215,20 @@ labelsInteractedWith: boolean = false;
 
     // Fetch the old data (existing event data)
     const oldAppointmentData = data.appointmentData;
-
+    if (oldAppointmentData.labels) {
+      form.updateData('labels', oldAppointmentData.labels.map(l => l.name));
+    }
     // Populate the 'labels' field in the form with old labels
-    form.updateData('labels', oldAppointmentData.labels.map(l => l.name));
-
+    if (!oldAppointmentData.location) {
+      form.updateData('location', '');  // Initialize with empty string or any default value
+    }
+    if (!oldAppointmentData.labels) {
+      form.updateData('labels', []);  // Initialize with empty array
+    }
     // Add new data fields for location and labels
     form.itemOption('mainGroup', {
+
+
       items: [
         ...form.itemOption('mainGroup').items,
         {
@@ -242,6 +264,8 @@ labelsInteractedWith: boolean = false;
     form.getEditor('labels').option('onValueChanged', () => {
       this.labelsInteractedWith = true;
     });
+    this.fetchEvents();
+
   }
 
 

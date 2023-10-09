@@ -34,17 +34,7 @@ type="month"
 [cellDuration]="60">
 </dxi-view>
 
-<div *dxTemplate="let data of 'appointmentTooltip'">
 
-  <div>
-    <ng-container *ngFor="let label of data.appointmentData.labels">
-      <span [style.backgroundColor]="label.color"
-            style="color: white; padding: 2px; margin-right: 2px;">
-        {{label.name}}
-      </span>
-    </ng-container>
-  </div>
-</div>
 
 
 
