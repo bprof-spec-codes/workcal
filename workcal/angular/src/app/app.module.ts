@@ -7,7 +7,7 @@ import { TenantManagementConfigModule } from '@abp/ng.tenant-management/config';
 import { ThemeLeptonXModule } from '@abp/ng.theme.lepton-x';
 import { SideMenuLayoutModule } from '@abp/ng.theme.lepton-x/layouts';
 import { ThemeSharedModule } from '@abp/ng.theme.shared';
-import { NgModule } from '@angular/core';
+import { NgModule, Component, enableProdMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../environments/environment';
@@ -16,11 +16,12 @@ import { AppComponent } from './app.component';
 import { APP_ROUTE_PROVIDER } from './route.provider';
 import { FeatureManagementModule } from '@abp/ng.feature-management';
 import { AbpOAuthModule } from '@abp/ng.oauth';
-import { DxSchedulerModule } from 'devextreme-angular';
+import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule } from 'devextreme-angular';
 import { CalendarPageComponent } from './calendar-page/calendar-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { HttpClientModule } from '@angular/common/http';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 
 @NgModule({
@@ -45,9 +46,13 @@ import { HttpClientModule } from '@angular/common/http';
     SideMenuLayoutModule.forRoot(),
     FeatureManagementModule.forRoot(),
     DxSchedulerModule,
+    DxDraggableModule,
+    DxScrollViewModule,
   ],
   declarations: [AppComponent, CalendarPageComponent],
   providers: [APP_ROUTE_PROVIDER],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
+
+platformBrowserDynamic().bootstrapModule(AppModule);

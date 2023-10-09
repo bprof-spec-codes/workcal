@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { EventApiService } from '../event-api.service';
 import { EventDto  } from '../models/event-dto.model';
+import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule } from 'devextreme-angular';
 
 @Component({
   selector: 'app-calendar-page',
@@ -17,6 +18,9 @@ export class CalendarPageComponent implements OnInit {
 
   currentDate: Date = new Date();
   currentView: string = 'day';
+   draggedEventLabels;
+
+
 
 defaultLabels: Array<{ name: string, color: string }> = [
   { name: 'Meeting', color: '#FF0000' },
@@ -119,7 +123,19 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   }
 
 
+  onAppointmentDragStart(event): void {
+    this.draggedEventLabels = event.itemData.labels;
+    console.log("draggedEventLabels:", this.draggedEventLabels);
 
+  }
+
+  onAppointmentDragEnd(event): void {
+    if (event.fromComponent === event.toComponent) {
+      const appointmentData = event.itemData;
+      appointmentData.labels = this.draggedEventLabels;
+      this.updateEvent(appointmentData);
+    }
+  }
 
   onEventUpdating(event): void {
     const appointmentData = event.newData;
@@ -130,6 +146,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       return;
     }
 
+
+
     //  label data
     /*const selectedLabels = this.IdLabels.filter(label =>
       appointmentData.labels?.includes(label.name)
@@ -137,26 +155,66 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       label.eventId = appointmentDataOld.id;  // Add EventId to each selected label
       return label;
     });*/
-   /* const selectedLabels = this.defaultLabels.filter(label =>
-      appointmentData.labels?.includes(label.name)
-    );*/
 
-    const selectedLabels = appointmentData.labels?.length > 0 ?
-    this.defaultLabels.filter(label => appointmentData.labels.includes(label.name)) :
-    appointmentDataOld.labels;
 
-    const updatedEvent: EventDto = {
-      id: appointmentDataOld.id,
-      name: appointmentData.text,
-      startTime: new Date(appointmentData.startDate),
-      endTime: new Date(appointmentData.endDate),
-      location: appointmentData.location || '',
-      labels: selectedLabels  //  selected
-    };
+   // Prepare label data
+   let selectedLabels = [];
 
-    console.log("Prepared payload for updating:", updatedEvent);
-    this.updateEvent(updatedEvent);
+  // Check if labels are provided and if they are strings (from form) or objects (from drag-and-drop)
+  if (appointmentData.labels && appointmentData.labels.length > 0) {
+    if (typeof appointmentData.labels[0] === 'string') {
+      // If from form, labels are strings
+      selectedLabels = this.defaultLabels.filter(label => appointmentData.labels.includes(label.name));
+    } else {
+      // If from drag-and-drop, labels are objects
+      selectedLabels = this.defaultLabels.filter(label => appointmentData.labels.map(l => l.name).includes(label.name));
+    }
+  } else {
+    // If no new labels are provided, retain the old labels
+    selectedLabels = appointmentDataOld.labels;
   }
+
+
+  // Prepare label data
+   // Prepare label data only if it's not already set
+   //let selectedLabels = appointmentData.labels;
+   console.log("selectedLabels:", selectedLabels);
+
+  /*if (selectedLabels && selectedLabels.length > 0) {
+    // Map label names back to full label objects
+    selectedLabels = this.defaultLabels.filter(label =>
+      selectedLabels.includes(label.name)
+    );
+    console.log("selectedLabels: > 0", selectedLabels);
+
+  } else {
+    // If no labels are set, select labels from defaultLabels
+    selectedLabels = this.defaultLabels.filter(label =>
+      appointmentDataOld.labels?.includes(label.name)
+    );
+  }*/
+ /*const selectedLabels = appointmentData.labels?[0].length > 0 ?
+    this.defaultLabels.filter(label => appointmentData.labels.includes(label.name)) :
+    appointmentDataOld.labels;*/
+
+
+
+    console.log("selectedLabels: ", selectedLabels);
+
+
+
+   const eventToUpdate: EventDto = {
+     id: appointmentDataOld.id,
+     name: appointmentData.text,
+     startTime: new Date(appointmentData.startDate),
+     endTime: new Date(appointmentData.endDate),
+     location: appointmentData.location || '',
+     labels: selectedLabels
+   };
+
+  console.log("Prepared payload for updating:", eventToUpdate);
+  this.updateEvent(eventToUpdate);
+}
 
 
   onEventDeleting(event: any): void {
