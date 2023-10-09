@@ -52,7 +52,8 @@ namespace workcal.Services
 
         public async Task<EventDto> GetAsync(Guid id)
         {
-            var eventEntity = await _eventRepository.GetAsync(id);
+            var eventEntity = await _eventRepository.WithDetails(e => e.Labels).FirstOrDefaultAsync(i => i.Id == id);
+            ;
             return ObjectMapper.Map<Event, EventDto>(eventEntity);
         }
 
@@ -75,14 +76,42 @@ namespace workcal.Services
         // Implementation for updating an event
         public async Task UpdateAsync(Guid id, CreateEventDto input)
         {
-            var eventEntity = await _eventRepository.GetAsync(id);  // Retrieve the existing event
-            eventEntity.Name = input.Name;  // Update fields
+            var eventEntity = await _eventRepository.WithDetails(e => e.Labels).FirstOrDefaultAsync(i => i.Id == id);
+            // Retrieve the existing event
+
+            // Update fields
+            eventEntity.Name = input.Name;
             eventEntity.StartTime = input.StartTime;
             eventEntity.EndTime = input.EndTime;
             eventEntity.Location = input.Location;
 
+            // Assume you have a way to fetch existing labels for the event.
+            var existingLabels = eventEntity.Labels;
+
+            // Find labels to be added
+            var labelsToAdd = input.Labels.Where(il => !existingLabels.Any(el => el.Name == il.Name)).ToList();
+            foreach (var label in labelsToAdd)
+            {
+                existingLabels.Add(new Label
+                {
+                    Name = label.Name,
+                    Color = label.Color,
+                    EventId = id
+                });
+            }
+
+            // Find labels to be deleted
+            var labelsToDelete = existingLabels.Where(el => !input.Labels.Any(il => il.Name == el.Name)).ToList();
+            foreach (var label in labelsToDelete)
+            {
+                existingLabels.Remove(label);
+            }
+
+            eventEntity.Labels = existingLabels;
+
             await _eventRepository.UpdateAsync(eventEntity);  // Update the event in the repository
         }
+
     }
 
 }

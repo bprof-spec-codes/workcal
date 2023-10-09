@@ -131,15 +131,20 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     }
 
     //  label data
-  /*  const selectedLabels = this.IdLabels.filter(label =>
+    /*const selectedLabels = this.IdLabels.filter(label =>
       appointmentData.labels?.includes(label.name)
     ).map(label => {
       label.eventId = appointmentDataOld.id;  // Add EventId to each selected label
       return label;
     });*/
-    const selectedLabels = this.defaultLabels.filter(label =>
+   /* const selectedLabels = this.defaultLabels.filter(label =>
       appointmentData.labels?.includes(label.name)
-    );
+    );*/
+
+    const selectedLabels = appointmentData.labels?.length > 0 ?
+    this.defaultLabels.filter(label => appointmentData.labels.includes(label.name)) :
+    appointmentDataOld.labels;
+
     const updatedEvent: EventDto = {
       id: appointmentDataOld.id,
       name: appointmentData.text,
@@ -173,13 +178,13 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   onAppointmentFormOpening(data: any): void {
     const form = data.form;
 
-    //  labels data
-    console.log('Selected Event Labels:', this.selectedEvent?.labels);
+    // Fetch the old data (existing event data)
+    const oldAppointmentData = data.appointmentData;
 
-    // labels exist
-    const labelNames = this.selectedEvent?.labels?.map(l => l.name) || [];
+    // Populate the 'labels' field in the form with old labels
+    form.updateData('labels', oldAppointmentData.labels.map(l => l.name));
 
-    // location and labels
+    // Add new data fields for location and labels
     form.itemOption('mainGroup', {
       items: [
         ...form.itemOption('mainGroup').items,
@@ -213,6 +218,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       ]
     });
   }
+
 
 
 
