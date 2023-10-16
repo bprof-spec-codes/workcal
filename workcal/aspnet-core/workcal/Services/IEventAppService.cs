@@ -11,9 +11,9 @@ namespace workcal.Services
     {
         Task CreateAsync(CreateEventDto @event);
         Task<EventDto> GetAsync(Guid id);
-        Task<List<EventDto>> GetAllAsync();  // New method for getting all events
-        Task DeleteAsync(Guid id);  // New method for deleting an event by id
-        Task UpdateAsync(Guid id, CreateEventDto @event);  // New method for updating an event
+        Task<List<EventDto>> GetAllAsync();  
+        Task DeleteAsync(Guid id);  
+        Task UpdateAsync(Guid id, CreateEventDto @event);  
     }
 
 }
