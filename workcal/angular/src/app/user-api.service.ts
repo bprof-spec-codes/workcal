@@ -7,7 +7,7 @@ import { UserDto } from './models/event-dto.model'; // Create this model based o
   providedIn: 'root'
 })
 export class UserApiService {
-  private baseUrl: string = 'https://localhost:44387/api/app/users';
+  private baseUrl: string = 'https://localhost:44387/api/identity/users';
 
   constructor(private http: HttpClient) { }
 

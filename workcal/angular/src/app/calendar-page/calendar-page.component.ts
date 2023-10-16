@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { EventApiService } from '../event-api.service';
-import { EventDto, SchedulerEvent , UserDto } from '../models/event-dto.model';
+import { EventDto, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule  } from 'devextreme-angular';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
@@ -51,7 +51,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
   ngOnInit(): void {
     this.fetchEvents();
-
+    this.fetchUsers();
   }
 
   refreshPage() {
@@ -82,10 +82,33 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       });
   }
 
+
+
   fetchUsers(): void {
-    this.userApiService.getAllUsers().subscribe(data => {
-      this.users = data;
-    });
+    this.userApiService.getAllUsers()
+      .pipe(
+        catchError(error => {
+          console.error('Error fetching users:', error);
+          return of([]);
+        })
+      )
+      .subscribe((data: UserResponse | any[]) => { // Explicitly type data
+        if (Array.isArray(data)) {
+          console.error('Received an array, expected an object with an items key:', data);
+          return;
+        }
+
+        if (data && data.items) {
+          this.users = data.items.map(user => ({
+            id: user.id,
+            userName: user.userName,
+            name: user.name,
+            email: user.email
+          }));
+        } else {
+          console.error('Items key not found in response:', data);
+        }
+      });
   }
 
 
@@ -99,6 +122,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       }
     );
     this.refreshPage();
+    console.log(this.users);
 
   }
 
@@ -347,8 +371,8 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
           dataField: 'userIds',
           editorType: 'dxTagBox',
           editorOptions: {
-            dataSource: this.users,  // <-- Use the fetched list of users here
-            displayExpr: 'username',
+            dataSource: this.users,
+            displayExpr: 'userName',
             valueExpr: 'id',
             placeholder: 'Assign to...'
           },

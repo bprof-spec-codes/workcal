@@ -29,6 +29,13 @@ export type SchedulerEvent = {
 
 export type UserDto = {
   id: string;
+  userName: string;
  name: string;
  email: string;
+
 };
+
+export interface UserResponse {
+  totalCount: number;
+  items: UserDto[];
+}
