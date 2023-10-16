@@ -73,7 +73,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           endDate: event.endTime,
           text: event.name,
           location: event.location,
-          labels: event.labels
+          labels: event.labels,
+          userIds: event.userIds
         }));
       });
   }
@@ -133,12 +134,12 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
 
     const newEvent: EventDto = {
-
       name: appointmentData.text,
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
-      labels: selectedLabels
+      labels: selectedLabels,
+      userIds: appointmentData.userIds
     };
 
     this.createEvent(newEvent);
@@ -189,7 +190,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
-      labels: selectedLabels
+      labels: selectedLabels,
+      userIds: appointmentData.userIds
     };
 
     this.updateEvent(updatedEvent);

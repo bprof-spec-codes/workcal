@@ -26,6 +26,8 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
     public DbSet<Entities.Event> Events { get; set; }  // DbSet for Event entity
     public DbSet<Entities.Label> Labels { get; set; }  // DbSet for Label entity
 
+    public DbSet<Entities.EventsUsers> EventUsers { get; set; }  // DbSet for Label entity
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

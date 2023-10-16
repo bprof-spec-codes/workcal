@@ -1,10 +1,12 @@
 export type EventDto = {
-  id?: string | null;
+  id?: string ;
   name: string;
   startTime: Date;
   endTime: Date;
   location: string;
   labels: LabelDto[];
+  userIds: string[];
+
 };
 
 export type LabelDto = {
@@ -21,4 +23,5 @@ export type SchedulerEvent = {
   text: string;
   location: string;
   labels: Array<{ name: string, color: string }>;
+  userIds: string[];
 };

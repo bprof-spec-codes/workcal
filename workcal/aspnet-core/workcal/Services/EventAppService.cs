@@ -27,6 +27,10 @@ namespace workcal.Services
 
         public async Task CreateAsync(CreateEventDto @event)
         {
+
+            Guid? eventId = null;
+
+
             try
             {
                 var eventEntity = new Event
@@ -36,7 +40,8 @@ namespace workcal.Services
                     EndTime = @event.EndTime,
                     Location = @event.Location,
                 };
-                await _eventRepository.InsertAsync(eventEntity);
+
+             var instertedEvent=    await _eventRepository.InsertAsync(eventEntity);
 
                 if (@event.Labels != null && @event.Labels.Count > 0)
                 {
@@ -51,12 +56,12 @@ namespace workcal.Services
                         await _labelRepository.InsertAsync(labelEntity);
                     }
                 }
-
+              
                 foreach (var userId in @event.UserIds)
                 {
                     var eventUser = new EventsUsers
                     {
-                        EventId = eventEntity.Id,
+                        EventId = instertedEvent.Id,
                         UserId = userId
                     };
                     await _eventsUsersRepository.InsertAsync(eventUser);
@@ -95,6 +100,8 @@ namespace workcal.Services
 
         public async Task<List<EventDto>> GetAllAsync()
         {
+           
+
             try
             {
                 var events = await _eventRepository
