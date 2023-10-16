@@ -1,3 +1,4 @@
+
 export type EventDto = {
   id?: string ;
   name: string;
@@ -24,4 +25,10 @@ export type SchedulerEvent = {
   location: string;
   labels: Array<{ name: string, color: string }>;
   userIds: string[];
+};
+
+export type UserDto = {
+  id: string;
+ name: string;
+ email: string;
 };

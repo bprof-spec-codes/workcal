@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { EventApiService } from '../event-api.service';
-import { EventDto, SchedulerEvent  } from '../models/event-dto.model';
+import { EventDto, SchedulerEvent , UserDto } from '../models/event-dto.model';
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule  } from 'devextreme-angular';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { UserApiService } from '../user-api.service';
 
 
 @Component({
@@ -27,6 +28,8 @@ export class CalendarPageComponent implements OnInit {
    labelPopupVisible: boolean = true;
    newLabel: { name: string, color: string } = { name: '', color: '#000000' };
 
+   users: UserDto[] = [];
+
 
 defaultLabels: Array<{ name: string, color: string }> = [
   { name: 'Meeting', color: '#FF0000' },
@@ -42,7 +45,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 ];
 
 
-  constructor(private eventApiService: EventApiService,private router: Router)
+  constructor(private eventApiService: EventApiService, private userApiService: UserApiService ,private router: Router)
   {   this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.router.onSameUrlNavigation = 'reload';}
 
@@ -79,7 +82,11 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       });
   }
 
-
+  fetchUsers(): void {
+    this.userApiService.getAllUsers().subscribe(data => {
+      this.users = data;
+    });
+  }
 
 
   createEvent(newEvent: EventDto): void {
@@ -308,6 +315,7 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
             text: 'New Label Color'
           }
         },
+
         {
           itemType: 'button',
           horizontalAlignment: 'left',
@@ -334,7 +342,20 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
               }
             }
           }
-        }
+        },
+        {
+          dataField: 'userIds',
+          editorType: 'dxTagBox',
+          editorOptions: {
+            dataSource: this.users,  // <-- Use the fetched list of users here
+            displayExpr: 'username',
+            valueExpr: 'id',
+            placeholder: 'Assign to...'
+          },
+          label: {
+            text: 'Assign To'
+          }
+        },
       ]
     });
 
