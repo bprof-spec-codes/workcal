@@ -1,4 +1,3 @@
-// event-dto.model.ts
 
 export class EventDto {
   id: string;
@@ -28,4 +27,13 @@ export class LabelDto {
   name: string;
   color: string;
   eventId?: string;
+}
+
+export interface SchedulerEvent {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+  text: string;
+  location: string;
+  labels: Array<{ name: string, color: string }>;
 }

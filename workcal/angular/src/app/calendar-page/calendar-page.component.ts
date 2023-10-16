@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { EventApiService } from '../event-api.service';
-import { EventDto  } from '../models/event-dto.model';
+import { EventDto, SchedulerEvent  } from '../models/event-dto.model';
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule } from 'devextreme-angular';
 import { Router } from '@angular/router';
 
@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
 
 export class CalendarPageComponent implements OnInit {
   events: EventDto[] = [];
-  schedulerEvents: any[] = []; // For DevExtreme Scheduler
+  schedulerEvents: SchedulerEvent[] = [];
 
   selectedEvent: EventDto;
 
@@ -47,7 +47,6 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   }
 
   refreshPage() {
-    // This will refresh the page seamlessly
     this.router.navigate([this.router.url]);
   }
 
@@ -69,11 +68,11 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
 
 
+
   createEvent(newEvent: EventDto): void {
     this.eventApiService.createEvent(newEvent).subscribe(
-      (response) => { //Assume backind id
+      (response) => {
         console.log('Event created successfully.');
-        // Fetch updated events after creating
         this.fetchEvents();
       },
       (error) => {
@@ -88,7 +87,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   updateEvent(eventToUpdate: EventDto): void {
     this.eventApiService.updateEvent(eventToUpdate.id, eventToUpdate).subscribe( () => {
       console.log('Event updated successfully.');
-      this.fetchEvents(); // Refresh
+      this.fetchEvents();
     },
     (error) => {
       console.error('Error updating event:', error);
@@ -96,24 +95,25 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
   );
   this.fetchEvents();
+  this.refreshPage();
 
   }
-  deleteEvent(eventId: string): void {
-    this.eventApiService.deleteEvent(eventId).subscribe(() => {
-      const index = this.events.findIndex(event => event.id === eventId);
-      if (index !== -1) {
-        this.events.splice(index, 1);
 
-      }
-    });
-    this.fetchEvents();
+  deleteEvent(eventId: string): void {
+    const index = this.events.findIndex(event => event.id === eventId);
+    if (index !== -1) {
+      this.eventApiService.deleteEvent(eventId).subscribe(() => {
+        this.events.splice(index, 1);
+        this.fetchEvents();
+      });
+    }
+    this.refreshPage();
 
   }
 
   onEventAdding(event): void {
     const appointmentData = event.appointmentData;
 
-    // Prepare label data
     const selectedLabels = this.defaultLabels.filter(label =>
       appointmentData.labels?.includes(label.name)
     );
@@ -128,12 +128,13 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
-      labels: selectedLabels  //  label
+      labels: selectedLabels
     };
 
     console.log("Prepared payload for adding:", newEvent);
     this.createEvent(newEvent);
     this.fetchEvents();
+    this.refreshPage();
 
   }
 
@@ -163,18 +164,14 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       return;
     }
 
-    // Initialize labels to empty arrays if they are null or undefined
     appointmentData.labels = appointmentData.labels || [];
     appointmentDataOld.labels = appointmentDataOld.labels || [];
 
     let selectedLabels = [];
 
-    // Check if the labels field has been interacted with
     if (this.labelsInteractedWith) {
-      // Trust the new labels from the form
       selectedLabels = this.defaultLabels.filter(label => appointmentData.labels.includes(label.name));
     } else {
-      // Use the old labels
       selectedLabels = appointmentDataOld.labels;
     }
 
@@ -184,25 +181,27 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
-      labels: selectedLabels  // Set selectedLabels, which may be empty
+      labels: selectedLabels
     };
 
     console.log("Prepared payload for updating:", updatedEvent);
     this.updateEvent(updatedEvent);
     this.labelsInteractedWith = false;
     this.fetchEvents();
+    this.refreshPage();
 
   }
 
 
 
-  onEventDeleting(event: any): void {
+  onEventDeleting(event: {
+    cancel: boolean; appointmentData: SchedulerEvent
+}): void {
     const appointmentData = event.appointmentData;
 
-    // Verify if the id is present
     if (!appointmentData.id) {
       console.error("Event ID is missing, cannot delete");
-      event.cancel = true; //  if id is missing
+      event.cancel = true;
       return;
     }
 
@@ -213,25 +212,21 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
   }
 
-// Class-level variable to hold the flag
 labelsInteractedWith: boolean = false;
 
-  onAppointmentFormOpening(data: any): void {
-    const form = data.form;
+onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): void {
+  const form = data.form;
 
-    // Fetch the old data (existing event data)
     const oldAppointmentData = data.appointmentData;
     if (oldAppointmentData.labels) {
       form.updateData('labels', oldAppointmentData.labels.map(l => l.name));
     }
-    // Populate the 'labels' field in the form with old labels
     if (!oldAppointmentData.location) {
-      form.updateData('location', '');  // Initialize with empty string or any default value
+      form.updateData('location', '');
     }
     if (!oldAppointmentData.labels) {
-      form.updateData('labels', []);  // Initialize with empty array
+      form.updateData('labels', []);
     }
-    // Add new data fields for location and labels
     form.itemOption('mainGroup', {
 
 
