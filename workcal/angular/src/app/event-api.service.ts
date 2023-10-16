@@ -11,9 +11,9 @@ export class EventApiService {
 
   constructor(private http: HttpClient) { }
 
-  getAllEvents(): Observable<EventDto[]> {
-    return this.http.get<EventDto[]>(`${this.baseUrl}`);
-  }
+  getAllEvents(): Observable<EventDto[] | null> {
+    return this.http.get<EventDto[] | null>(`${this.baseUrl}`);
+}
 
   getEventById(id: string): Observable<EventDto> {
     return this.http.get<EventDto>(`${this.baseUrl}/${id}`);

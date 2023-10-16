@@ -3,6 +3,9 @@ import { EventApiService } from '../event-api.service';
 import { EventDto, SchedulerEvent  } from '../models/event-dto.model';
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule } from 'devextreme-angular';
 import { Router } from '@angular/router';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+
 
 @Component({
   selector: 'app-calendar-page',
@@ -53,17 +56,24 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
 
   fetchEvents(): void {
-    this.eventApiService.getAllEvents().subscribe(data => {
-      this.events = data;
-      this.schedulerEvents = data.map(event => ({
-        id: event.id,
-        startDate: event.startTime,
-        endDate: event.endTime,
-        text: event.name,
-        location: event.location,
-        labels: event.labels
-      }));
-    });
+    this.eventApiService.getAllEvents()
+      .pipe(
+        catchError(error => {
+          console.error('Error fetching events:', error);
+          return of([]);
+        })
+      )
+      .subscribe(data => {
+        this.events = data;
+        this.schedulerEvents = data.map(event => ({
+          id: event.id,
+          startDate: event.startTime,
+          endDate: event.endTime,
+          text: event.name,
+          location: event.location,
+          labels: event.labels
+        }));
+      });
   }
 
 
@@ -72,7 +82,6 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   createEvent(newEvent: EventDto): void {
     this.eventApiService.createEvent(newEvent).subscribe(
       (response) => {
-        console.log('Event created successfully.');
         this.fetchEvents();
       },
       (error) => {
@@ -86,7 +95,6 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
   updateEvent(eventToUpdate: EventDto): void {
     this.eventApiService.updateEvent(eventToUpdate.id, eventToUpdate).subscribe( () => {
-      console.log('Event updated successfully.');
       this.fetchEvents();
     },
     (error) => {
@@ -123,7 +131,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
 
     const newEvent: EventDto = {
-      id: '',
+
       name: appointmentData.text,
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
@@ -131,7 +139,6 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       labels: selectedLabels
     };
 
-    console.log("Prepared payload for adding:", newEvent);
     this.createEvent(newEvent);
     this.fetchEvents();
     this.refreshPage();
@@ -141,7 +148,6 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
   onAppointmentDragStart(event): void {
     this.draggedEventLabels = event.itemData.labels;
-    console.log("draggedEventLabels:", this.draggedEventLabels);
 
   }
 
@@ -184,7 +190,6 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       labels: selectedLabels
     };
 
-    console.log("Prepared payload for updating:", updatedEvent);
     this.updateEvent(updatedEvent);
     this.labelsInteractedWith = false;
     this.fetchEvents();
@@ -205,7 +210,6 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       return;
     }
 
-    console.log("Prepared id for deleting:", appointmentData.id);
 
     this.deleteEvent(appointmentData.id);
     this.fetchEvents();
