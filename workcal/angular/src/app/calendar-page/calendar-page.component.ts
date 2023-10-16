@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { EventApiService } from '../event-api.service';
 import { EventDto, SchedulerEvent  } from '../models/event-dto.model';
-import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule } from 'devextreme-angular';
+import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule  } from 'devextreme-angular';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -24,6 +24,8 @@ export class CalendarPageComponent implements OnInit {
   currentView: string = 'day';
    draggedEventLabels;
 
+   labelPopupVisible: boolean = true;
+   newLabel: { name: string, color: string } = { name: '', color: '#000000' };
 
 
 defaultLabels: Array<{ name: string, color: string }> = [
@@ -216,6 +218,27 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
   }
 
+
+// Function to create a new label and update defaultLabels
+createNewLabel(): void {
+  if (this.newLabel.name && this.newLabel.color) {
+    // Update the defaultLabels array
+    this.defaultLabels.push({
+      name: this.newLabel.name,
+      color: this.newLabel.color
+    });
+
+    // Reset newLabel for next use
+    this.newLabel = { name: '', color: '#000000' };
+
+    // Close the popup
+    this.labelPopupVisible = false;
+  } else {
+    console.error('Label Name and Color are required.');
+  }
+}
+
+
 labelsInteractedWith: boolean = false;
 
 onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): void {
@@ -262,6 +285,53 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
           label: {
             text: 'Labels'
           }
+        },
+        {
+          dataField: 'newLabelName',
+          editorType: 'dxTextBox',
+          editorOptions: {
+            placeholder: 'Enter new label name...'
+          },
+          label: {
+            text: 'New Label Name'
+          }
+        },
+        {
+          dataField: 'newLabelColor',
+          editorType: 'dxColorBox',
+          editorOptions: {
+            placeholder: 'Pick a color...'
+          },
+          label: {
+            text: 'New Label Color'
+          }
+        },
+        {
+          itemType: 'button',
+          horizontalAlignment: 'left',
+          buttonOptions: {
+            text: 'Create Label',
+            onClick: () => {
+              const newLabelName = form.option('formData').newLabelName;
+              const newLabelColor = form.option('formData').newLabelColor;
+
+              if (newLabelName && newLabelColor) {
+                // Add the new label to the default labels array
+                this.defaultLabels.push({
+                  name: newLabelName,
+                  color: newLabelColor
+                });
+
+                // Clear the fields
+                form.updateData('newLabelName', '');
+                form.updateData('newLabelColor', '');
+
+                // Optionally, you can add this new label to the current event's label list
+                const existingLabels = form.option('formData').labels || [];
+                form.updateData('labels', [...existingLabels, newLabelName]);
+              }
+            }
+          }
         }
       ]
     });
@@ -274,6 +344,8 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
   }
 
 
-
+  openLabelPopup(): void {
+    this.labelPopupVisible = true;
+  }
 
 }
