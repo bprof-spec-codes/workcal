@@ -4,7 +4,6 @@ using workcal.Services.Dtos;
 
 namespace workcal.Services
 {
-    // AutoMapper Profile
     public class LabelProfile : Profile
     {
         public LabelProfile()

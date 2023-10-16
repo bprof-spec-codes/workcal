@@ -6,8 +6,8 @@ using workcal.Services.Dtos;
 using Volo.Abp.Domain.Repositories;
 using Microsoft.IdentityModel.Tokens;
 using AutoMapper.Internal.Mappers;
-using Microsoft.EntityFrameworkCore;  
-
+using Microsoft.EntityFrameworkCore;
+using Volo.Abp;
 
 namespace workcal.Services
 {
@@ -22,80 +22,127 @@ namespace workcal.Services
             _labelRepository = labelRepository;
         }
 
-        public async Task CreateAsync(CreateEventDto input)
+        public async Task CreateAsync(CreateEventDto @event)
         {
-            // Create and Save Event
-            var eventEntity = new Event
+            try
             {
-                Name = input.Name,
-                StartTime = input.StartTime,
-                EndTime = input.EndTime,
-                Location = input.Location,
-            };
-            await _eventRepository.InsertAsync(eventEntity);
-
-            //  ID,  create labels
-            if (input.Labels != null && input.Labels.Count > 0)
-            {
-                foreach (var label in input.Labels)
+                var eventEntity = new Event
                 {
-                    var labelEntity = new Label
+                    Name = @event.Name,
+                    StartTime = @event.StartTime,
+                    EndTime = @event.EndTime,
+                    Location = @event.Location,
+                };
+                await _eventRepository.InsertAsync(eventEntity);
+
+                if (@event.Labels != null && @event.Labels.Count > 0)
+                {
+                    foreach (var label in @event.Labels)
                     {
-                        EventId = eventEntity.Id, // Assign the newly created Event's ID
-                        Name = label.Name,
-                        Color = label.Color
-                    };
-                    await _labelRepository.InsertAsync(labelEntity); // Assuming _labelRepository is your label repository
+                        var labelEntity = new Label
+                        {
+                            EventId = eventEntity.Id,
+                            Name = label.Name,
+                            Color = label.Color
+                        };
+                        await _labelRepository.InsertAsync(labelEntity);
+                    }
                 }
+            }
+              catch (Exception ex)
+            {
+                Logger.LogError("An error occurred while creating the event: " + ex.Message);
+                throw new UserFriendlyException("An error occurred while creating the event.");
             }
         }
 
         public async Task<EventDto> GetAsync(Guid id)
         {
-            var eventEntity = await _eventRepository.WithDetails(e => e.Labels).FirstOrDefaultAsync(i => i.Id == id);
-            ;
-            return ObjectMapper.Map<Event, EventDto>(eventEntity);
+            try
+            {
+                var eventEntity = await _eventRepository.WithDetails(e => e.Labels)
+                                                         .FirstOrDefaultAsync(i => i.Id == id);
+                if (eventEntity == null)
+                {
+                    throw new UserFriendlyException("Event not found.");
+                }
+                return ObjectMapper.Map<Event, EventDto>(eventEntity);
+            }
+            catch (UserFriendlyException ex)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("An error occurred while fetching the event: " + ex.Message);
+                throw new UserFriendlyException("An error occurred while fetching the event.");
+            }
         }
 
-        // Implementation for getting all events
         public async Task<List<EventDto>> GetAllAsync()
         {
-            var events = await _eventRepository
-                .WithDetails(e => e.Labels)  // Include Labels in the query.
+            try
+            {
+                var events = await _eventRepository
+                .WithDetails(e => e.Labels)
                 .ToListAsync();
 
-            return ObjectMapper.Map<List<Event>, List<EventDto>>(events);
-        }
+                return ObjectMapper.Map<List<Event>, List<EventDto>>(events);
+            }
+            catch (UserFriendlyException ex)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("An error occurred while fetching the event: " + ex.Message);
+                throw new UserFriendlyException("An error occurred while fetching the event.");
+            }
+}
 
-        // Implementation for deleting an event by id
         public async Task DeleteAsync(Guid id)
         {
-            await _eventRepository.DeleteAsync(id);
+            try
+            {
+                var eventEntity = await _eventRepository.GetAsync(id);
+                if (eventEntity == null)
+                {
+                    throw new UserFriendlyException("Event not found.");
+                }
+
+                await _eventRepository.DeleteAsync(id);
+            }
+            catch (UserFriendlyException ex)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("An error occurred while deleting the event: " + ex.Message);
+                throw new UserFriendlyException("An error occurred while deleting the event.");
+            }
         }
 
-        // Implementation for updating an event
-        public async Task UpdateAsync(Guid id, CreateEventDto input)
+        public async Task UpdateAsync(Guid id, CreateEventDto @event)
         {
-            // Fetch the existing event along with its labels
-            var eventEntity = await _eventRepository.WithDetails(e => e.Labels).FirstOrDefaultAsync(i => i.Id == id);
-
-            if (eventEntity == null)
+            try
             {
-                // Handle not found error
-                return;
-            }
 
-            // Update basic fields
-            eventEntity.Name = input.Name;
-            eventEntity.StartTime = input.StartTime;
-            eventEntity.EndTime = input.EndTime;
-            eventEntity.Location = input.Location;
+                var eventEntity = await _eventRepository.WithDetails(e => e.Labels).FirstOrDefaultAsync(i => i.Id == id);
+
+                if (eventEntity == null)
+                {
+                    throw new UserFriendlyException("Event not found.");
+                }
+
+                eventEntity.Name = @event.Name;
+            eventEntity.StartTime = @event.StartTime;
+            eventEntity.EndTime = @event.EndTime;
+            eventEntity.Location = @event.Location;
             await _eventRepository.UpdateAsync(eventEntity);
 
-            // A dictionary for quick lookup of existing labels
             var existingLabelsDict = eventEntity.Labels.ToDictionary(l => l.Name, l => l);
 
-            // Create a list to hold the final set of labels
             var finalLabels = new List<Label>();
 
             foreach (var oldLabel in eventEntity.Labels)
@@ -104,43 +151,45 @@ namespace workcal.Services
                 await _labelRepository.DeleteAsync(oldLabel); 
                }
 
-            foreach (var inputLabel in input.Labels)
+            foreach (var eventLabel in @event.Labels)
             {
-                if (existingLabelsDict.TryGetValue(inputLabel.Name, out var existingLabel))
+
+                if (existingLabelsDict.TryGetValue(eventLabel.Name, out var existingLabel))
                 {
-                    // Update the existing label if needed
-                    existingLabel.Color = inputLabel.Color;
-                    // finalLabels.Add(existingLabel);
+                    existingLabel.Color = eventLabel.Color;
 
 
                     await _labelRepository.InsertAsync(new Label
                     {
-                        Name = inputLabel.Name,
-                        Color = inputLabel.Color,
+                        Name = eventLabel.Name,
+                        Color = eventLabel.Color,
                         EventId = id
                     });
                 }
                 else
                 {
-                    // Create a new label
-                    /*  finalLabels.Add(new Label
-                      {
-                          Name = inputLabel.Name,
-                          Color = inputLabel.Color,
-                          EventId = id
-                      });*/
+                   
 
                     await _labelRepository.InsertAsync(new Label
                     {
-                        Name = inputLabel.Name,
-                        Color = inputLabel.Color,
+                        Name = eventLabel.Name,
+                        Color = eventLabel.Color,
                         EventId = id
                     });
                 }
             }
 
-            // Set the final set of labels and save changes outside of the loop
-           // eventEntity.Labels = finalLabels;
+        }
+            catch (UserFriendlyException ex)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("An error occurred while updating the event: " + ex.Message);
+                throw new UserFriendlyException("An error occurred while updating the event.");
+}
+
 
         }
 
