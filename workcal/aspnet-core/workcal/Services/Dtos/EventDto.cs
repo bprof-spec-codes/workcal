@@ -12,6 +12,8 @@ namespace workcal.Services.Dtos
         public DateTime EndTime { get; set; }
         public string Location { get; set; }
         public List<Label> Labels { get; set; }
+        public List<Guid> UserIds { get; set; }
+
 
     }
 }

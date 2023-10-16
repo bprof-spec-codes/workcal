@@ -56,12 +56,7 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
                     .HasOne(ur => ur.Event)
                     .WithMany(u => u.EventUsers)
                     .HasForeignKey(ur => ur.UserId);
-        /*
-        builder.Entity<EventsUsers>()
-            .HasOne(ur => ur.User)
-            .WithMany(r => (ICollection<EventsUsers>)r.ExtraProperties["Events"])
-            .HasForeignKey(ur => ur.EventId);
-        */
+        
 
         builder.Entity<EventsUsers>(b => {
             b.ToTable("EventsUsers"); b.ConfigureByConvention();

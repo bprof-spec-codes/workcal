@@ -18,5 +18,8 @@ namespace workcal.Services.Dtos
         public string Location { get; set; }
 
         public List<CreateLabelDto> Labels { get; set; }
+
+        public List<Guid> UserIds { get; set; }
+
     }
 }

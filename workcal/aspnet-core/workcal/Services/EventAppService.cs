@@ -15,11 +15,14 @@ namespace workcal.Services
     {
         private readonly IRepository<Event, Guid> _eventRepository;
         private readonly IRepository<Label, Guid> _labelRepository;
+        private readonly IRepository<EventsUsers, Guid> _eventsUsersRepository;
 
-        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository)
+
+        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository, IRepository<EventsUsers, Guid> eventsUsersRepository)
         {
             _eventRepository = eventRepository;
             _labelRepository = labelRepository;
+            _eventsUsersRepository = eventsUsersRepository;
         }
 
         public async Task CreateAsync(CreateEventDto @event)
@@ -48,6 +51,17 @@ namespace workcal.Services
                         await _labelRepository.InsertAsync(labelEntity);
                     }
                 }
+
+                foreach (var userId in @event.UserIds)
+                {
+                    var eventUser = new EventsUsers
+                    {
+                        EventId = eventEntity.Id,
+                        UserId = userId
+                    };
+                    await _eventsUsersRepository.InsertAsync(eventUser);
+                }
+
             }
               catch (Exception ex)
             {
