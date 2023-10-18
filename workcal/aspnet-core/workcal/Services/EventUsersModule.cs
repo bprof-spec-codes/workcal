@@ -5,13 +5,13 @@ namespace workcal
 {
     // ABP Module Configuration
     [DependsOn(typeof(AbpAutoMapperModule))]
-    public class EventusersModule : AbpModule
+    public class EventUsersModule : AbpModule
     {
         public override void ConfigureServices(ServiceConfigurationContext context)
         {
             Configure<AbpAutoMapperOptions>(options =>
             {
-                options.AddMaps<EventusersModule>();
+                options.AddMaps<EventUsersModule>();
             });
         }
     }

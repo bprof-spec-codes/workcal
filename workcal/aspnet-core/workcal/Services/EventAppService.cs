@@ -8,6 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using AutoMapper.Internal.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Volo.Abp;
+using Polly;
+using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
 
 namespace workcal.Services
 {
@@ -79,7 +81,7 @@ namespace workcal.Services
         {
             try
             {
-                var eventEntity = await _eventRepository.WithDetails(e => e.Labels)
+                var eventEntity = await _eventRepository.WithDetails(e => e.Labels, e => e.EventUsers)
                                                          .FirstOrDefaultAsync(i => i.Id == id);
                 if (eventEntity == null)
                 {
@@ -105,10 +107,15 @@ namespace workcal.Services
             try
             {
                 var events = await _eventRepository
-                .WithDetails(e => e.Labels)
-                .ToListAsync();
+                .WithDetailsAsync(e => e.Labels, e => e.EventUsers);
 
-                return ObjectMapper.Map<List<Event>, List<EventDto>>(events);
+               var eventlist = events.ToList();
+
+
+                 return ObjectMapper.Map<List<Event>, List<EventDto>>(eventlist);
+
+                
+
             }
             catch (UserFriendlyException ex)
             {
@@ -120,6 +127,8 @@ namespace workcal.Services
                 throw new UserFriendlyException("An error occurred while fetching the event.");
             }
 }
+
+      
 
         public async Task DeleteAsync(Guid id)
         {

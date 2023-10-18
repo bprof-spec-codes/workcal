@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Volo.Abp.Domain.Entities;
+using Volo.Abp.Domain.Entities.Auditing;
 
 namespace workcal.Entities
 {

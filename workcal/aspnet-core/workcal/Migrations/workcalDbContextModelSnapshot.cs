@@ -1655,16 +1655,25 @@ namespace workcal.Migrations
 
             modelBuilder.Entity("workcal.Entities.EventsUsers", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId1")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("EventId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
+
+                    b.HasIndex("EventId", "UserId");
 
                     b.ToTable("EventsUsers", (string)null);
                 });
@@ -1836,15 +1845,21 @@ namespace workcal.Migrations
 
             modelBuilder.Entity("workcal.Entities.EventsUsers", b =>
                 {
-                    b.HasOne("Volo.Abp.Identity.IdentityUser", "User")
+                    b.HasOne("workcal.Entities.Event", "Event")
+                        .WithMany("EventUsers")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Volo.Abp.Identity.IdentityUser", null)
                         .WithMany()
-                        .HasForeignKey("Id")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("workcal.Entities.Event", "Event")
-                        .WithMany("EventUsers")
-                        .HasForeignKey("Id")
+                    b.HasOne("Volo.Abp.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

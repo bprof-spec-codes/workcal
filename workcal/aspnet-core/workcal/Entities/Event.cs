@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using Volo.Abp.Identity;
+using Volo.Abp.Domain.Entities.Auditing;
 
 namespace workcal.Entities
 {
@@ -23,7 +24,7 @@ namespace workcal.Entities
         public List<Label> Labels { get; set; }
 
         [ValidateNever]
-        [JsonIgnore]
+    
         public ICollection<EventsUsers> EventUsers { get; set; }
 
     

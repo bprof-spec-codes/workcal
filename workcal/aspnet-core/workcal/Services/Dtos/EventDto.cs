@@ -13,7 +13,7 @@ namespace workcal.Services.Dtos
         public string Location { get; set; }
         public List<Label> Labels { get; set; }
 
-        public List<Guid> UserIds { get; set; }
+        public List<EventsUsers> EventsUsers { get; set; }
 
 
     }
