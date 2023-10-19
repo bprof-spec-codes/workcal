@@ -30,6 +30,8 @@
             "allowedCommonJsDependencies": ["chart.js", "js-sha256"],
             "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
+              
+            
               {
                 "input": "node_modules/@volo/ngx-lepton-x.lite/assets/css/bootstrap-dim.css",
                 "inject": false,
@@ -108,7 +110,8 @@
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+             ]
           },
           "configurations": {
             "production": {
