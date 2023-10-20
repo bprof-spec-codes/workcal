@@ -1,6 +1,7 @@
 
 import { Component } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +12,7 @@ export class AppComponent {
 
   token: string|undefined;
 
-  constructor() {
+  constructor(private router:Router) {
     this.token = undefined;
   }
 
@@ -24,6 +25,13 @@ export class AppComponent {
     }
 
     console.debug(`Token [${this.token}] generated`);
+    
+
+  }
+  public redirect(){
+if(this.token!=undefined){
+this.router.navigate(['account']);
+  }
   }
 
 }
