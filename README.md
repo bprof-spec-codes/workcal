@@ -4,7 +4,7 @@
 |---|---|
 |Scrum Master|Sörös Bence|
 |Product Owner|Kiss Levente|
-|Architect|Bognár Bence|
-|Full stack|Acsai András|
-|Full stack|Borossa Zoltán|
-|Full stack|Nagy Máté|
+|Architect|Csizmadia Gergő|
+|Full stack|Bognár Bence|
+|Full stack|Juhász Márton Bendegúz|
+|Full stack|Varga Márk|
