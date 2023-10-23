@@ -30,14 +30,6 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
         builder.ConfigureSettingManagement();
         builder.ConfigureAuditLogging();
         builder.ConfigureIdentity();
-
-
-        //ObjectExtensionManager.Instance
-        //    .MapEfCoreProperty<IdentityUser, string>(
-        //    "SocialSecurityNumber", (
-        //        entityBuilder, propertyBuilder
-        //        ) => { propertyBuilder.HasMaxLength(32); }
-        //        );
         builder.ConfigureOpenIddict();
         builder.ConfigureFeatureManagement();
         builder.ConfigureTenantManagement();
