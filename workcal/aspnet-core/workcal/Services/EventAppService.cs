@@ -209,7 +209,7 @@ namespace workcal.Services
                     throw new UserFriendlyException("Event not found.");
                 }
 
-                await _eventRepository.DeleteAsync(id);
+                await _eventRepository.DeleteAsync(id); // Delete entity
             }
             catch (UserFriendlyException ex)
             {

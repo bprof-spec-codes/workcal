@@ -1853,7 +1853,7 @@ namespace workcal.Migrations
                     b.HasOne("workcal.Entities.Event", null)
                         .WithMany("EventUsers")
                         .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("workcal.Entities.Event", "Event")
@@ -1865,7 +1865,7 @@ namespace workcal.Migrations
                     b.HasOne("Volo.Abp.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Volo.Abp.Identity.IdentityUser", "User")
@@ -1884,7 +1884,7 @@ namespace workcal.Migrations
                     b.HasOne("workcal.Entities.Event", "Event")
                         .WithMany("Labels")
                         .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Event");

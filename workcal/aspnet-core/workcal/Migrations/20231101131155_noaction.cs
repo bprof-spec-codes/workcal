@@ -48,7 +48,7 @@ namespace workcal.Migrations
                 column: "UserId",
                 principalTable: "AbpUsers",
                 principalColumn: "Id",
-        onDelete: ReferentialAction.NoAction);
+        onDelete: ReferentialAction.Cascade);
 
           
 
@@ -58,7 +58,7 @@ namespace workcal.Migrations
                 column: "EventId",
                 principalTable: "Events",
                 principalColumn: "Id",
-             onDelete: ReferentialAction.NoAction);
+             onDelete: ReferentialAction.Cascade);
 
         
         }

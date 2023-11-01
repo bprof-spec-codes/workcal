@@ -88,8 +88,8 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
         {
             b.ConfigureByConvention();
 
-            b.HasMany(e => e.Labels).WithOne(o => o.Event).HasForeignKey(x => x.EventId).IsRequired().OnDelete(DeleteBehavior.NoAction); ;
-            b.HasMany(x => x.EventUsers).WithOne().HasForeignKey(x => x.EventId).IsRequired().OnDelete(DeleteBehavior.NoAction); ;
+            b.HasMany(e => e.Labels).WithOne(o => o.Event).HasForeignKey(x => x.EventId).IsRequired().OnDelete(DeleteBehavior.Cascade); ;
+            b.HasMany(x => x.EventUsers).WithOne().HasForeignKey(x => x.EventId).IsRequired().OnDelete(DeleteBehavior.Cascade); ;
 
         });
 
@@ -97,9 +97,9 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
 
             builder.Entity<EventsUsers>(b => {
               b.ToTable("EventsUsers"); b.ConfigureByConvention();
-             b.HasOne<Event>().WithMany(x => x.EventUsers).HasForeignKey("EventId").OnDelete(DeleteBehavior.NoAction);
+             b.HasOne<Event>().WithMany(x => x.EventUsers).HasForeignKey("EventId").OnDelete(DeleteBehavior.Cascade);
            // b.HasOne<IdenityUsers>().WithMany().HasForeignKey("UserId").OnDelete(DeleteBehavior.NoAction);
-            b.HasOne<IdentityUser>().WithMany().HasForeignKey(x => x.UserId).IsRequired().OnDelete(DeleteBehavior.NoAction);
+            b.HasOne<IdentityUser>().WithMany().HasForeignKey(x => x.UserId).IsRequired().OnDelete(DeleteBehavior.Cascade);
 
             b.HasKey(x => new { x.EventId, x.UserId });
               b.HasIndex(x => new { x.EventId, x.UserId });
