@@ -77,7 +77,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           text: event.name,
           location: event.location,
           labels: event.labels,
-          userIds: event.userIds || []
+          users: event.users
         }));
       });
   }
@@ -160,8 +160,11 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       appointmentData.labels?.includes(label.name)
     );
 
+      const selectedUsers = this.users.filter(user =>
+        appointmentData.users?.includes(user.name)
+      );
 
-
+      const selectedUserIDs = selectedUsers.map(user => user.id);
 
 
     const newEvent: EventDto = {
@@ -170,7 +173,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
       labels: selectedLabels,
-      userIds: appointmentData.userIds || []
+      userIDs:  selectedUserIDs
     };
 
     this.createEvent(newEvent);
@@ -215,6 +218,14 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       selectedLabels = appointmentDataOld.labels;
     }
 
+    const selectedUsers = this.users.filter(user =>
+      appointmentData.users?.includes(user.name)
+    );
+
+    const selectedUserIDs = selectedUsers.map(user => user.id);
+
+
+
     const updatedEvent: EventDto = {
       id: appointmentDataOld.id,
       name: appointmentData.text,
@@ -222,7 +233,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
       labels: selectedLabels,
-      userIds: appointmentData.userIds || []
+      userIDs: selectedUserIDs
     };
 
     this.updateEvent(updatedEvent);
@@ -368,7 +379,7 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
           }
         },
         {
-          dataField: 'userIds',
+          dataField: 'users',
           editorType: 'dxTagBox',
           editorOptions: {
             dataSource: this.users,

@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using Volo.Abp.Authorization;
 using Volo.Abp.Identity;
 using static Volo.Abp.Identity.Settings.IdentitySettingNames;
+using workcal.Migrations;
 
 namespace workcal.Services
 {
@@ -22,12 +23,12 @@ namespace workcal.Services
     {
         private readonly IRepository<Event, Guid> _eventRepository;
         private readonly IRepository<Label, Guid> _labelRepository;
-        private readonly IRepository<EventsUsers, Guid> _eventsUsersRepository;
+        private readonly IRepository<Entities.EventsUsers, Guid> _eventsUsersRepository;
         private readonly IRepository<Volo.Abp.Identity.IdentityUser, Guid> _userRepository; // Inject the user repository
 
 
 
-        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository ,IRepository<EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
+        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository ,IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
 
         {
             _eventRepository = eventRepository;
@@ -72,7 +73,7 @@ namespace workcal.Services
               
                 foreach (var userId in @event.UserIds)
                 {
-                    var eventUser = new EventsUsers
+                    var eventUser = new Entities.EventsUsers
                     {
                         EventId = instertedEvent.Id,
                         UserId = userId
@@ -94,7 +95,13 @@ namespace workcal.Services
             {
                 var eventEntity = await _eventRepository.WithDetails(e => e.Labels)
                                                          .FirstOrDefaultAsync(i => i.Id == id);
-                var eventUsers = await _eventsUsersRepository.GetListAsync();
+
+                var alleventUsers = await _eventsUsersRepository.GetListAsync();
+
+                var alluser = await _userRepository.GetListAsync();
+
+
+
 
 
 
@@ -102,7 +109,21 @@ namespace workcal.Services
                 {
                     throw new UserFriendlyException("Event not found.");
                 }
-                return ObjectMapper.Map<Event, EventDto>(eventEntity);
+                var eventDto = ObjectMapper.Map<Event, EventDto>(eventEntity);
+
+                List<Entities.EventsUsers> eventusesEventid = alleventUsers.Where(i => i.EventId == eventEntity.Id  ).ToList();
+
+                var usersInEvent = alluser.Where(u => eventusesEventid.Any(eu => eu.UserId == u.Id)).ToList();
+                eventDto.Users = new List<Volo.Abp.Identity.IdentityUser>();
+
+
+                eventDto.Users.AddRange(usersInEvent);
+
+
+                return eventDto;
+
+
+
             }
             catch (UserFriendlyException ex)
             {
@@ -130,6 +151,10 @@ namespace workcal.Services
                 // Map to DTO
                 var eventDtoList = ObjectMapper.Map<List<Event>, List<EventDto>>(eventList);
 
+                var alluser = await _userRepository.GetListAsync();
+
+                var allEventUsers = await _eventsUsersRepository.GetListAsync();
+
                 // Loop through each event DTO to populate the Users list
                 for (int i = 0; i < eventDtoList.Count; i++)
                 {
@@ -139,15 +164,23 @@ namespace workcal.Services
                     // Initialize the Users list for the current event DTO
                     eventDtoList[i].Users = new List<Volo.Abp.Identity.IdentityUser>();
 
-                    // Populate the Users list based on the EventUsers collection
-                    foreach (var eventUser in correspondingEvent.EventUsers)
-                    {
-                        // Fetch the user by UserId (Assuming you have a method to get a user by Id)
-                        var user = await _userRepository.GetListAsync();
+                     
+                    
 
-                        // Add the user to the current event DTO's Users list
-                        eventDtoList[i].Users.AddRange(user);
+                    foreach (var user in alluser)
+                    {
+                        foreach (var eventuser in allEventUsers)
+                        {
+                            if (user.Id == eventuser.UserId && correspondingEvent.Id ==eventuser.EventId)
+                            {
+                                eventDtoList[i].Users.Add(user);
+                                break;
+                            }
+                        }
+                       
                     }
+
+                 
                 }
 
                 return eventDtoList;
