@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using workcal.Entities;
 
 namespace workcal.Services.Dtos
@@ -13,7 +14,7 @@ namespace workcal.Services.Dtos
         public string Location { get; set; }
         public List<Label> Labels { get; set; }
 
-        public List<EventsUsers> EventsUsers { get; set; }
+        public List<Guid> UserIds { get; set; }
 
 
     }

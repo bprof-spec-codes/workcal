@@ -10,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using Volo.Abp;
 using Polly;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
+using Volo.Abp.Users;
+using Microsoft.AspNetCore.Identity;
 
 namespace workcal.Services
 {
@@ -18,13 +20,16 @@ namespace workcal.Services
         private readonly IRepository<Event, Guid> _eventRepository;
         private readonly IRepository<Label, Guid> _labelRepository;
         private readonly IRepository<EventsUsers, Guid> _eventsUsersRepository;
+        
 
 
-        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository, IRepository<EventsUsers, Guid> eventsUsersRepository)
+        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository ,IRepository<EventsUsers, Guid> eventsUsersRepository )
         {
             _eventRepository = eventRepository;
             _labelRepository = labelRepository;
             _eventsUsersRepository = eventsUsersRepository;
+          
+
         }
 
         public async Task CreateAsync(CreateEventDto @event)
@@ -81,8 +86,12 @@ namespace workcal.Services
         {
             try
             {
-                var eventEntity = await _eventRepository.WithDetails(e => e.Labels, e => e.EventUsers)
+                var eventEntity = await _eventRepository.WithDetails(e => e.Labels)
                                                          .FirstOrDefaultAsync(i => i.Id == id);
+                var eventUsers = await _eventsUsersRepository.GetListAsync();
+
+
+
                 if (eventEntity == null)
                 {
                     throw new UserFriendlyException("Event not found.");
@@ -102,20 +111,46 @@ namespace workcal.Services
 
         public async Task<List<EventDto>> GetAllAsync()
         {
-           
 
             try
             {
                 var events = await _eventRepository
-                .WithDetailsAsync(e => e.Labels, e => e.EventUsers);
+                    .WithDetailsAsync(e => e.Labels);
 
-               var eventlist = events.ToList();
+                var eventList = events.ToList();
 
+                var evetUserslist = await _eventsUsersRepository.GetListAsync();
 
-                 return ObjectMapper.Map<List<Event>, List<EventDto>>(eventlist);
+                var eventDtoList = ObjectMapper.Map<List<Event>, List<EventDto>>(eventList);
 
-                
+                // Loop through each event DTO to populate the Users list
+                for (int i = 0; i < eventDtoList.Count; i++)
+                {
+                    // Fetch corresponding Event entity
+                    var correspondingEvent = eventList[i];
 
+                    // Initialize the Users list for the current event DTO
+                    eventDtoList[i].UserIds = new List<Guid>();
+
+                   
+                        // Populate the Users list based on the EventUsers collection
+                        foreach (var eventUser in evetUserslist)
+                        {
+                        // Fetch the user by UserId (Assuming you have a method to get a user by Id)
+                        //var user = await _userManager.FindByIdAsync(eventUser.UserId.ToString());
+
+                        // Add the user to the current event DTO's Users list
+                        if (eventUser.EventId== eventDtoList[i].Id)
+                        {
+                            eventDtoList[i].UserIds.Add(eventUser.UserId);
+                        }
+                           
+                        }
+                    
+                   
+                }
+
+                return eventDtoList;
             }
             catch (UserFriendlyException ex)
             {

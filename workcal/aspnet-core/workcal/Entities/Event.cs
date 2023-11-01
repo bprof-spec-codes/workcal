@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using Volo.Abp.Identity;
 using Volo.Abp.Domain.Entities.Auditing;
+using System.Collections.ObjectModel;
 
 namespace workcal.Entities
 {
@@ -27,7 +28,8 @@ namespace workcal.Entities
     
         public ICollection<EventsUsers> EventUsers { get; set; }
 
-    
+        public Event() {
+        }
 
     }
 

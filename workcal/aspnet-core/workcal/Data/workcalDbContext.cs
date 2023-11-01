@@ -1,5 +1,6 @@
 ﻿//using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Reflection.Emit;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -26,10 +27,10 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
     {
     }
 
-    public DbSet<Event> Events { get; set; }  // DbSet for Event entity
-    public DbSet<Entities.Label> Labels { get; set; }  // DbSet for Label entity
+    public DbSet<Event> Events { get; set; } 
+    public DbSet<Entities.Label> Labels { get; set; }  
 
-    public DbSet<EventsUsers> EventUsers { get; set; }  // DbSet for Label entity
+    public DbSet<EventsUsers> EventUsers { get; set; }  
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -61,37 +62,48 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
 
 
 
-        builder.Entity<Event>().HasMany(e=> e.Labels)
+     /*   builder.Entity<Event>().HasMany(e=> e.Labels)
             .WithOne(o=>o.Event)
             .HasForeignKey(p => p.EventId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-      /* ObjectExtensionManager.Instance
-            .AddOrUpdate<IdentityUser>(options => { options.AddOrUpdateProperty<ICollection<EventsUsers>>("Events"); });*/
-
-
-         /* builder.Entity<EventsUsers>()
-                      .HasOne(ur => ur.Event)
-                      .WithMany(u => u.EventUsers)
-                      .HasForeignKey(ur => ur.UserId)
-                      .OnDelete(DeleteBehavior.NoAction);*/
-
-        builder.Entity<Event>().HasMany(x => x.EventUsers)
-           .WithOne()
-           .HasForeignKey(p => p.EventId)
-           .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.NoAction);
+     */
+        /* ObjectExtensionManager.Instance
+              .AddOrUpdate<IdentityUser>(options => { options.AddOrUpdateProperty<ICollection<EventsUsers>>("Events"); });*/
 
 
+        /* builder.Entity<EventsUsers>()
+                     .HasOne(ur => ur.Event)
+                     .WithMany(u => u.EventUsers)
+                     .HasForeignKey(ur => ur.UserId)
+                     .OnDelete(DeleteBehavior.NoAction);*/
+
+        /* builder.Entity<Event>().HasMany(x => x.EventUsers)
+            .WithOne(o=> o.Event)
+            .HasForeignKey(p => p.EventId)
+            .OnDelete(DeleteBehavior.NoAction);*/
 
 
-        builder.Entity<EventsUsers>(b => {
+
+        builder.Entity<Event>(b =>
+        {
+            b.ConfigureByConvention();
+
+            b.HasMany(e => e.Labels).WithOne(o => o.Event).HasForeignKey(x => x.EventId).IsRequired().OnDelete(DeleteBehavior.NoAction); ;
+            b.HasMany(x => x.EventUsers).WithOne().HasForeignKey(x => x.EventId).IsRequired().OnDelete(DeleteBehavior.NoAction); ;
+
+        });
+
+
+
+            builder.Entity<EventsUsers>(b => {
               b.ToTable("EventsUsers"); b.ConfigureByConvention();
-            b.HasOne(x => x.Event).WithMany(x => x.EventUsers).HasForeignKey("EventId").OnDelete(DeleteBehavior.NoAction);
-           // b.HasOne(x => x.User).WithMany().HasForeignKey("UserId").OnDelete(DeleteBehavior.NoAction); 
-              b.HasKey(x => new { x.EventId, x.UserId });
+             b.HasOne<Event>().WithMany(x => x.EventUsers).HasForeignKey("EventId").OnDelete(DeleteBehavior.NoAction);
+           // b.HasOne<IdenityUsers>().WithMany().HasForeignKey("UserId").OnDelete(DeleteBehavior.NoAction);
+            b.HasOne<IdentityUser>().WithMany().HasForeignKey(x => x.UserId).IsRequired().OnDelete(DeleteBehavior.NoAction);
+
+            b.HasKey(x => new { x.EventId, x.UserId });
               b.HasIndex(x => new { x.EventId, x.UserId });
 
-            b.HasOne<IdentityUser>().WithMany().HasForeignKey(x => x.UserId).IsRequired();
 
 
         });

@@ -33,15 +33,9 @@ namespace workcal.Migrations
                 column: "UserId",
                 principalTable: "AbpUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_EventsUsers_AbpUsers_UserId1",
-                table: "EventsUsers",
-                column: "UserId1",
-                principalTable: "AbpUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+         
         }
 
         /// <inheritdoc />

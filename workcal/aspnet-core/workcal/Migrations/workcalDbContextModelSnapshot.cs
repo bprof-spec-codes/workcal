@@ -1661,6 +1661,9 @@ namespace workcal.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("EventId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
@@ -1668,6 +1671,8 @@ namespace workcal.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("EventId", "UserId");
+
+                    b.HasIndex("EventId1");
 
                     b.HasIndex("UserId");
 
@@ -1845,16 +1850,22 @@ namespace workcal.Migrations
 
             modelBuilder.Entity("workcal.Entities.EventsUsers", b =>
                 {
-                    b.HasOne("workcal.Entities.Event", "Event")
+                    b.HasOne("workcal.Entities.Event", null)
                         .WithMany("EventUsers")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("workcal.Entities.Event", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Volo.Abp.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Volo.Abp.Identity.IdentityUser", "User")
@@ -1873,7 +1884,7 @@ namespace workcal.Migrations
                     b.HasOne("workcal.Entities.Event", "Event")
                         .WithMany("Labels")
                         .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Event");

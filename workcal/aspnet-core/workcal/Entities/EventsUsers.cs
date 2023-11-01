@@ -14,17 +14,17 @@ namespace workcal.Entities
     public class EventsUsers : BasicAggregateRoot<Guid>
     {
         public Guid UserId { get; set; }
-
         [AllowNull]
         public IdentityUser User { get; set; }
+
         public Guid EventId { get; set; }
-
-
         [AllowNull]
         public Event Event { get; set; }
 
+        public EventsUsers() { }
+        public EventsUsers(Guid userId, Guid eventId) { UserId = userId; EventId = eventId; }
+        public override object[] GetKeys() { return new object[]{ UserId, EventId }; }
 
-   
 
 
     }

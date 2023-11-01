@@ -47,6 +47,7 @@ using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Autofac.Core;
 
 namespace workcal;
 
@@ -137,7 +138,6 @@ public class workcalModule : AbpModule
             options.ConventionalControllers.Create(typeof(workcalModule).Assembly);
         });
 
-      
 
         ConfigureAuthentication(context);
         ConfigureBundles();
@@ -251,6 +251,8 @@ public class workcalModule : AbpModule
 
     private void ConfigureSwagger(IServiceCollection services, IConfiguration configuration)
     {
+
+
         services.AddAbpSwaggerGenWithOAuth(
             configuration["AuthServer:Authority"],
             new Dictionary<string, string>
