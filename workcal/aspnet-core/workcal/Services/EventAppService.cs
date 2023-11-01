@@ -16,6 +16,7 @@ using Volo.Abp.Authorization;
 using Volo.Abp.Identity;
 using static Volo.Abp.Identity.Settings.IdentitySettingNames;
 using workcal.Migrations;
+using System.Linq;
 
 namespace workcal.Services
 {
@@ -276,8 +277,26 @@ namespace workcal.Services
                     });
                 }
             }
+                var allEventUsers = await _eventsUsersRepository.GetListAsync();
+                var existingEventUsers = allEventUsers.Where(eu => eu.EventId == id).ToList();
 
-        }
+                foreach (var eventUser in existingEventUsers)
+                {
+                    await _eventsUsersRepository.DeleteAsync(eventUser);
+                }
+
+                // 2. Insert new Event-User relations based on updated event data
+                foreach (var userId in @event.UserIds)
+                {
+                    var eventUser = new Entities.EventsUsers
+                    {
+                        EventId = id,
+                        UserId = userId
+                    };
+                    await _eventsUsersRepository.InsertAsync(eventUser);
+                }
+
+            }
             catch (UserFriendlyException ex)
             {
                 throw;

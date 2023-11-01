@@ -6,7 +6,7 @@ export type EventDto = {
   endTime: Date;
   location: string;
   labels: LabelDto[];
-  userIDs: String[];
+  userIDs: UserDto[];
 
 };
 

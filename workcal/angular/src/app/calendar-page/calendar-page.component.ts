@@ -160,11 +160,12 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       appointmentData.labels?.includes(label.name)
     );
 
-      const selectedUsers = this.users.filter(user =>
+      const selectedUsers = appointmentData.users.filter(user =>
         appointmentData.users?.includes(user.name)
       );
 
-      const selectedUserIDs = selectedUsers.map(user => user.id);
+      const selectedUserIDs = appointmentData.users;
+
 
 
     const newEvent: EventDto = {
@@ -199,8 +200,12 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   }
 
   onEventUpdating(event): void {
+
+    //console.log("Event data before any operation: ", JSON.stringify(event));
+
     const appointmentData = event.newData;
     const appointmentDataOld = event.oldData;
+    console.log('New appointmentData:', appointmentData);
 
     if (!appointmentDataOld.id) {
       console.error("Event ID is missing, cannot update");
@@ -218,13 +223,29 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       selectedLabels = appointmentDataOld.labels;
     }
 
-    const selectedUsers = this.users.filter(user =>
-      appointmentData.users?.includes(user.name)
-    );
-
-    const selectedUserIDs = selectedUsers.map(user => user.id);
 
 
+
+
+    let selectedUserIDs: UserDto[] = [];
+
+    // Check the type of the first element in the array
+    if (Array.isArray(appointmentData.users) && appointmentData.users.length > 0) {
+      if (typeof appointmentData.users[0] === 'string') {
+        // It's an array of IDs (strings)
+        selectedUserIDs = appointmentData.users;
+      } else if (typeof appointmentData.users[0] === 'object') {
+        // It's an array of objects
+        selectedUserIDs = appointmentData.users.map(user => user.id);
+      }
+    } else {
+      // Handle other cases or set to an empty array if needed
+      selectedUserIDs = [];
+    }
+
+
+
+   // console.log("appointmentData before any operation: ", JSON.stringify(appointmentData));
 
     const updatedEvent: EventDto = {
       id: appointmentDataOld.id,
@@ -379,17 +400,29 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
           }
         },
         {
-          dataField: 'users',
-          editorType: 'dxTagBox',
-          editorOptions: {
-            dataSource: this.users,
-            displayExpr: 'userName',
-            valueExpr: 'id',
-            placeholder: 'Assign to...'
-          },
-          label: {
-            text: 'Assign To'
-          }
+        dataField: 'users',
+    editorType: 'dxTagBox',
+    editorOptions: {
+      dataSource: this.users,
+      displayExpr: 'userName',
+      valueExpr: 'id',
+      placeholder: 'Assign to...',
+      onValueChanged: (e) => {
+        // Debugging: Log the current value whenever it changes
+        console.log("Current value of users field:", e.value);
+        data.appointmentData.users = e.value.map(userObjOrId => {
+          return typeof userObjOrId === 'object' ? userObjOrId.id : userObjOrId;
+        });
+        // Here, you can directly manipulate data.appointmentData.users based on e.value
+        // which should be the current array of selected user IDs.
+      //  data.appointmentData.users = e.value;
+        console.log("Updated appointmentData.users:", data.appointmentData.users);
+
+      }
+    },
+    label: {
+      text: 'Assign To'
+    }
         },
       ]
     });
