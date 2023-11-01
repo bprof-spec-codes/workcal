@@ -14,6 +14,7 @@ export class AppComponent {
 
   constructor(private router:Router) {
     this.token = undefined;
+    
   }
 
   public send(form: NgForm): void {
@@ -25,11 +26,13 @@ export class AppComponent {
     }
 
     console.debug(`Token [${this.token}] generated`);
-    
+   
 
   }
   public redirect(){
-if(this.token!=undefined){
+    localStorage.setItem('Captcha',this.token);
+    console.log("\n\n "+ localStorage.getItem('Captcha'))  
+    if(this.token!=undefined){
 this.router.navigate(['account']);
   }
   }

@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
+import { Apiservice } from './api.service';
 
 const routes: Routes = [
   {
@@ -14,7 +15,7 @@ const routes: Routes = [
   },
   {
     path: 'account',
-    loadChildren: () => import('@abp/ng.account').then(m => m.AccountModule.forLazy()),
+    loadChildren: () => import('@abp/ng.account').then(m => m.AccountModule.forLazy()), canActivate: [Apiservice]
   },
   {
     path: 'identity',
