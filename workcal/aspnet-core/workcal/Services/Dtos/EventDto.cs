@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
+using Volo.Abp.Identity;
 using workcal.Entities;
 
 namespace workcal.Services.Dtos
@@ -14,7 +15,7 @@ namespace workcal.Services.Dtos
         public string Location { get; set; }
         public List<Label> Labels { get; set; }
 
-        public List<Guid> UserIds { get; set; }
+        public List<Volo.Abp.Identity.IdentityUser> Users { get; set; }
 
 
     }

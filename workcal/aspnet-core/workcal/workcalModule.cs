@@ -48,6 +48,9 @@ using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Autofac.Core;
+using Microsoft.AspNetCore.Identity;
+using IdentityUser = Microsoft.AspNetCore.Identity.IdentityUser;
+using IdentityRole = Microsoft.AspNetCore.Identity.IdentityRole;
 
 namespace workcal;
 
@@ -137,6 +140,9 @@ public class workcalModule : AbpModule
         {
             options.ConventionalControllers.Create(typeof(workcalModule).Assembly);
         });
+        var services = context.Services;
+
+     
 
 
         ConfigureAuthentication(context);

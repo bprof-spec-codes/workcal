@@ -1,4 +1,6 @@
-﻿using Volo.Abp.AutoMapper;
+﻿using Autofac.Core;
+using Microsoft.AspNetCore.Identity;
+using Volo.Abp.AutoMapper;
 using Volo.Abp.Modularity;
 
 namespace workcal
@@ -13,6 +15,8 @@ namespace workcal
             {
                 options.AddMaps<EventModule>();
             });
+
+         
         }
     }
 }

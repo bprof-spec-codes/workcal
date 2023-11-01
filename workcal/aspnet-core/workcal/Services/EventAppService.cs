@@ -12,6 +12,9 @@ using Polly;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
 using Volo.Abp.Users;
 using Microsoft.AspNetCore.Identity;
+using Volo.Abp.Authorization;
+using Volo.Abp.Identity;
+using static Volo.Abp.Identity.Settings.IdentitySettingNames;
 
 namespace workcal.Services
 {
@@ -20,15 +23,18 @@ namespace workcal.Services
         private readonly IRepository<Event, Guid> _eventRepository;
         private readonly IRepository<Label, Guid> _labelRepository;
         private readonly IRepository<EventsUsers, Guid> _eventsUsersRepository;
-        
+        private readonly IRepository<Volo.Abp.Identity.IdentityUser, Guid> _userRepository; // Inject the user repository
 
 
-        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository ,IRepository<EventsUsers, Guid> eventsUsersRepository )
+
+        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository ,IRepository<EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
+
         {
             _eventRepository = eventRepository;
             _labelRepository = labelRepository;
             _eventsUsersRepository = eventsUsersRepository;
-          
+    _userRepository = userRepository;
+
 
         }
 
@@ -114,13 +120,14 @@ namespace workcal.Services
 
             try
             {
+                // Fetch events with their associated Labels and EventUsers
                 var events = await _eventRepository
-                    .WithDetailsAsync(e => e.Labels);
+                    .WithDetailsAsync(e => e.Labels, e => e.EventUsers);
 
+                // Convert to List for easier manipulation
                 var eventList = events.ToList();
 
-                var evetUserslist = await _eventsUsersRepository.GetListAsync();
-
+                // Map to DTO
                 var eventDtoList = ObjectMapper.Map<List<Event>, List<EventDto>>(eventList);
 
                 // Loop through each event DTO to populate the Users list
@@ -130,24 +137,17 @@ namespace workcal.Services
                     var correspondingEvent = eventList[i];
 
                     // Initialize the Users list for the current event DTO
-                    eventDtoList[i].UserIds = new List<Guid>();
+                    eventDtoList[i].Users = new List<Volo.Abp.Identity.IdentityUser>();
 
-                   
-                        // Populate the Users list based on the EventUsers collection
-                        foreach (var eventUser in evetUserslist)
-                        {
+                    // Populate the Users list based on the EventUsers collection
+                    foreach (var eventUser in correspondingEvent.EventUsers)
+                    {
                         // Fetch the user by UserId (Assuming you have a method to get a user by Id)
-                        //var user = await _userManager.FindByIdAsync(eventUser.UserId.ToString());
+                        var user = await _userRepository.GetListAsync();
 
                         // Add the user to the current event DTO's Users list
-                        if (eventUser.EventId== eventDtoList[i].Id)
-                        {
-                            eventDtoList[i].UserIds.Add(eventUser.UserId);
-                        }
-                           
-                        }
-                    
-                   
+                        eventDtoList[i].Users.AddRange(user);
+                    }
                 }
 
                 return eventDtoList;
@@ -161,7 +161,7 @@ namespace workcal.Services
                 Logger.LogError("An error occurred while fetching the event: " + ex.Message);
                 throw new UserFriendlyException("An error occurred while fetching the event.");
             }
-}
+        }
 
       
 
