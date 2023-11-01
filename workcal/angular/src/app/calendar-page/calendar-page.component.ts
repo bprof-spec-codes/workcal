@@ -28,7 +28,8 @@ export class CalendarPageComponent implements OnInit {
    labelPopupVisible: boolean = true;
    newLabel: { name: string, color: string } = { name: '', color: '#000000' };
 
-   users: UserDto[] = [];
+   allusers: UserDto[] = [];
+   normalizedUserIDs: string[] = [];
 
 
 defaultLabels: Array<{ name: string, color: string }> = [
@@ -77,7 +78,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           text: event.name,
           location: event.location,
           labels: event.labels,
-          users: event.users
+          users: event.users.map(user => ({ id: user.id, userName: user.userName }))
         }));
       });
   }
@@ -99,7 +100,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
         }
 
         if (data && data.items) {
-          this.users = data.items.map(user => ({
+          this.allusers = data.items.map(user => ({
             id: user.id,
             userName: user.userName,
             name: user.name,
@@ -122,7 +123,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       }
     );
     this.refreshPage();
-    console.log(this.users);
+    console.log(this.allusers);
 
   }
 
@@ -206,6 +207,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     const appointmentData = event.newData;
     const appointmentDataOld = event.oldData;
     console.log('New appointmentData:', appointmentData);
+    console.log('Initial appointmentData.users:', appointmentData.users);
 
     if (!appointmentDataOld.id) {
       console.error("Event ID is missing, cannot update");
@@ -224,8 +226,11 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     }
 
 
+    appointmentData.users = appointmentData.users.map(userId => {
+      return this.allusers.find(user => user.id === userId) || userId;
+    });
 
-
+    console.log('New appointmentData:', appointmentData.users);
 
     let selectedUserIDs: UserDto[] = [];
 
@@ -256,6 +261,9 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       labels: selectedLabels,
       userIDs: selectedUserIDs
     };
+
+    console.log('Final selectedUserIDs:', selectedUserIDs);
+
 
     this.updateEvent(updatedEvent);
     this.labelsInteractedWith = false;
@@ -308,6 +316,9 @@ labelsInteractedWith: boolean = false;
 
 onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): void {
   const form = data.form;
+
+
+
 
     const oldAppointmentData = data.appointmentData;
     if (oldAppointmentData.labels) {
@@ -403,22 +414,11 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
         dataField: 'users',
     editorType: 'dxTagBox',
     editorOptions: {
-      dataSource: this.users,
+      dataSource: this.allusers,
       displayExpr: 'userName',
-      valueExpr: 'id',
+      valueExpr: 'userName',
       placeholder: 'Assign to...',
-      onValueChanged: (e) => {
-        // Debugging: Log the current value whenever it changes
-        console.log("Current value of users field:", e.value);
-        data.appointmentData.users = e.value.map(userObjOrId => {
-          return typeof userObjOrId === 'object' ? userObjOrId.id : userObjOrId;
-        });
-        // Here, you can directly manipulate data.appointmentData.users based on e.value
-        // which should be the current array of selected user IDs.
-      //  data.appointmentData.users = e.value;
-        console.log("Updated appointmentData.users:", data.appointmentData.users);
 
-      }
     },
     label: {
       text: 'Assign To'
@@ -437,6 +437,15 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
   openLabelPopup(): void {
     this.labelPopupVisible = true;
+  }
+
+  normalizeUserData(user: any): UserDto {
+    return {
+      id: user.id,
+      userName: user.userName,
+      name: user.name,
+      email: user.email
+    };
   }
 
 }
