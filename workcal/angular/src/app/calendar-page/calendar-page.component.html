@@ -66,7 +66,6 @@ type="month"
 
 
 
-
   </div>
 </div>
 
@@ -74,6 +73,14 @@ type="month"
 
 </dx-scheduler>
 
+<ng-template #userTemplate let-data="data">
+  <mat-chip-list>
+    <mat-chip *ngFor="let user of data.appointmentData.users" [removable]="true" (removed)="removeUser(user, data)">
+      {{user.name}}
+      <mat-icon matChipRemove>cancel</mat-icon>
+    </mat-chip>
+  </mat-chip-list>
+</ng-template>
 
 
 </div>

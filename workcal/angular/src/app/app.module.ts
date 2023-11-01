@@ -22,13 +22,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { HttpClientModule } from '@angular/common/http';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { MatChipsModule } from '@angular/material/chips';
 
 
 @NgModule({
   imports: [
+
     HttpClientModule,
     MatButtonModule,
     MatToolbarModule,
+   MatChipsModule ,
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,

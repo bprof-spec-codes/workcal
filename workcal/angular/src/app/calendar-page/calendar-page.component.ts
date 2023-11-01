@@ -46,7 +46,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 ];
 
 
-  constructor(private eventApiService: EventApiService, private userApiService: UserApiService ,private router: Router)
+  constructor(private eventApiService: EventApiService, private userApiService: UserApiService ,private router: Router )
   {   this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.router.onSameUrlNavigation = 'reload';}
 
@@ -311,6 +311,9 @@ createNewLabel(): void {
   }
 }
 
+// Implement the AfterViewInit lifecycle hook to access the DOM elements
+
+
 
 labelsInteractedWith: boolean = false;
 
@@ -416,20 +419,38 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     editorOptions: {
       dataSource: this.allusers,
       displayExpr: 'userName',
-      valueExpr: 'userName',
+      valueExpr: 'id',
       placeholder: 'Assign to...',
+      onValueChanged: (e) => {
+        const selectedUserIDs = e.value.map(userObjOrId => {
+          return typeof userObjOrId === 'object' ? userObjOrId.id : userObjOrId;
+        });
 
+        data.appointmentData.users = selectedUserIDs;
+
+        console.log("Updated appointmentData.users:", data.appointmentData.users);
+      },
+      onItemRemoved: (e) => {
+        // This event should be triggered when an item is removed.
+        // Add your custom logic here.
+
+        // You can access the removed item using e.itemData or e.itemElement depending on your needs
+      }
     },
     label: {
       text: 'Assign To'
     }
         },
+
       ]
     });
 
     form.getEditor('labels').option('onValueChanged', () => {
       this.labelsInteractedWith = true;
     });
+
+
+
     this.fetchEvents();
 
   }
@@ -447,5 +468,8 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
       email: user.email
     };
   }
+
+
+
 
 }
