@@ -190,48 +190,56 @@ export class WorkerStatisticsComponent implements OnInit {
 
 
   calculateStatistics(events: EventDto[]): void {
+    // Filter events by selected labels if any labels are selected
+    const filteredEventsByLabels = this.selectedLabelNames.length > 0
+      ? events.filter(event =>
+          event.labels.some(label => this.selectedLabelNames.includes(label.name))
+        )
+      : events;
+
+    // Segment the filtered events by the reportType
+    const segmentedEvents = this.groupEventsByReportType(filteredEventsByLabels, this.reportType);
+
     // Initialize variables to hold the segmented data
     let segmentedData = {};
 
-  // Segment events by the reportType
-  const segmentedEvents = this.groupEventsByReportType(events, this.reportType);
+    // Iterate over each segment to calculate the total hours
+    for (const [segment, segmentEvents] of Object.entries(segmentedEvents)) {
+      segmentedData[segment] = segmentEvents.reduce((acc, event) => {
+        const eventDuration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / (1000 * 60 * 60); // Convert to hours
+        event.users.forEach(user => {
+          if (this.selectedWorkerIds.includes(user.id)) {
+            acc[user.id] = (acc[user.id] || 0) + eventDuration;
+          }
+        });
+        return acc;
+      }, {});
+    }
 
-  // Iterate over each segment to calculate the total hours
-  for (const [segment, events] of Object.entries(segmentedEvents)) {
-    segmentedData[segment] = events.reduce((acc, event) => {
-      const eventDuration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / (1000 * 60 * 60); // Convert to hours
-      event.users.forEach(user => {
-        if (this.selectedWorkerIds.includes(user.id)) {
-          acc[user.id] = (acc[user.id] || 0) + eventDuration;
-        }
-      });
-      return acc;
-    }, {});
-  }
+    // Prepare data for the chart
+    this.workerHours = [];
 
-  // Prepare data for the chart
-  this.workerHours = [];
-
-  // Create a map to track the index for each worker
-  let workerIndexMap = {};
-  this.selectedWorkerIds.forEach((id, index) => {
-    workerIndexMap[id] = index;
-  });
-
-  // Populate the workerHours array with segments and hours for each worker
-  Object.entries(segmentedData).forEach(([segment, workersHours]) => {
-    let segmentData = { segment: segment }; // This will be used as the argumentField for the chart
-    Object.entries(workersHours).forEach(([userId, hours]) => {
-      // Find the worker's name using the userId
-      const workerName = this.workers.find(worker => worker.id === userId)?.name || 'Unknown';
-      // Add a new field to segmentData for each worker
-      segmentData[workerName] = hours; // This will be used as the valueField for the chart
+    // Create a map to track the index for each worker
+    let workerIndexMap = {};
+    this.selectedWorkerIds.forEach((id, index) => {
+      workerIndexMap[id] = index;
     });
-    this.workerHours.push(segmentData);
-  });
-    console.log('Final workerHours:', this.workerHours);
 
+    // Populate the workerHours array with segments and hours for each worker
+    Object.entries(segmentedData).forEach(([segment, workersHours]) => {
+      let segmentData = { segment: segment }; // This will be used as the argumentField for the chart
+      Object.entries(workersHours).forEach(([userId, hours]) => {
+        // Find the worker's name using the userId
+        const workerName = this.workers.find(worker => worker.id === userId)?.name || 'Unknown';
+        // Add a new field to segmentData for each worker
+        segmentData[workerName] = hours; // This will be used as the valueField for the chart
+      });
+      this.workerHours.push(segmentData);
+    });
+
+    console.log('Final workerHours:', this.workerHours);
   }
+
 
 
 }
