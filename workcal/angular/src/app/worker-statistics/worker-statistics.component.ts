@@ -14,11 +14,12 @@ import { mergeMap, delay } from 'rxjs/operators';
   styleUrls: ['./worker-statistics.component.scss']
 })
 export class WorkerStatisticsComponent implements OnInit {
-  workerHoursMonthly: Array<any> = [];
-  workerHoursWeekly: Array<any> = [];
+  workerHours: Array<any> = [];
+
 
   reportType: string = 'weekly';
   selectedWorkerIds: string[] = [];
+  selectedWorkers: UserDto[] = [];
 
   workers: UserDto[] = [];
   events: EventDto[] = [];
@@ -28,6 +29,8 @@ export class WorkerStatisticsComponent implements OnInit {
 
   distinctLabelNames: string[] = [];
   selectedLabelNames: string[] = [];
+
+  filteredEvents: EventDto[] = [];
 
 
   constructor(private eventService: EventApiService,  private userApiService: UserApiService
@@ -100,6 +103,8 @@ export class WorkerStatisticsComponent implements OnInit {
       this.selectedWorkerIds = this.selectedWorkerIds.filter(id => id !== workerId);
     }
     // Update the statistics based on the new selection
+    this.selectedWorkers = this.workers.filter(worker => this.selectedWorkerIds.includes(worker.id));
+
     this.getWorkerStatistics();
   }
 
@@ -120,6 +125,42 @@ export class WorkerStatisticsComponent implements OnInit {
     this.getWorkerStatistics();
   }
 
+  onReportTypeChange(): void {
+    // Assuming the events are already filtered by worker and date
+    this.calculateStatistics(this.filteredEvents);
+  }
+
+  groupEventsByReportType(events: EventDto[], reportType: string): { [key: string]: EventDto[] } {
+    const groupedEvents = {};
+
+    for (const event of events) {
+      let key;
+      const eventDate = new Date(event.startTime);
+
+      switch (reportType) {
+        case 'daily':
+          key = eventDate.toISOString().split('T')[0]; // YYYY-MM-DD
+          break;
+        case 'weekly':
+          key = `Week ${this.getWeekNumber(eventDate)}`;
+          break;
+        case 'monthly':
+          key = `${eventDate.getFullYear()}-${eventDate.getMonth() + 1}`;
+          break;
+        case 'yearly':
+          key = eventDate.getFullYear().toString();
+          break;
+      }
+
+      if (!groupedEvents[key]) {
+        groupedEvents[key] = [];
+      }
+      groupedEvents[key].push(event);
+    }
+
+    return groupedEvents;
+  }
+
 
   getWeekNumber(date: Date): number {
     const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
@@ -132,8 +173,8 @@ export class WorkerStatisticsComponent implements OnInit {
     if (this.workers.length && this.events.length) {
       // If no workers are selected, clear the statistics
       if (!this.selectedWorkerIds.length) {
-        this.workerHoursMonthly = [];
-        this.workerHoursWeekly = [];
+        this.workerHours = [];
+
         return;
       }
       // Filter events for the selected workers and date range
@@ -148,62 +189,49 @@ export class WorkerStatisticsComponent implements OnInit {
   }
 
 
+  calculateStatistics(events: EventDto[]): void {
+    // Initialize variables to hold the segmented data
+    let segmentedData = {};
 
-calculateStatistics(events: EventDto[]): void {
-  const userHoursMonthly = {};
-  const userHoursWeekly = {};
-  const now = new Date();
+  // Segment events by the reportType
+  const segmentedEvents = this.groupEventsByReportType(events, this.reportType);
 
-  // Filter events by selected labels if any labels are selected
-  const filteredEventsByLabels = this.selectedLabelNames.length > 0
-    ? events.filter(event =>
-        event.labels.some(label => this.selectedLabelNames.includes(label.name))
-      )
-    : events;
-
-  // Further filter events by date range if already not done
-  const filteredEvents = filteredEventsByLabels.filter(event =>
-    new Date(event.startTime) >= this.startDate &&
-    new Date(event.endTime) <= this.endDate
-  );
-
-  // Process the filtered events
-  filteredEvents.forEach(event => {
-    const eventDuration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / (1000 * 60 * 60); // Convert to hours
-
-    event.users.forEach(user => {
-      if (this.selectedWorkerIds.includes(user.id)) { // Assuming selectedWorkerIds is an array now
-        // Calculate monthly hours if the event is in the current month
-        if (new Date(event.startTime).getMonth() === now.getMonth()) {
-          userHoursMonthly[user.id] = (userHoursMonthly[user.id] || 0) + eventDuration;
+  // Iterate over each segment to calculate the total hours
+  for (const [segment, events] of Object.entries(segmentedEvents)) {
+    segmentedData[segment] = events.reduce((acc, event) => {
+      const eventDuration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / (1000 * 60 * 60); // Convert to hours
+      event.users.forEach(user => {
+        if (this.selectedWorkerIds.includes(user.id)) {
+          acc[user.id] = (acc[user.id] || 0) + eventDuration;
         }
+      });
+      return acc;
+    }, {});
+  }
 
-        // Calculate weekly hours if the event is in the current week
-        const eventWeek = this.getWeekNumber(new Date(event.startTime));
-        const currentWeek = this.getWeekNumber(now);
-        if (eventWeek === currentWeek) {
-          userHoursWeekly[user.id] = (userHoursWeekly[user.id] || 0) + eventDuration;
-        }
-      }
-    });
+  // Prepare data for the chart
+  this.workerHours = [];
+
+  // Create a map to track the index for each worker
+  let workerIndexMap = {};
+  this.selectedWorkerIds.forEach((id, index) => {
+    workerIndexMap[id] = index;
   });
 
-  // Convert the user hours object to an array for the chart, filtering by selected workers
-  this.workerHoursMonthly = Object.keys(userHoursMonthly)
-    .filter(userId => this.selectedWorkerIds.includes(userId))
-    .map(userId => ({
-      workerName: this.workers.find(user => user.id === userId)?.name, // Assuming you want to display the user's name
-      hours: userHoursMonthly[userId]
-    }));
+  // Populate the workerHours array with segments and hours for each worker
+  Object.entries(segmentedData).forEach(([segment, workersHours]) => {
+    let segmentData = { segment: segment }; // This will be used as the argumentField for the chart
+    Object.entries(workersHours).forEach(([userId, hours]) => {
+      // Find the worker's name using the userId
+      const workerName = this.workers.find(worker => worker.id === userId)?.name || 'Unknown';
+      // Add a new field to segmentData for each worker
+      segmentData[workerName] = hours; // This will be used as the valueField for the chart
+    });
+    this.workerHours.push(segmentData);
+  });
+    console.log('Final workerHours:', this.workerHours);
 
-  this.workerHoursWeekly = Object.keys(userHoursWeekly)
-    .filter(userId => this.selectedWorkerIds.includes(userId))
-    .map(userId => ({
-      workerName: this.workers.find(user => user.id === userId)?.name, // Assuming you want to display the user's name
-      hours: userHoursWeekly[userId]
-    }));
-}
-
+  }
 
 
 }
