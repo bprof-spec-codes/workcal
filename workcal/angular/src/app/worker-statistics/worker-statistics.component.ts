@@ -4,9 +4,9 @@ import { EventDto, SchedulerEvent , UserDto, UserResponse } from '../models/even
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule  } from 'devextreme-angular';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { UserApiService } from '../user-api.service';
-
+import { fromEvent, of } from 'rxjs';
+import { mergeMap, delay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-worker-statistics',
@@ -25,6 +25,10 @@ export class WorkerStatisticsComponent implements OnInit {
 
   startDate: Date;
   endDate: Date;
+
+  distinctLabelNames: string[] = [];
+  selectedLabelNames: string[] = [];
+
 
   constructor(private eventService: EventApiService,  private userApiService: UserApiService
   ) {}
@@ -75,10 +79,17 @@ export class WorkerStatisticsComponent implements OnInit {
   fetchEvents(): void {
     this.eventService.getAllEvents().subscribe(events => {
       this.events = events;
+      this.events = events;
+      this.fetchDistinctLabelNames(events);
       this.getWorkerStatistics();
     });
   }
 
+
+  fetchDistinctLabelNames(events: EventDto[]): void {
+    const allLabelNames = events.flatMap(event => event.labels.map(label => label.name));
+    this.distinctLabelNames = Array.from(new Set(allLabelNames));
+  }
 
   onWorkerSelectionChange(workerId: string, isChecked: boolean): void {
     if (isChecked) {
@@ -99,6 +110,15 @@ export class WorkerStatisticsComponent implements OnInit {
   }
 
 
+  onLabelSelectionChange(labelName: string, isChecked: boolean): void {
+    if (isChecked) {
+      this.selectedLabelNames.push(labelName);
+    } else {
+      this.selectedLabelNames = this.selectedLabelNames.filter(name => name !== labelName);
+    }
+    // Update the statistics based on the new label selection
+    this.getWorkerStatistics();
+  }
 
 
   getWeekNumber(date: Date): number {
@@ -128,53 +148,62 @@ export class WorkerStatisticsComponent implements OnInit {
   }
 
 
-  // Extracted calculation logic into its own method
-// Extracted calculation logic into its own method
-calculateStatistics(filteredEvents: EventDto[]): void {
+
+calculateStatistics(events: EventDto[]): void {
   const userHoursMonthly = {};
   const userHoursWeekly = {};
   const now = new Date();
 
-  // Initialize hours for each selected worker
-  this.selectedWorkerIds.forEach(workerId => {
-    userHoursMonthly[workerId] = 0;
-    userHoursWeekly[workerId] = 0;
-  });
+  // Filter events by selected labels if any labels are selected
+  const filteredEventsByLabels = this.selectedLabelNames.length > 0
+    ? events.filter(event =>
+        event.labels.some(label => this.selectedLabelNames.includes(label.name))
+      )
+    : events;
 
-  // Iterate over filtered events
+  // Further filter events by date range if already not done
+  const filteredEvents = filteredEventsByLabels.filter(event =>
+    new Date(event.startTime) >= this.startDate &&
+    new Date(event.endTime) <= this.endDate
+  );
+
+  // Process the filtered events
   filteredEvents.forEach(event => {
     const eventDuration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / (1000 * 60 * 60); // Convert to hours
 
-    // Iterate over users in the event
     event.users.forEach(user => {
-      // Check if the user is one of the selected workers
-      if (this.selectedWorkerIds.includes(user.id)) {
+      if (this.selectedWorkerIds.includes(user.id)) { // Assuming selectedWorkerIds is an array now
         // Calculate monthly hours if the event is in the current month
         if (new Date(event.startTime).getMonth() === now.getMonth()) {
-          userHoursMonthly[user.id] += eventDuration;
+          userHoursMonthly[user.id] = (userHoursMonthly[user.id] || 0) + eventDuration;
         }
 
         // Calculate weekly hours if the event is in the current week
         const eventWeek = this.getWeekNumber(new Date(event.startTime));
         const currentWeek = this.getWeekNumber(now);
         if (eventWeek === currentWeek) {
-          userHoursWeekly[user.id] += eventDuration;
+          userHoursWeekly[user.id] = (userHoursWeekly[user.id] || 0) + eventDuration;
         }
       }
     });
   });
 
-  // Convert the hours object to an array for the chart, including only selected workers
-  this.workerHoursMonthly = this.selectedWorkerIds.map(workerId => ({
-    workerName: this.workers.find(user => user.id === workerId)?.name || 'Unknown', // Use worker name if available
-    hours: userHoursMonthly[workerId]
-  }));
+  // Convert the user hours object to an array for the chart, filtering by selected workers
+  this.workerHoursMonthly = Object.keys(userHoursMonthly)
+    .filter(userId => this.selectedWorkerIds.includes(userId))
+    .map(userId => ({
+      workerName: this.workers.find(user => user.id === userId)?.name, // Assuming you want to display the user's name
+      hours: userHoursMonthly[userId]
+    }));
 
-  this.workerHoursWeekly = this.selectedWorkerIds.map(workerId => ({
-    workerName: this.workers.find(user => user.id === workerId)?.name || 'Unknown', // Use worker name if available
-    hours: userHoursWeekly[workerId]
-  }));
+  this.workerHoursWeekly = Object.keys(userHoursWeekly)
+    .filter(userId => this.selectedWorkerIds.includes(userId))
+    .map(userId => ({
+      workerName: this.workers.find(user => user.id === userId)?.name, // Assuming you want to display the user's name
+      hours: userHoursWeekly[userId]
+    }));
 }
+
 
 
 }

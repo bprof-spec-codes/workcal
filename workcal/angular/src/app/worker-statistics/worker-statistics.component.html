@@ -15,6 +15,12 @@
       <label [for]="worker.id">{{ worker.name }}</label>
     </div>
 
+    <div *ngFor="let labelName of distinctLabelNames">
+      <input type="checkbox" [id]="'label-' + labelName" [value]="labelName"
+             (change)="onLabelSelectionChange(labelName, $event.target.checked)"
+             [checked]="selectedLabelNames.includes(labelName)">
+      <label [for]="'label-' + labelName">{{ labelName }}</label>
+    </div>
 
     <dx-date-box
     [(value)]="startDate"
