@@ -16,8 +16,10 @@ import { UserApiService } from '../user-api.service';
 export class WorkerStatisticsComponent implements OnInit {
   workerHoursMonthly: Array<any> = [];
   workerHoursWeekly: Array<any> = [];
+
   reportType: string = 'weekly';
-  selectedWorkerId: string | null = null;
+  selectedWorkerIds: string[] = [];
+
   workers: UserDto[] = [];
   events: EventDto[] = [];
 
@@ -34,8 +36,7 @@ export class WorkerStatisticsComponent implements OnInit {
     this.endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
 
-    this.fetchEventsAndCalculateHours();
-   // this.getWorkerStatistics();
+    this.fetchEvents();
     this.fetchWorkers();
   }
 
@@ -71,61 +72,33 @@ export class WorkerStatisticsComponent implements OnInit {
       });
   }
 
+  fetchEvents(): void {
+    this.eventService.getAllEvents().subscribe(events => {
+      this.events = events;
+      this.getWorkerStatistics();
+    });
+  }
 
 
-
-  onWorkerChange(): void {
+  onWorkerSelectionChange(workerId: string, isChecked: boolean): void {
+    if (isChecked) {
+      // Add workerId to the selectedWorkerIds if checked
+      this.selectedWorkerIds.push(workerId);
+    } else {
+      // Remove workerId from the selectedWorkerIds if unchecked
+      this.selectedWorkerIds = this.selectedWorkerIds.filter(id => id !== workerId);
+    }
+    // Update the statistics based on the new selection
     this.getWorkerStatistics();
   }
+
 
 
   onDateChange(): void {
     this.getWorkerStatistics();
   }
-  fetchEventsAndCalculateHours(): void {
-    this.eventService.getAllEvents().subscribe(events => {
-      this.events = events;
 
-      // Filter events based on the date range before processing them
-      const filteredEvents = events.filter(event =>
-        new Date(event.startTime) >= this.startDate &&
-        new Date(event.endTime) <= this.endDate
-      );
 
-      const userHoursMonthly = {};
-      const userHoursWeekly = {};
-      const now = new Date();
-
-      // Use filteredEvents for your calculations
-      filteredEvents.forEach(event => {
-        const eventDuration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / (1000 * 60 * 60); // Convert to hours
-        event.users.forEach(user => {
-          // Calculate monthly hours if the event is in the current month
-          if (new Date(event.startTime).getMonth() === now.getMonth()) {
-            userHoursMonthly[user.id] = (userHoursMonthly[user.id] || 0) + eventDuration;
-          }
-
-          // Calculate weekly hours if the event is in the current week
-          const eventWeek = this.getWeekNumber(new Date(event.startTime));
-          const currentWeek = this.getWeekNumber(now);
-          if (eventWeek === currentWeek) {
-            userHoursWeekly[user.id] = (userHoursWeekly[user.id] || 0) + eventDuration;
-          }
-        });
-      });
-
-      // Convert the hours object to an array for the chart
-      this.workerHoursMonthly = Object.keys(userHoursMonthly).map(userId => ({
-        workerName: userId, // Replace with user name if available
-        hours: userHoursMonthly[userId]
-      }));
-
-      this.workerHoursWeekly = Object.keys(userHoursWeekly).map(userId => ({
-        workerName: userId, // Replace with user name if available
-        hours: userHoursWeekly[userId]
-      }));
-    });
-  }
 
 
   getWeekNumber(date: Date): number {
@@ -135,78 +108,73 @@ export class WorkerStatisticsComponent implements OnInit {
   }
 
   getWorkerStatistics(): void {
-    // Only run this if workers and events have been loaded
-    if (this.workers && this.events) {
-      console.log('Error fetching users:', this.selectedWorkerId);
-
-      // If no worker is selected, clear the statistics
-      if (!this.selectedWorkerId) {
+    // Ensure we have workers and events loaded
+    if (this.workers.length && this.events.length) {
+      // If no workers are selected, clear the statistics
+      if (!this.selectedWorkerIds.length) {
         this.workerHoursMonthly = [];
         this.workerHoursWeekly = [];
         return;
       }
-      console.log('Error fetching users:', this.selectedWorkerId);
-
-
-      // Filter events for the selected worker
+      // Filter events for the selected workers and date range
       const filteredEvents = this.events.filter(event =>
-        event.users.some(user => user.id === this.selectedWorkerId)
-
-        );
-
-        const filteredEventsBydate = filteredEvents.filter(event =>
-          new Date(event.startTime) >= this.startDate &&
-          new Date(event.endTime) <= this.endDate
-        );
-
-
-      // Now calculate the statistics based on filteredEvents
-      this.calculateStatistics(filteredEventsBydate);
+        event.users.some(user => this.selectedWorkerIds.includes(user.id)) &&
+        new Date(event.startTime) >= this.startDate &&
+        new Date(event.endTime) <= this.endDate
+      );
+      // Calculate the statistics based on filtered events
+      this.calculateStatistics(filteredEvents);
     }
   }
 
 
   // Extracted calculation logic into its own method
 // Extracted calculation logic into its own method
-calculateStatistics(events: EventDto[]): void {
+calculateStatistics(filteredEvents: EventDto[]): void {
   const userHoursMonthly = {};
   const userHoursWeekly = {};
   const now = new Date();
 
-  const filteredEvents = events.filter(event =>
-    new Date(event.startTime) >= this.startDate &&
-    new Date(event.endTime) <= this.endDate
-  );
-
-  events.forEach(event => {
-    const eventDuration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / (1000 * 60 * 60); // Convert to hours
-    // Here, we know that only the selected worker's events are passed, so we just process the first user
-    const user = event.users.find(user => user.id === this.selectedWorkerId);
-    if (user) {
-      // Calculate monthly hours if the event is in the current month
-      if (new Date(event.startTime).getMonth() === now.getMonth()) {
-        userHoursMonthly[user.id] = (userHoursMonthly[user.id] || 0) + eventDuration;
-      }
-
-      // Calculate weekly hours if the event is in the current week
-      const eventWeek = this.getWeekNumber(new Date(event.startTime));
-      const currentWeek = this.getWeekNumber(now);
-      if (eventWeek === currentWeek) {
-        userHoursWeekly[user.id] = (userHoursWeekly[user.id] || 0) + eventDuration;
-      }
-    }
+  // Initialize hours for each selected worker
+  this.selectedWorkerIds.forEach(workerId => {
+    userHoursMonthly[workerId] = 0;
+    userHoursWeekly[workerId] = 0;
   });
 
-  // Since only one worker's statistics are needed, we don't need to map over keys, just create a single object
-  this.workerHoursMonthly = [{
-    workerName: this.workers.find(user => user.id === this.selectedWorkerId)?.id,
-    hours: userHoursMonthly[this.selectedWorkerId] || 0
-  }];
+  // Iterate over filtered events
+  filteredEvents.forEach(event => {
+    const eventDuration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / (1000 * 60 * 60); // Convert to hours
 
-  this.workerHoursWeekly = [{
-    workerName: this.workers.find(user => user.id === this.selectedWorkerId)?.id,
-    hours: userHoursWeekly[this.selectedWorkerId] || 0
-  }];
+    // Iterate over users in the event
+    event.users.forEach(user => {
+      // Check if the user is one of the selected workers
+      if (this.selectedWorkerIds.includes(user.id)) {
+        // Calculate monthly hours if the event is in the current month
+        if (new Date(event.startTime).getMonth() === now.getMonth()) {
+          userHoursMonthly[user.id] += eventDuration;
+        }
+
+        // Calculate weekly hours if the event is in the current week
+        const eventWeek = this.getWeekNumber(new Date(event.startTime));
+        const currentWeek = this.getWeekNumber(now);
+        if (eventWeek === currentWeek) {
+          userHoursWeekly[user.id] += eventDuration;
+        }
+      }
+    });
+  });
+
+  // Convert the hours object to an array for the chart, including only selected workers
+  this.workerHoursMonthly = this.selectedWorkerIds.map(workerId => ({
+    workerName: this.workers.find(user => user.id === workerId)?.name || 'Unknown', // Use worker name if available
+    hours: userHoursMonthly[workerId]
+  }));
+
+  this.workerHoursWeekly = this.selectedWorkerIds.map(workerId => ({
+    workerName: this.workers.find(user => user.id === workerId)?.name || 'Unknown', // Use worker name if available
+    hours: userHoursWeekly[workerId]
+  }));
 }
+
 
 }

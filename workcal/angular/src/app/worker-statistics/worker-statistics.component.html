@@ -8,9 +8,13 @@
       <option value="monthly">Monthly</option>
     </select>
 
-    <select [(ngModel)]="selectedWorkerId" (ngModelChange)="onWorkerChange()">
-      <option *ngFor="let worker of workers" [value]="worker.id">{{ worker.userName }}</option>
-    </select>
+    <div *ngFor="let worker of workers">
+      <input type="checkbox" [id]="worker.id" [value]="worker.id"
+             (change)="onWorkerSelectionChange(worker.id, $event.target.checked)"
+             [checked]="selectedWorkerIds.includes(worker.id)">
+      <label [for]="worker.id">{{ worker.name }}</label>
+    </div>
+
 
     <dx-date-box
     [(value)]="startDate"
