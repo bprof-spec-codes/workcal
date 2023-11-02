@@ -6,7 +6,7 @@ export type EventDto = {
   endTime: Date;
   location: string;
   labels: LabelDto[];
-  userIDs: UserDto[];
+  users: UserDto[];
 
 };
 
@@ -29,7 +29,7 @@ export type SchedulerEvent = {
 
 export type UserDto = {
   id: string;
-  userName: string;
+ userName: string;
  name: string;
  email: string;
 

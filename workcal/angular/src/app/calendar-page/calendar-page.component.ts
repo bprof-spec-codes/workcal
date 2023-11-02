@@ -175,7 +175,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
       labels: selectedLabels,
-      userIDs:  selectedUserIDs
+      users:  selectedUserIDs
     };
 
     this.createEvent(newEvent);
@@ -259,7 +259,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
       labels: selectedLabels,
-      userIDs: selectedUserIDs
+      users: selectedUserIDs
     };
 
     console.log('Final selectedUserIDs:', selectedUserIDs);

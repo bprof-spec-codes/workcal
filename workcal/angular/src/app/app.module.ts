@@ -23,11 +23,16 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { HttpClientModule } from '@angular/common/http';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { MatChipsModule } from '@angular/material/chips';
+import { WorkerStatisticsComponent } from './worker-statistics/worker-statistics.component';
+import { DxChartModule, DxSelectBoxModule } from 'devextreme-angular';
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
   imports: [
-
+    DxChartModule,
+    DxSelectBoxModule,
+    FormsModule,
     HttpClientModule,
     MatButtonModule,
     MatToolbarModule,
@@ -53,7 +58,7 @@ import { MatChipsModule } from '@angular/material/chips';
     DxScrollViewModule,
     DxColorBoxModule,
   ],
-  declarations: [AppComponent, CalendarPageComponent],
+  declarations: [AppComponent, CalendarPageComponent, WorkerStatisticsComponent],
   providers: [APP_ROUTE_PROVIDER],
   bootstrap: [AppComponent],
 })

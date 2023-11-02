@@ -1,0 +1,26 @@
+<div>
+  <h2>Worker Hours Report</h2>
+  <!-- Include selectors for report type and user -->
+  <div>
+    <label for="reportType">Report Type:</label>
+    <select id="reportType" [(ngModel)]="reportType">
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+
+    <!-- Include a selector for users if needed -->
+  </div>
+
+  <!-- Chart for displaying hours -->
+  <dx-chart
+    [dataSource]="reportType === 'weekly' ? workerHoursWeekly : workerHoursMonthly"
+    title="Worker Hours Report">
+    <dxi-series
+      argumentField="workerName"
+      valueField="hours"
+      name="Hours Worked"
+      type="bar">
+    </dxi-series>
+  </dx-chart>
+</div>
+
