@@ -19,7 +19,7 @@ namespace workcal.Services.Dtos
 
         public List<CreateLabelDto> Labels { get; set; }
 
-        public List<Guid> UserIds { get; set; }
+        public List<Guid> Users { get; set; }
 
     }
 }

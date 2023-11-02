@@ -11,19 +11,44 @@
     <select [(ngModel)]="selectedWorkerId" (ngModelChange)="onWorkerChange()">
       <option *ngFor="let worker of workers" [value]="worker.id">{{ worker.userName }}</option>
     </select>
-    <!-- Include a selector for users if needed -->
+
+    <dx-date-box
+    [(value)]="startDate"
+    (valueChange)="onDateChange()"
+    type="date"
+    placeholder="Start Date">
+  </dx-date-box>
+
+  <dx-date-box
+    [(value)]="endDate"
+    (valueChange)="onDateChange()"
+    type="date"
+    placeholder="End Date">
+  </dx-date-box>
+
   </div>
+
+
 
   <!-- Chart for displaying hours -->
   <dx-chart
     [dataSource]="reportType === 'weekly' ? workerHoursWeekly : workerHoursMonthly"
     title="Worker Hours Report">
+
+
+
     <dxi-series
       argumentField="workerName"
       valueField="hours"
       name="Hours Worked"
       type="bar">
+
+
     </dxi-series>
+
+
   </dx-chart>
+
+
 </div>
 

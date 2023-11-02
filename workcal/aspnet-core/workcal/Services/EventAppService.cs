@@ -72,7 +72,7 @@ namespace workcal.Services
                     }
                 }
               
-                foreach (var userId in @event.UserIds)
+                foreach (var userId in @event.Users)
                 {
                     var eventUser = new Entities.EventsUsers
                     {
@@ -286,7 +286,7 @@ namespace workcal.Services
                 }
 
                 // 2. Insert new Event-User relations based on updated event data
-                foreach (var userId in @event.UserIds)
+                foreach (var userId in @event.Users)
                 {
                     var eventUser = new Entities.EventsUsers
                     {

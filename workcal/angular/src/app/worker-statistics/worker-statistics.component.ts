@@ -21,13 +21,26 @@ export class WorkerStatisticsComponent implements OnInit {
   workers: UserDto[] = [];
   events: EventDto[] = [];
 
+  startDate: Date;
+  endDate: Date;
+
   constructor(private eventService: EventApiService,  private userApiService: UserApiService
   ) {}
 
   ngOnInit(): void {
+
+    let now = new Date();
+    this.startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    this.endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+
     this.fetchEventsAndCalculateHours();
+   // this.getWorkerStatistics();
     this.fetchWorkers();
   }
+
+
+
 
   fetchWorkers(): void {
     this.userApiService.getAllUsers()
@@ -53,7 +66,7 @@ export class WorkerStatisticsComponent implements OnInit {
         } else {
           console.error('Items key not found in response:', data);
         }
-        this.getWorkerStatistics(); // Call after workers are fetched
+        this.getWorkerStatistics();
 
       });
   }
@@ -66,14 +79,25 @@ export class WorkerStatisticsComponent implements OnInit {
   }
 
 
-   fetchEventsAndCalculateHours(): void {
-  this.eventService.getAllEvents().subscribe(events => {
-    this.events = events;
+  onDateChange(): void {
+    this.getWorkerStatistics();
+  }
+  fetchEventsAndCalculateHours(): void {
+    this.eventService.getAllEvents().subscribe(events => {
+      this.events = events;
+
+      // Filter events based on the date range before processing them
+      const filteredEvents = events.filter(event =>
+        new Date(event.startTime) >= this.startDate &&
+        new Date(event.endTime) <= this.endDate
+      );
+
       const userHoursMonthly = {};
       const userHoursWeekly = {};
       const now = new Date();
 
-      events.forEach(event => {
+      // Use filteredEvents for your calculations
+      filteredEvents.forEach(event => {
         const eventDuration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / (1000 * 60 * 60); // Convert to hours
         event.users.forEach(user => {
           // Calculate monthly hours if the event is in the current month
@@ -103,6 +127,7 @@ export class WorkerStatisticsComponent implements OnInit {
     });
   }
 
+
   getWeekNumber(date: Date): number {
     const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
     const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
@@ -125,10 +150,18 @@ export class WorkerStatisticsComponent implements OnInit {
 
       // Filter events for the selected worker
       const filteredEvents = this.events.filter(event =>
-        event.users.some(user => user.id === this.selectedWorkerId));
+        event.users.some(user => user.id === this.selectedWorkerId)
+
+        );
+
+        const filteredEventsBydate = filteredEvents.filter(event =>
+          new Date(event.startTime) >= this.startDate &&
+          new Date(event.endTime) <= this.endDate
+        );
+
 
       // Now calculate the statistics based on filteredEvents
-      this.calculateStatistics(filteredEvents);
+      this.calculateStatistics(filteredEventsBydate);
     }
   }
 
@@ -139,6 +172,11 @@ calculateStatistics(events: EventDto[]): void {
   const userHoursMonthly = {};
   const userHoursWeekly = {};
   const now = new Date();
+
+  const filteredEvents = events.filter(event =>
+    new Date(event.startTime) >= this.startDate &&
+    new Date(event.endTime) <= this.endDate
+  );
 
   events.forEach(event => {
     const eventDuration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / (1000 * 60 * 60); // Convert to hours

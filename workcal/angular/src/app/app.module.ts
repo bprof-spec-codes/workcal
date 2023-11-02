@@ -26,10 +26,12 @@ import { MatChipsModule } from '@angular/material/chips';
 import { WorkerStatisticsComponent } from './worker-statistics/worker-statistics.component';
 import { DxChartModule, DxSelectBoxModule } from 'devextreme-angular';
 import { FormsModule } from '@angular/forms';
+import { DxDateBoxModule } from 'devextreme-angular';
 
 
 @NgModule({
   imports: [
+    DxDateBoxModule,
     DxChartModule,
     DxSelectBoxModule,
     FormsModule,
