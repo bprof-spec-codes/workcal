@@ -27,7 +27,6 @@ export class WorkerStatisticsComponent implements OnInit {
   ngOnInit(): void {
     this.fetchEventsAndCalculateHours();
     this.fetchWorkers();
-
   }
 
   fetchWorkers(): void {
@@ -59,12 +58,8 @@ export class WorkerStatisticsComponent implements OnInit {
       });
   }
 
-  /*fetchWorkers(): void {
-    this.userApiService.getAllUsers().subscribe(users => {
-      this.workers = users;
-      this.getWorkerStatistics(); // Call after workers are fetched
-    });
-  }*/
+
+
 
   onWorkerChange(): void {
     this.getWorkerStatistics();
@@ -115,13 +110,65 @@ export class WorkerStatisticsComponent implements OnInit {
   }
 
   getWorkerStatistics(): void {
-    // Ensure this.events is populated before applying the filter
-    if (this.selectedWorkerId && this.events) {
+    // Only run this if workers and events have been loaded
+    if (this.workers && this.events) {
+      console.log('Error fetching users:', this.selectedWorkerId);
+
+      // If no worker is selected, clear the statistics
+      if (!this.selectedWorkerId) {
+        this.workerHoursMonthly = [];
+        this.workerHoursWeekly = [];
+        return;
+      }
+      console.log('Error fetching users:', this.selectedWorkerId);
+
+
+      // Filter events for the selected worker
       const filteredEvents = this.events.filter(event =>
         event.users.some(user => user.id === this.selectedWorkerId));
+
       // Now calculate the statistics based on filteredEvents
-      // ... your logic to calculate statistics ...
+      this.calculateStatistics(filteredEvents);
     }
   }
+
+
+  // Extracted calculation logic into its own method
+// Extracted calculation logic into its own method
+calculateStatistics(events: EventDto[]): void {
+  const userHoursMonthly = {};
+  const userHoursWeekly = {};
+  const now = new Date();
+
+  events.forEach(event => {
+    const eventDuration = (new Date(event.endTime).getTime() - new Date(event.startTime).getTime()) / (1000 * 60 * 60); // Convert to hours
+    // Here, we know that only the selected worker's events are passed, so we just process the first user
+    const user = event.users.find(user => user.id === this.selectedWorkerId);
+    if (user) {
+      // Calculate monthly hours if the event is in the current month
+      if (new Date(event.startTime).getMonth() === now.getMonth()) {
+        userHoursMonthly[user.id] = (userHoursMonthly[user.id] || 0) + eventDuration;
+      }
+
+      // Calculate weekly hours if the event is in the current week
+      const eventWeek = this.getWeekNumber(new Date(event.startTime));
+      const currentWeek = this.getWeekNumber(now);
+      if (eventWeek === currentWeek) {
+        userHoursWeekly[user.id] = (userHoursWeekly[user.id] || 0) + eventDuration;
+      }
+    }
+  });
+
+  // Since only one worker's statistics are needed, we don't need to map over keys, just create a single object
+  this.workerHoursMonthly = [{
+    workerName: this.workers.find(user => user.id === this.selectedWorkerId)?.id,
+    hours: userHoursMonthly[this.selectedWorkerId] || 0
+  }];
+
+  this.workerHoursWeekly = [{
+    workerName: this.workers.find(user => user.id === this.selectedWorkerId)?.id,
+    hours: userHoursWeekly[this.selectedWorkerId] || 0
+  }];
+}
 
 }
