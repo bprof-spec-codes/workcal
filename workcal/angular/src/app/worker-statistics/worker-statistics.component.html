@@ -8,6 +8,11 @@
       <option value="monthly">Monthly</option>
     </select>
 
+    <select [(ngModel)]="selectedWorkerId">
+      <option *ngFor="let worker of workers" [value]="worker.id">
+        {{ worker.userName }}
+      </option>
+    </select>
     <!-- Include a selector for users if needed -->
   </div>
 

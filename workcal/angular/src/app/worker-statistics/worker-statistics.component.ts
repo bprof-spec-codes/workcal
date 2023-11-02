@@ -17,16 +17,63 @@ export class WorkerStatisticsComponent implements OnInit {
   workerHoursMonthly: Array<any> = [];
   workerHoursWeekly: Array<any> = [];
   reportType: string = 'weekly';
+  selectedWorkerId: string | null = null;
+  workers: UserDto[] = [];
+  events: EventDto[] = [];
 
-  constructor(private eventService: EventApiService) {}
+  constructor(private eventService: EventApiService,  private userApiService: UserApiService
+  ) {}
 
   ngOnInit(): void {
     this.fetchEventsAndCalculateHours();
+    this.fetchWorkers();
+
   }
 
-  fetchEventsAndCalculateHours(): void {
-    this.eventService.getAllEvents().subscribe(events => {
-      // Assume events have a structure where each event has a startDate, endDate, and users array
+  fetchWorkers(): void {
+    this.userApiService.getAllUsers()
+      .pipe(
+        catchError(error => {
+          console.error('Error fetching users:', error);
+          return of([]);
+        })
+      )
+      .subscribe((data: UserResponse | any[]) => { // Explicitly type data
+        if (Array.isArray(data)) {
+          console.error('Received an array, expected an object with an items key:', data);
+          return;
+        }
+
+        if (data && data.items) {
+          this.workers = data.items.map(user => ({
+            id: user.id,
+            userName: user.userName,
+            name: user.name,
+            email: user.email
+          }));
+        } else {
+          console.error('Items key not found in response:', data);
+        }
+        this.getWorkerStatistics(); // Call after workers are fetched
+
+      });
+  }
+
+  /*fetchWorkers(): void {
+    this.userApiService.getAllUsers().subscribe(users => {
+      this.workers = users;
+      this.getWorkerStatistics(); // Call after workers are fetched
+    });
+  }*/
+
+  onWorkerChange(): void {
+    this.getWorkerStatistics();
+  }
+
+
+   fetchEventsAndCalculateHours(): void {
+  this.eventService.getAllEvents().subscribe(events => {
+    this.events = events;
       const userHoursMonthly = {};
       const userHoursWeekly = {};
       const now = new Date();
@@ -66,4 +113,15 @@ export class WorkerStatisticsComponent implements OnInit {
     const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
     return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
   }
+
+  getWorkerStatistics(): void {
+    // Ensure this.events is populated before applying the filter
+    if (this.selectedWorkerId && this.events) {
+      const filteredEvents = this.events.filter(event =>
+        event.users.some(user => user.id === this.selectedWorkerId));
+      // Now calculate the statistics based on filteredEvents
+      // ... your logic to calculate statistics ...
+    }
+  }
+
 }
