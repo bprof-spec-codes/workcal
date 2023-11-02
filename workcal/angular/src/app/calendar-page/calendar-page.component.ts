@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { UserApiService } from '../user-api.service';
-
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-calendar-page',
@@ -53,10 +53,11 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   ngOnInit(): void {
     this.fetchEvents();
     this.fetchUsers();
+
   }
 
   refreshPage() {
-    this.router.navigate([this.router.url]);
+    //this.router.navigate([this.router.url]);
   }
 
 
@@ -81,6 +82,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           users: event.users.map(user => ({ id: user.id, userName: user.userName }))
         }));
       });
+
   }
 
 
@@ -110,6 +112,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           console.error('Items key not found in response:', data);
         }
       });
+
   }
 
 
@@ -122,8 +125,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
         console.error('Error creating event:', error);
       }
     );
-    this.refreshPage();
     console.log(this.allusers);
+    this.refreshPage();
 
   }
 
@@ -197,6 +200,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       this.updateEvent(appointmentData);
     }
     this.fetchEvents();
+    this.refreshPage();
 
   }
 
@@ -288,6 +292,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
     this.deleteEvent(appointmentData.id);
     this.fetchEvents();
+    this.refreshPage();
 
   }
 
@@ -309,6 +314,7 @@ createNewLabel(): void {
   } else {
     console.error('Label Name and Color are required.');
   }
+
 }
 
 // Implement the AfterViewInit lifecycle hook to access the DOM elements
@@ -452,6 +458,7 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
 
     this.fetchEvents();
+    this.refreshPage();
 
   }
 
