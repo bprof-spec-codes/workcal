@@ -7,7 +7,7 @@ import { TenantManagementConfigModule } from '@abp/ng.tenant-management/config';
 import { ThemeLeptonXModule } from '@abp/ng.theme.lepton-x';
 import { SideMenuLayoutModule } from '@abp/ng.theme.lepton-x/layouts';
 import { ThemeSharedModule } from '@abp/ng.theme.shared';
-import { NgModule } from '@angular/core';
+import { NgModule, Component, enableProdMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../environments/environment';
@@ -16,9 +16,29 @@ import { AppComponent } from './app.component';
 import { APP_ROUTE_PROVIDER } from './route.provider';
 import { FeatureManagementModule } from '@abp/ng.feature-management';
 import { AbpOAuthModule } from '@abp/ng.oauth';
+import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule,DxColorBoxModule } from 'devextreme-angular';
+import { CalendarPageComponent } from './calendar-page/calendar-page.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { HttpClientModule } from '@angular/common/http';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { MatChipsModule } from '@angular/material/chips';
+import { WorkerStatisticsComponent } from './worker-statistics/worker-statistics.component';
+import { DxChartModule, DxSelectBoxModule } from 'devextreme-angular';
+import { FormsModule } from '@angular/forms';
+import { DxDateBoxModule } from 'devextreme-angular';
+
 
 @NgModule({
   imports: [
+    DxDateBoxModule,
+    DxChartModule,
+    DxSelectBoxModule,
+    FormsModule,
+    HttpClientModule,
+    MatButtonModule,
+    MatToolbarModule,
+   MatChipsModule ,
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
@@ -35,9 +55,15 @@ import { AbpOAuthModule } from '@abp/ng.oauth';
     ThemeLeptonXModule.forRoot(),
     SideMenuLayoutModule.forRoot(),
     FeatureManagementModule.forRoot(),
+    DxSchedulerModule,
+    DxDraggableModule,
+    DxScrollViewModule,
+    DxColorBoxModule,
   ],
-  declarations: [AppComponent],
+  declarations: [AppComponent, CalendarPageComponent, WorkerStatisticsComponent],
   providers: [APP_ROUTE_PROVIDER],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
+
+platformBrowserDynamic().bootstrapModule(AppModule);

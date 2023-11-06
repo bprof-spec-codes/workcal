@@ -1,7 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { CalendarPageComponent } from './calendar-page/calendar-page.component';
+import { WorkerStatisticsComponent } from './worker-statistics/worker-statistics.component';
+
 
 const routes: Routes = [
+  { path: 'calendar', component: CalendarPageComponent },
+  { path: 'statistics', component: WorkerStatisticsComponent },
+
+
   {
     path: '',
     pathMatch: 'full',

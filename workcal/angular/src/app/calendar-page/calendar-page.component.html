@@ -1,0 +1,78 @@
+<div>
+  <h1>Calendar Page</h1>
+  <dx-scheduler
+
+  [dataSource]="schedulerEvents"
+  [currentDate]="currentDate"
+  [startDayHour]="6"
+  [endDayHour]="22"
+  [views]="['day', 'week', 'workWeek', 'month']"
+  [currentView]="'week'"
+  [timeZone]="'UTC+2'"
+  (onAppointmentAdding)="onEventAdding($event)"
+  (onAppointmentUpdating)="onEventUpdating($event)"
+  (onAppointmentDeleting)="onEventDeleting($event)"
+  (onAppointmentFormOpening)="onAppointmentFormOpening($event)"
+  (onDragStart)="onAppointmentDragStart($event)"
+  (onDragEnd)="onAppointmentDragEnd($event)"
+
+  appointmentTemplate="appointment-template"
+
+
+
+>
+
+<dxi-view
+type="day"
+[cellDuration]="60">
+</dxi-view>
+<dxi-view
+type="week"
+[cellDuration]="60">
+</dxi-view>
+<dxi-view
+type="month"
+[cellDuration]="60">
+</dxi-view>
+
+
+
+
+
+<div *dxTemplate="let model of 'appointment-template'">
+  <div style="height: 100%; width: 100%;">
+
+    <div class="dx-scheduler-appointment-title">
+      {{ model.appointmentData.text }}
+
+    </div>
+
+
+
+    <div class="dx-scheduler-appointment-content-date" >
+      {{ (model.targetedAppointmentData.startDate | date : "shortTime")
+      + " - " +
+      (model.targetedAppointmentData.endDate | date : "shortTime") }}
+    </div>
+
+    <div class=" dx-scheduler-appointment-content-details">
+      <ng-container *ngFor="let label of model.appointmentData.labels">
+        <span [style.backgroundColor]="label.color"
+              style="color: white; padding: 4px; margin-right: 4px;">
+          {{label.name}}
+        </span>
+      </ng-container>
+    </div>
+
+
+
+  </div>
+</div>
+
+
+
+</dx-scheduler>
+
+
+
+</div>
