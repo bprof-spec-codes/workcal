@@ -12,6 +12,7 @@
   },
   "private": true,
   "dependencies": {
+    "@abp/bootstrap": "^7.4.0",
     "@abp/ng.account": "~7.3.3",
     "@abp/ng.components": "~7.3.3",
     "@abp/ng.core": "~7.3.3",
