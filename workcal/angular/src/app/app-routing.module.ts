@@ -15,12 +15,8 @@ const routes: Routes = [
     loadChildren: () => import('./home/home.module').then(m => m.HomeModule),
   },
   {
-    path: 'home',
-  component:HomeComponent
-  },
-  {
     path: 'account',
-    loadChildren: () => import('@abp/ng.account').then(m => m.AccountModule.forLazy()), canActivate: [Apiservice]
+    loadChildren: () => import('@abp/ng.account').then(m => m.AccountModule.forLazy()),
   },
   {
     path: 'identity',

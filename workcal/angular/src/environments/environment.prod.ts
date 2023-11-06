@@ -23,7 +23,4 @@ export const environment = {
       rootNamespace: 'workcal',
     },
   },
-  recaptcha: {
-    siteKey: '6LcgfacoAAAAAHZ3dKjXBpMBiUYegcJJUaAmGFtN',
-  },
 } as Environment;

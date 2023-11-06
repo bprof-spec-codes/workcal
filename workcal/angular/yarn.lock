@@ -7,21 +7,6 @@
   resolved "https://registry.npmjs.org/@aashutoshrathi/word-wrap/-/word-wrap-1.2.6.tgz"
   integrity sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==
 
-"@abp/bootstrap@^7.4.0":
-  version "7.4.0"
-  resolved "https://registry.npmjs.org/@abp/bootstrap/-/bootstrap-7.4.0.tgz"
-  integrity sha512-3Fa+fL5NH+0H2KK4MAaqNsiz0PYwK0+Oxjmd0NgKwcqV2vJzRrzS3WG5kITYjNz9QGdBV+FrhNX/NSRU8LDx3Q==
-  dependencies:
-    "@abp/core" "~7.4.0"
-    bootstrap "^5.1.3"
-
-"@abp/core@~7.4.0":
-  version "7.4.0"
-  resolved "https://registry.npmjs.org/@abp/core/-/core-7.4.0.tgz"
-  integrity sha512-yxrnw6eAEIj/CcX5jAwb4xmCsdqWaG+KRcBA8GFvqXbsK94IjqLDiJ3flo+QhGn2DXo40ISxofZop0CgSbP7Ew==
-  dependencies:
-    "@abp/utils" "~7.4.0"
-
 "@abp/ng.account.core@~7.3.3":
   version "7.3.3"
   resolved "https://registry.npmjs.org/@abp/ng.account.core/-/ng.account.core-7.3.3.tgz"
@@ -551,7 +536,7 @@
   resolved "https://registry.npmjs.org/@assemblyscript/loader/-/loader-0.10.1.tgz"
   integrity sha512-H71nDOOL8Y7kWRLqf6Sums+01Q5msqBW2KhDUTemh1tvY04eSkSXrK0uj/4mmY0Xr16/3zyZmsrxN7CKuRbNRg==
 
-"@babel/code-frame@^7.0.0", "@babel/code-frame@^7.18.6", "@babel/code-frame@^7.21.4", "@babel/code-frame@^7.22.13", "@babel/code-frame@^7.22.5":
+"@babel/code-frame@^7.0.0", "@babel/code-frame@^7.18.6", "@babel/code-frame@^7.21.4", "@babel/code-frame@^7.22.13":
   version "7.22.13"
   resolved "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.22.13.tgz"
   integrity sha512-XktuhWlJ5g+3TJXc5upd9Ks1HutSArik6jf2eAjYFyIOf4ej3RN+184cZbzDvbPnuTJIUhPKKJE3cIsYTiAT3w==
@@ -641,10 +626,7 @@
   resolved "https://registry.npmjs.org/@babel/helper-annotate-as-pure/-/helper-annotate-as-pure-7.18.6.tgz"
   integrity sha512-duORpUiYrEpzKIop6iNbjnwKLAKnJ47csTyRACyEmWj0QdUrm5aqNJGHSSEQSUAvNW0ojX0dOmK9dZduvkfeXA==
   dependencies:
-    "@babel/types" "^7.22.5"
-    "@jridgewell/gen-mapping" "^0.3.2"
-    "@jridgewell/trace-mapping" "^0.3.17"
-    jsesc "^2.5.1"
+    "@babel/types" "^7.18.6"
 
 "@babel/helper-annotate-as-pure@^7.22.5":
   version "7.22.5"
@@ -653,13 +635,6 @@
   dependencies:
     "@babel/types" "^7.22.5"
 
-"@babel/helper-annotate-as-pure@7.18.6":
-  version "7.18.6"
-  resolved "https://registry.npmjs.org/@babel/helper-annotate-as-pure/-/helper-annotate-as-pure-7.18.6.tgz"
-  integrity sha512-duORpUiYrEpzKIop6iNbjnwKLAKnJ47csTyRACyEmWj0QdUrm5aqNJGHSSEQSUAvNW0ojX0dOmK9dZduvkfeXA==
-  dependencies:
-    "@babel/types" "^7.18.6"
-
 "@babel/helper-builder-binary-assignment-operator-visitor@^7.22.5":
   version "7.22.15"
   resolved "https://registry.npmjs.org/@babel/helper-builder-binary-assignment-operator-visitor/-/helper-builder-binary-assignment-operator-visitor-7.22.15.tgz"
@@ -667,7 +642,7 @@
   dependencies:
     "@babel/types" "^7.22.15"
 
-"@babel/helper-compilation-targets@^7.17.7", "@babel/helper-compilation-targets@^7.20.7", "@babel/helper-compilation-targets@^7.21.4", "@babel/helper-compilation-targets@^7.21.5", "@babel/helper-compilation-targets@^7.22.15", "@babel/helper-compilation-targets@^7.22.5", "@babel/helper-compilation-targets@^7.22.9":
+"@babel/helper-compilation-targets@^7.17.7", "@babel/helper-compilation-targets@^7.20.7", "@babel/helper-compilation-targets@^7.21.4", "@babel/helper-compilation-targets@^7.21.5", "@babel/helper-compilation-targets@^7.22.15", "@babel/helper-compilation-targets@^7.22.5":
   version "7.22.15"
   resolved "https://registry.npmjs.org/@babel/helper-compilation-targets/-/helper-compilation-targets-7.22.15.tgz"
   integrity sha512-y6EEzULok0Qvz8yyLkCvVX+02ic+By2UdOhylwUOvOn9dvYc9mKICJuuU1n1XBI02YWsNsnrY1kc6DVbjcXbtw==
@@ -2807,11 +2782,6 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
-"@types/grecaptcha@^3.0.3":
-  version "3.0.6"
-  resolved "https://registry.npmjs.org/@types/grecaptcha/-/grecaptcha-3.0.6.tgz"
-  integrity sha512-4BR/3v+pbiRt3cwRwibFnV4+LmuvRUjVVqgeCul9ODAyQhlPKE4tIIRJwZUeWWpmX8e9vo/xXuQTQl8FJPP7KA==
-
 "@types/http-cache-semantics@*":
   version "4.0.2"
   resolved "https://registry.npmjs.org/@types/http-cache-semantics/-/http-cache-semantics-4.0.2.tgz"
@@ -3276,7 +3246,7 @@ accepts@~1.3.4, accepts@~1.3.5, accepts@~1.3.8:
     mime-types "~2.1.34"
     negotiator "0.6.3"
 
-acorn-import-assertions@^1.7.6, acorn-import-assertions@^1.9.0:
+acorn-import-assertions@^1.7.6:
   version "1.9.0"
   resolved "https://registry.npmjs.org/acorn-import-assertions/-/acorn-import-assertions-1.9.0.tgz"
   integrity sha512-cmMwop9x+8KFhxvKrKfPYmN6/pKTYYHBqLa0DfvVZcKMJWNyWLnaqND7dx/qn66R7ewM1UX5XMaDVP5wlVTaVA==
@@ -4672,7 +4642,7 @@ engine.io@~6.5.2:
     engine.io-parser "~5.2.1"
     ws "~8.11.0"
 
-enhanced-resolve@^5.13.0, enhanced-resolve@^5.15.0:
+enhanced-resolve@^5.13.0:
   version "5.15.0"
   resolved "https://registry.npmjs.org/enhanced-resolve/-/enhanced-resolve-5.15.0.tgz"
   integrity sha512-LXYT42KJ7lpIKECr2mAXIaMldcNCh/7E0KBKOu4KSfkHmP+mZmSs+8V5gBAqisWBy0OO4W5Oyys0GO1Y8KtdKg==
@@ -7040,14 +7010,6 @@ ng-packagr@^16.0.0:
   optionalDependencies:
     esbuild "^0.19.0"
 
-ng-recaptcha@^12.0.2:
-  version "12.0.2"
-  resolved "https://registry.npmjs.org/ng-recaptcha/-/ng-recaptcha-12.0.2.tgz"
-  integrity sha512-3osY3dFMg6/puxi1+kPRNr/Y/vooOP3SFtFmrFOKbfGVWufpfuCmzmtsqY68QMP4ts0rQvjF+DfkexEXSfhk9Q==
-  dependencies:
-    "@types/grecaptcha" "^3.0.3"
-    tslib "^2.2.0"
-
 ng-zorro-antd@^16.0.0:
   version "16.2.0"
   resolved "https://registry.npmjs.org/ng-zorro-antd/-/ng-zorro-antd-16.2.0.tgz"
@@ -7514,14 +7476,7 @@ parse5@^6.0.1:
   resolved "https://registry.npmjs.org/parse5/-/parse5-6.0.1.tgz"
   integrity sha512-Ofn/CTFzRGTTxwpNEs9PP93gXShHcTq255nzRYSKe8AkVpZY7e1fpmTfOyoIvjP5HG7Z2ZM7VS9PPhQGW2pOpw==
 
-parse5@^7.0.0:
-  version "7.1.2"
-  resolved "https://registry.npmjs.org/parse5/-/parse5-7.1.2.tgz"
-  integrity sha512-Czj1WaSVpaoj0wbhMzLmWD69anp2WH7FXMB9n1Sy8/ZFF9jolSQVMu1Ij5WIyGmcBmhk7EOndpO4mIpihVqAXw==
-  dependencies:
-    entities "^4.4.0"
-
-parse5@^7.1.2:
+parse5@^7.0.0, parse5@^7.1.2:
   version "7.1.2"
   resolved "https://registry.npmjs.org/parse5/-/parse5-7.1.2.tgz"
   integrity sha512-Czj1WaSVpaoj0wbhMzLmWD69anp2WH7FXMB9n1Sy8/ZFF9jolSQVMu1Ij5WIyGmcBmhk7EOndpO4mIpihVqAXw==
