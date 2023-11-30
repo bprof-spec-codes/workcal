@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { EventApiService } from '../event-api.service';
 import { EventDto, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
-import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule  } from 'devextreme-angular';
+import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule, DxButtonComponent  } from 'devextreme-angular';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { UserApiService } from '../user-api.service';
 import { Location } from '@angular/common';
+import notify from 'devextreme/ui/notify';
+
 
 @Component({
   selector: 'app-calendar-page',
@@ -16,6 +18,11 @@ import { Location } from '@angular/common';
 
 
 export class CalendarPageComponent implements OnInit {
+
+  
+  
+  todayEvents: SchedulerEvent[] = [];
+
   events: EventDto[] = [];
   schedulerEvents: SchedulerEvent[] = [];
 
@@ -59,6 +66,9 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   refreshPage() {
     //this.router.navigate([this.router.url]);
   }
+
+
+
 
 
 
@@ -475,7 +485,6 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
       email: user.email
     };
   }
-
 
 
 

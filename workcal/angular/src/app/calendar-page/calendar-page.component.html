@@ -1,12 +1,30 @@
 <div>
   <h1>Calendar Page</h1>
+
+  
+
+
+    <dx-button
+            stylingMode="contained"
+            type="normal"
+            [width]="120"
+            
+          >
+          <button printSectionId="printSection1" ngxPrint>
+            Print
+            </button>
+          </dx-button>
+          
+
+
+    <div id="printSection1">
   <dx-scheduler
 
   [dataSource]="schedulerEvents"
   [currentDate]="currentDate"
   [startDayHour]="6"
   [endDayHour]="22"
-  [views]="['day', 'week', 'workWeek', 'month']"
+  [views]="['print','day', 'week', 'workWeek', 'month']"
   [currentView]="'week'"
   [timeZone]="'UTC+2'"
   (onAppointmentAdding)="onEventAdding($event)"
@@ -19,8 +37,8 @@
   appointmentTemplate="appointment-template"
 
 
-
 >
+
 
 <dxi-view
 type="day"
@@ -39,6 +57,10 @@ type="month"
 
 
 
+
+
+
+
 <div *dxTemplate="let model of 'appointment-template'">
   <div style="height: 100%; width: 100%;">
 
@@ -46,7 +68,6 @@ type="month"
       {{ model.appointmentData.text }}
 
     </div>
-
 
 
     <div class="dx-scheduler-appointment-content-date" >
@@ -63,16 +84,12 @@ type="month"
         </span>
       </ng-container>
     </div>
-
+  </div>
 
 
   </div>
-</div>
-
-
-
 </dx-scheduler>
 
 
-
+</div>
 </div>
