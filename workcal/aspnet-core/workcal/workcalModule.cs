@@ -46,6 +46,8 @@ using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
+using workcal.MailSender;
+using workcal.Services;
 
 namespace workcal;
 
@@ -130,6 +132,9 @@ public class workcalModule : AbpModule
         {
             context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
         }
+        context.Services.AddTransient<IEmailSender, EmailSender>();
+        context.Services.AddTransient<IUserService, UserService>();
+        context.Services.Configure<AuthMessageSenderOptions>(configuration);
 
         ConfigureAuthentication(context);
         ConfigureBundles();
