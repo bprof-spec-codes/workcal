@@ -7,28 +7,36 @@ import { EventDto, LabelDto } from './models/event-dto.model'; // Create this mo
   providedIn: 'root'
 })
 export class EventApiService {
-  private baseUrl: string = 'https://localhost:44387/api/app/event';
+  private baseEventUrl: string = 'https://localhost:44387/api/app/event';
+  private baseLabelUrl: string = 'https://localhost:44387/api/app/label';
 
   constructor(private http: HttpClient) { }
 
   getAllEvents(): Observable<EventDto[] | null> {
-    return this.http.get<EventDto[] | null>(`${this.baseUrl}`);
+    return this.http.get<EventDto[] | null>(`${this.baseEventUrl}`);
+}
+getAllLabels(): Observable<LabelDto[]> {
+  return this.http.get<LabelDto[]>(`${this.baseEventUrl}`); // Update the URL to match your backend endpoint
+}
+
+getUniqueLabels(): Observable<LabelDto[]> {
+  return this.http.get<LabelDto[]>(`https://localhost:44387/unique`);
 }
 
   getEventById(id: string): Observable<EventDto> {
-    return this.http.get<EventDto>(`${this.baseUrl}/${id}`);
+    return this.http.get<EventDto>(`${this.baseEventUrl}/${id}`);
   }
 
   createEvent(event: EventDto): Observable<EventDto> {
-    return this.http.post<EventDto>(`${this.baseUrl}`, event);
+    return this.http.post<EventDto>(`${this.baseEventUrl}`, event);
   }
 
   updateEvent(id: string, event: EventDto): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${id}`, event);
+    return this.http.put<void>(`${this.baseEventUrl}/${id}`, event);
   }
 
   deleteEvent(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.http.delete<void>(`${this.baseEventUrl}/${id}`);
   }
 
   addLabelToEvent(eventId: string, label: LabelDto) {
@@ -42,5 +50,6 @@ export class EventApiService {
   deleteLabel(eventId: string, labelId: string) {
     return this.http.delete(`/api/app/event/${eventId}/labels/${labelId}`);
   }
+
 
 }

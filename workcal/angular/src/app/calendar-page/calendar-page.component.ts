@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { EventApiService } from '../event-api.service';
-import { EventDto, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
+import { EventDto, LabelDto, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule, DxButtonComponent  } from 'devextreme-angular';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
@@ -19,14 +19,16 @@ import notify from 'devextreme/ui/notify';
 
 export class CalendarPageComponent implements OnInit {
 
-  
-  
+
+
   todayEvents: SchedulerEvent[] = [];
 
   events: EventDto[] = [];
   schedulerEvents: SchedulerEvent[] = [];
 
   selectedEvent: EventDto;
+
+  dynamicUniqueLabels: LabelDto[] = [];
 
   currentDate: Date = new Date();
   currentView: string = 'day';
@@ -39,7 +41,7 @@ export class CalendarPageComponent implements OnInit {
    normalizedUserIDs: string[] = [];
 
 
-defaultLabels: Array<{ name: string, color: string }> = [
+   defaultLabels : Array<{ name: string, color: string }> = [
   { name: 'Meeting', color: '#FF0000' },
   { name: 'Workshop', color: '#00FF00'},
   { name: 'Conference', color: '#0000FF' },
@@ -60,6 +62,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   ngOnInit(): void {
     this.fetchEvents();
     this.fetchUsers();
+    this.fetchUniqueLabels();
 
   }
 
@@ -125,6 +128,12 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
   }
 
+  fetchUniqueLabels(): void {
+    this.eventApiService.getUniqueLabels()
+      .subscribe(labels => {
+        this.dynamicUniqueLabels = labels;
+      });
+  }
 
   createEvent(newEvent: EventDto): void {
     this.eventApiService.createEvent(newEvent).subscribe(
@@ -170,7 +179,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   onEventAdding(event): void {
     const appointmentData = event.appointmentData;
 
-    const selectedLabels = this.defaultLabels.filter(label =>
+    const selectedLabels = this.dynamicUniqueLabels .filter(label =>
       appointmentData.labels?.includes(label.name)
     );
 
@@ -234,7 +243,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     let selectedLabels = [];
 
     if (this.labelsInteractedWith) {
-      selectedLabels = this.defaultLabels.filter(label => appointmentData.labels.includes(label.name));
+      selectedLabels = this.dynamicUniqueLabels .filter(label => appointmentData.labels.includes(label.name));
     } else {
       selectedLabels = appointmentDataOld.labels;
     }
@@ -307,11 +316,11 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   }
 
 
-// Function to create a new label and update defaultLabels
+// Function to create a new label and update dynamicUniqueLabels
 createNewLabel(): void {
   if (this.newLabel.name && this.newLabel.color) {
-    // Update the defaultLabels array
-    this.defaultLabels.push({
+    // Update the dynamicUniqueLabels  array
+    this.dynamicUniqueLabels .push({
       name: this.newLabel.name,
       color: this.newLabel.color
     });
@@ -368,7 +377,7 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
           dataField: 'labels',
           editorType: 'dxTagBox',
           editorOptions: {
-            dataSource: this.defaultLabels,
+            dataSource: this.dynamicUniqueLabels ,
             displayExpr: 'name',
             valueExpr: 'name',
             itemTemplate: function(itemData, _, itemElement) {
@@ -413,7 +422,7 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
               if (newLabelName && newLabelColor) {
                 // Add the new label to the default labels array
-                this.defaultLabels.push({
+                this.dynamicUniqueLabels .push({
                   name: newLabelName,
                   color: newLabelColor
                 });

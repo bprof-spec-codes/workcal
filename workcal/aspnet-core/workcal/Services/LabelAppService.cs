@@ -1,4 +1,5 @@
 ﻿using AutoMapper.Internal.Mappers;
+using Microsoft.AspNetCore.Mvc;
 using Volo.Abp;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
@@ -74,6 +75,19 @@ namespace workcal.Services
                 Logger.LogError("An error occurred while fetching the label: " + ex.Message);
                 throw new UserFriendlyException("An error occurred while fetching the label.");
             }
+        }
+
+       
+        [HttpGet("unique")]
+        public async Task<List<LabelDto>> GetUniqueLabelsAsync()
+        {
+            var labels = await _labelRepository.GetQueryableAsync();
+            var uniqueLabels = labels
+                .GroupBy(label => new { label.Name, label.Color })
+                .Select(group => group.First())
+                .ToList();
+
+            return ObjectMapper.Map<List<Label>, List<LabelDto>>(uniqueLabels);
         }
 
         public async Task DeleteAsync(Guid id)

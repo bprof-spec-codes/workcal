@@ -7,7 +7,9 @@ namespace workcal.Services
     {
         Task CreateAsync(CreateLabelDto input);
         Task<LabelDto> GetAsync(Guid id);
-        Task<List<LabelDto>> GetAllAsync();  
+        Task<List<LabelDto>> GetAllAsync();
+        Task<List<LabelDto>> GetUniqueLabelsAsync();
+
         Task DeleteAsync(Guid id);  
         Task UpdateAsync(Guid id, CreateLabelDto input);  
     }
