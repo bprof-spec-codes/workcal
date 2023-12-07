@@ -35,7 +35,7 @@ namespace workcal.Services
             _eventRepository = eventRepository;
             _labelRepository = labelRepository;
             _eventsUsersRepository = eventsUsersRepository;
-    _userRepository = userRepository;
+            _userRepository = userRepository;
 
 
         }
