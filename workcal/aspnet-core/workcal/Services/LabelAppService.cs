@@ -90,6 +90,19 @@ namespace workcal.Services
             return ObjectMapper.Map<List<Label>, List<LabelDto>>(uniqueLabels);
         }
 
+        [HttpDelete("deleteByNameAndColor")]
+        public async Task DeleteLabelsAsync(string labelName, string labelColor)
+        {
+            var labels = await _labelRepository.GetListAsync(label => label.Name == labelName && label.Color == labelColor);
+
+            foreach (var label in labels)
+            {
+                await _labelRepository.DeleteAsync(label);
+            }
+        }
+
+
+
         public async Task DeleteAsync(Guid id)
         {
             try

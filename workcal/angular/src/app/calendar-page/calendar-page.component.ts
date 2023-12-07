@@ -176,6 +176,17 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
   }
 
+  deleteLabelPermanent(labelname: string,labelcolor: string): void {
+    console.log(labelname,labelcolor );
+    this.eventApiService.deleteLabelsByNameAndColor(labelname, labelcolor)
+      .subscribe(() => {
+        this.fetchUniqueLabels(); // Refresh the label list
+      });
+      this.refreshPage();
+
+  }
+
+
   onEventAdding(event): void {
     const appointmentData = event.appointmentData;
 

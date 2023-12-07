@@ -23,6 +23,13 @@ getUniqueLabels(): Observable<LabelDto[]> {
   return this.http.get<LabelDto[]>(`https://localhost:44387/unique`);
 }
 
+deleteLabelsByNameAndColor(labelName: string, labelColor: string): Observable<void> {
+  const encodedLabelName = encodeURIComponent(labelName);
+  const encodedLabelColor = encodeURIComponent(labelColor); // This will convert '#' to '%23'
+  const url = `https://localhost:44387/deleteByNameAndColor?labelName=${encodedLabelName}&labelColor=${encodedLabelColor}`;
+  return this.http.delete<void>(url);
+}
+
   getEventById(id: string): Observable<EventDto> {
     return this.http.get<EventDto>(`${this.baseEventUrl}/${id}`);
   }

@@ -85,4 +85,13 @@ type="month"
 
 
 </div>
+
+<div class="label-list">
+  <div *ngFor="let label of dynamicUniqueLabels">
+    {{ label.name }} ({{ label.color }})
+    <button (click)="deleteLabelPermanent(label.name, label.color)">Delete</button>
+  </div>
+</div>
+
+
 </div>
