@@ -76,6 +76,29 @@ namespace workcal.Services
 
         }
 
+        public async Task<PictureDto> GetImage(string id)
+        {
+
+            var images = await _pictureRepository.GetListAsync();
+
+            var image = images.FirstOrDefault(x=> x.Title == id);
+
+          // var image = await _pictureRepository.GetAsync(id);
+
+          // return ObjectMapper.Map<Picture, PictureDto>(image);
+
+            PictureDto p = new PictureDto
+            {
+                Id = image.Id,
+                Title = image.Title,
+                ImageData = image.ImageData,
+                ContentType = image.ContentType
+            };
+
+            return p;
+
+        }
+
         [HttpGet("getImages")]
         public async Task<IEnumerable<PictureDto>> GetImages()
         {

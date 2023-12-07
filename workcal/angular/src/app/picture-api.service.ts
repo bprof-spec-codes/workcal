@@ -20,6 +20,9 @@ export class PictureService {
     return this.http.post('https://localhost:44387/uploadPicture', formData);
   }
 
+  getPictureById(id: string): Observable<Picture> {
+    return this.http.get<Picture>(`https://localhost:44387/api/app/picture/${id}/image`);
+  }
   getPictures(): Observable<Picture[]> {
     return this.http.get<any[]>(`https://localhost:44387/getImages`)
       .pipe(map(response => response.map(item => new Picture(item))));

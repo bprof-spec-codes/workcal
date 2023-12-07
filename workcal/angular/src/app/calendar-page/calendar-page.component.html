@@ -1,3 +1,6 @@
+User
+The image is pairing is working, and we can see the images when we diplay them under the calendar, but we only see the alt text in the event :
+
 <div>
   <h1>Calendar Page</h1>
 
@@ -69,6 +72,9 @@ type="month"
       (model.targetedAppointmentData.endDate | date : "shortTime") }}
     </div>
 
+
+
+
     <div class=" dx-scheduler-appointment-content-details">
       <ng-container *ngFor="let label of model.appointmentData.labels">
         <span [style.backgroundColor]="label.color"
@@ -76,7 +82,10 @@ type="month"
           {{label.name}}
         </span>
       </ng-container>
+
     </div>
+    <img *ngFor="let user of model.appointmentData.users" [src]="'data:image/jpeg;base64,' + user.imageUrl" class="event-user-image" alt="User Image"/>
+
   </div>
 
 
@@ -85,6 +94,9 @@ type="month"
 
 
 </div>
+
+<img *ngFor="let user of allusers" [src]="'data:image/jpeg;base64,' + user.imageUrl" class="event-user-image" alt="User Image"/>
+
 
 <div class="label-list">
   <div *ngFor="let label of dynamicUniqueLabels">

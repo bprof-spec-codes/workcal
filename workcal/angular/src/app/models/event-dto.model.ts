@@ -10,12 +10,7 @@ export type EventDto = {
 
 };
 
-export type LabelDto = {
-  id?: string;
-  name: string;
-  color: string;
-  eventId?: string;
-};
+
 
 export type SchedulerEvent = {
   id: string;
@@ -25,6 +20,14 @@ export type SchedulerEvent = {
   location: string;
   labels: Array<{ name: string, color: string }>;
   users: UserDto[];
+
+};
+
+export type LabelDto = {
+  id?: string;
+  name: string;
+  color: string;
+  eventId?: string;
 };
 
 export type UserDto = {
@@ -32,6 +35,7 @@ export type UserDto = {
  userName: string;
  name: string;
  email: string;
+ imageUrl?: string; // Add this line
 
 };
 

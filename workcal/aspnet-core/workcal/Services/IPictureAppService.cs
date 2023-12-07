@@ -11,5 +11,6 @@ namespace workcal.Services
         Task UploadPicture(IFormFile file, Guid userId);
         Task UpdateImage(PictureDto pictureDto);
         Task<IEnumerable<PictureDto>> GetImages();
+        Task<PictureDto> GetImage(string id);
     }
 }

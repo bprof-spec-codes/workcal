@@ -3,11 +3,12 @@ import { EventApiService } from '../event-api.service';
 import { EventDto, LabelDto, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule, DxButtonComponent  } from 'devextreme-angular';
 import { Router } from '@angular/router';
-import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
 import { UserApiService } from '../user-api.service';
 import { Location } from '@angular/common';
 import notify from 'devextreme/ui/notify';
+import { PictureService } from '../picture-api.service';
 
 
 @Component({
@@ -55,15 +56,16 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 ];
 
 
-  constructor(private eventApiService: EventApiService, private userApiService: UserApiService ,private router: Router )
+  constructor(private eventApiService: EventApiService, private userApiService: UserApiService ,private pictureService: PictureService ,private router: Router )
   {   this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.router.onSameUrlNavigation = 'reload';}
 
   ngOnInit(): void {
-    this.fetchEvents();
     this.fetchUsers();
-    this.fetchUniqueLabels();
+    this.fetchEvents();
 
+    this.fetchUniqueLabels();
+   // this.fetchUserImages();
   }
 
   refreshPage() {
@@ -92,41 +94,65 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           text: event.name,
           location: event.location,
           labels: event.labels,
-          users: event.users.map(user => ({ id: user.id, userName: user.userName }))
+          users: event.users.map(user => ({ id: user.id, userName: user.userName })),
+
         }));
+
       });
 
   }
-
-
-
   fetchUsers(): void {
     this.userApiService.getAllUsers()
       .pipe(
         catchError(error => {
           console.error('Error fetching users:', error);
-          return of([]);
+          return of({ items: [] } as UserResponse); // Provide a fallback value
+        }),
+        switchMap((response: UserResponse) => {
+          if (response.items.length === 0) {
+            return of([]); // If no users, return an empty array
+          }
+          // Create an array of observables for each user to fetch the picture
+          const userObservables = response.items.map(user =>
+            this.pictureService.getPictureById(user.id).pipe(
+              catchError(() => of(undefined)), // Handle errors in image fetching
+              map(picture => ({
+                ...user,
+                imageUrl: picture ? picture.imageData : undefined
+              }))
+            )
+          );
+          return forkJoin(userObservables); // Combine all observables
         })
       )
-      .subscribe((data: UserResponse | any[]) => { // Explicitly type data
-        if (Array.isArray(data)) {
-          console.error('Received an array, expected an object with an items key:', data);
-          return;
-        }
-
-        if (data && data.items) {
-          this.allusers = data.items.map(user => ({
-            id: user.id,
-            userName: user.userName,
-            name: user.name,
-            email: user.email
-          }));
-        } else {
-          console.error('Items key not found in response:', data);
-        }
+      .subscribe(usersWithImages => {
+        this.allusers = usersWithImages;
       });
-
   }
+  fetchUserImages(): void {
+    console.log('image.imageData:');
+
+    this.allusers.forEach((user, index) => {
+      this.pictureService.getPictureById(user.id)
+        .pipe(
+          catchError(error => {
+            console.error(`Error fetching image for user ${user.id}:`, error);
+            return of(null); // Return null if image fetch fails
+          })
+        )
+        .subscribe(image => {
+          if (image) {
+            this.allusers[index].imageUrl = image.imageData; // Assign image URL
+            console.log('image.imageData:',image.imageData );
+
+          }
+          // If needed, refresh part of your component to reflect the image updates
+
+        });
+    });
+  }
+
+
 
   fetchUniqueLabels(): void {
     this.eventApiService.getUniqueLabels()
@@ -208,7 +234,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
       labels: selectedLabels,
-      users:  selectedUserIDs
+      users:  selectedUserIDs,
+
     };
 
     this.createEvent(newEvent);
@@ -293,7 +320,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       endTime: new Date(appointmentData.endDate),
       location: appointmentData.location || '',
       labels: selectedLabels,
-      users: selectedUserIDs
+      users: selectedUserIDs,
+
     };
 
     console.log('Final selectedUserIDs:', selectedUserIDs);
