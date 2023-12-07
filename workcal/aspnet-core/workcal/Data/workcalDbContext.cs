@@ -16,6 +16,7 @@ using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using workcal.Entities;
+using workcal.Migrations;
 
 namespace workcal.Data;
 
@@ -28,9 +29,12 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
     }
 
     public DbSet<Event> Events { get; set; } 
-    public DbSet<Entities.Label> Labels { get; set; }  
+    public DbSet<Entities.Label> Labels { get; set; }
 
-    public DbSet<EventsUsers> EventUsers { get; set; }  
+    public DbSet<Picture> Pictures { get; set; }
+
+
+    public DbSet<Entities.EventsUsers> EventUsers { get; set; }  
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -87,7 +91,7 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
 
 
 
-            builder.Entity<EventsUsers>(b => {
+            builder.Entity<Entities.EventsUsers>(b => {
               b.ToTable("EventsUsers"); b.ConfigureByConvention();
              b.HasOne<Event>().WithMany(x => x.EventUsers).HasForeignKey("EventId").OnDelete(DeleteBehavior.Cascade);
            // b.HasOne<IdenityUsers>().WithMany().HasForeignKey("UserId").OnDelete(DeleteBehavior.NoAction);
@@ -100,26 +104,36 @@ public class workcalDbContext : AbpDbContext<workcalDbContext>
 
         });
 
-     /* builder.Entity<Event>(b => {
-             b.ConfigureByConvention(); 
-            ;//one-to-many relationship with Author table
-           
-            //many-to-many relationship with Category table => BookCategories
-            b.HasMany(x=>x.EventUsers).WithOne().HasForeignKey(x=>x.EventId).IsRequired();
-        
+        builder.Entity<Picture>(b =>
+        {
+            b.ConfigureByConvention();
+            b.HasOne(p => p.User)
+                .WithMany() // If the IdentityUser entity doesn't have a navigation property for Pictures, leave this empty
+                .HasForeignKey(p => p.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
-        builder.Entity<EventsUsers>(b => {
-            b.ToTable("EventsUsers"); b.ConfigureByConvention();
-            //define composite key
-            b.HasKey(x=>new{x.EventId,x.UserId});
-            //many-to-many configuration
-            b.HasOne<Event>().WithMany(x=>x.EventUsers).HasForeignKey(x=> x.EventId).IsRequired();
-            b.HasOne<IdentityUser>().WithMany().HasForeignKey(x=>x.UserId).IsRequired();
-            b.HasIndex(x=>new{x.EventId,x.UserId });
-        });
-        */
-        }
+        /* builder.Entity<Event>(b => {
+                b.ConfigureByConvention(); 
+               ;//one-to-many relationship with Author table
+
+               //many-to-many relationship with Category table => BookCategories
+               b.HasMany(x=>x.EventUsers).WithOne().HasForeignKey(x=>x.EventId).IsRequired();
+
+           });
+
+           builder.Entity<EventsUsers>(b => {
+               b.ToTable("EventsUsers"); b.ConfigureByConvention();
+               //define composite key
+               b.HasKey(x=>new{x.EventId,x.UserId});
+               //many-to-many configuration
+               b.HasOne<Event>().WithMany(x=>x.EventUsers).HasForeignKey(x=> x.EventId).IsRequired();
+               b.HasOne<IdentityUser>().WithMany().HasForeignKey(x=>x.UserId).IsRequired();
+               b.HasIndex(x=>new{x.EventId,x.UserId });
+           });
+           */
+    }
 
 
 

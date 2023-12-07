@@ -12,6 +12,19 @@ export class EventApiService {
 
   constructor(private http: HttpClient) { }
 
+  uploadPicture(file: File, userId: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userId', userId);
+
+    return this.http.post('https://localhost:44387/upload', formData, {
+      headers: { 'enctype': 'multipart/form-data' }
+    });
+  }
+
+
+
+
   getAllEvents(): Observable<EventDto[] | null> {
     return this.http.get<EventDto[] | null>(`${this.baseEventUrl}`);
 }

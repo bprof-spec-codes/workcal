@@ -1,0 +1,25 @@
+<div class="picture-upload">
+  <form (submit)="uploadPicture()">
+    <div>
+      <label for="picture">Select Picture:</label>
+      <input type="file" id="picture" (change)="onFileSelected($event)">
+    </div>
+    <div>
+      <label for="user">Select User:</label>
+      <select [(ngModel)]="selectedUserId" name="user">
+        <option *ngFor="let user of allusers" [value]="user.id">{{user.name}}</option>
+      </select>
+    </div>
+    <button type="submit">Upload Picture</button>
+  </form>
+</div>
+<div class="image-list">
+
+  <div *ngFor="let picture of pictures" class="picture-item">
+    <img [src]="picture.imageUrl" alt="{{ picture.title }}" class="picture-thumbnail">
+    <input type="file" (change)="updatePicture(picture.id, $event)"> <!-- Update option -->
+
+    <button (click)="deletePicture(picture.id)">Delete</button> <!-- Delete option -->
+</div>
+
+</div>

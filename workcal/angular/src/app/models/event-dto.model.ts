@@ -39,3 +39,24 @@ export interface UserResponse {
   totalCount: number;
   items: UserDto[];
 }
+
+
+export class Picture {
+  id: string;
+  title: string;
+  imageData: string;
+  contentType: string;
+
+  constructor(data: any) {
+    this.id = data.id;
+    this.title = data.title;
+    this.imageData = data.imageData;
+    this.contentType = data.contentType;
+  }
+
+  get imageUrl(): string {
+    return `data:${this.contentType};base64,${this.imageData}`;
+  }
+}
+
+

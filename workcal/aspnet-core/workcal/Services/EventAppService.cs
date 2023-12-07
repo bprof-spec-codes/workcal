@@ -17,6 +17,7 @@ using Volo.Abp.Identity;
 using static Volo.Abp.Identity.Settings.IdentitySettingNames;
 using workcal.Migrations;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 
 namespace workcal.Services
 {
@@ -24,21 +25,79 @@ namespace workcal.Services
     {
         private readonly IRepository<Event, Guid> _eventRepository;
         private readonly IRepository<Label, Guid> _labelRepository;
+        private readonly IRepository<Picture, Guid> _pictureRepository;
+
         private readonly IRepository<Entities.EventsUsers, Guid> _eventsUsersRepository;
         private readonly IRepository<Volo.Abp.Identity.IdentityUser, Guid> _userRepository; // Inject the user repository
 
 
 
-        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository ,IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
+        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository , IRepository<Picture, Guid> pictureRepository, IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
 
         {
             _eventRepository = eventRepository;
             _labelRepository = labelRepository;
+            _pictureRepository = pictureRepository;
             _eventsUsersRepository = eventsUsersRepository;
-    _userRepository = userRepository;
+             _userRepository = userRepository;
 
 
         }
+
+
+        [HttpPost("upload")]
+        public async Task UploadPicture(IFormFile file, Guid userId)
+        {
+
+            try
+            {
+                // Example validation criteria
+                var allowedFileTypes = new List<string> { "image/jpeg", "image/png" };
+                var maxFileSize = 5 * 1024 * 1024; // 5 MB
+
+                if (file.Length > maxFileSize)
+                {
+                    throw new UserFriendlyException("File size exceeds the allowable limit.");
+
+                }
+
+                if (!allowedFileTypes.Contains(file.ContentType))
+                {
+                    throw new UserFriendlyException("Invalid file type.");
+                }
+
+                byte[] fileData;
+                using (var memoryStream = new MemoryStream())
+                {
+                    await file.CopyToAsync(memoryStream);
+                    fileData = memoryStream.ToArray();
+                }
+
+                var picture = new Picture
+                {
+                    Title = userId.ToString(), // You can set this based on the user ID
+                    ImageData = fileData,
+                    ContentType = file.ContentType,
+                    UserId = userId // Assuming this is passed to the method
+                };
+
+                // Assuming you have a repository or context to interact with your database
+                await _pictureRepository.InsertAsync(picture);
+
+            }
+            catch (UserFriendlyException ex)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("An error occurred while uploading: " + ex.Message);
+                throw new UserFriendlyException("An error occurred while uploading.");
+            }
+
+
+        }
+
 
         public async Task CreateAsync(CreateEventDto @event)
         {
