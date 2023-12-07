@@ -3,7 +3,7 @@ import { EventApiService } from '../event-api.service';
 import { EventDto, LabelDto, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule, DxButtonComponent  } from 'devextreme-angular';
 import { Router } from '@angular/router';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 import { forkJoin, of } from 'rxjs';
 import { UserApiService } from '../user-api.service';
 import { Location } from '@angular/common';
@@ -62,10 +62,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
   ngOnInit(): void {
     this.fetchUsers();
-    this.fetchEvents();
-
     this.fetchUniqueLabels();
-   // this.fetchUserImages();
+
   }
 
   refreshPage() {
@@ -94,13 +92,25 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           text: event.name,
           location: event.location,
           labels: event.labels,
-          users: event.users.map(user => ({ id: user.id, userName: user.userName })),
+          users: event.users.map(user => {
+            // Find the corresponding user in 'allusers' to get the 'imageUrl'
+            const userWithImage = this.allusers.find(u => u.id === user.id);
+            return {
+              id: user.id,
+              userName: user.userName,
+              imageUrl: userWithImage ? userWithImage.imageUrl : undefined // Set imageUrl here
+            };
+
+          }),
 
         }));
+        console.log('fetchEvents');
+
+        console.log(data);
 
       });
-
   }
+
   fetchUsers(): void {
     this.userApiService.getAllUsers()
       .pipe(
@@ -123,33 +133,14 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
             )
           );
           return forkJoin(userObservables); // Combine all observables
+        }),
+        finalize(() => {
+          this.fetchEvents(); // Call fetchEvents after all user images are loaded
         })
       )
       .subscribe(usersWithImages => {
         this.allusers = usersWithImages;
       });
-  }
-  fetchUserImages(): void {
-    console.log('image.imageData:');
-
-    this.allusers.forEach((user, index) => {
-      this.pictureService.getPictureById(user.id)
-        .pipe(
-          catchError(error => {
-            console.error(`Error fetching image for user ${user.id}:`, error);
-            return of(null); // Return null if image fetch fails
-          })
-        )
-        .subscribe(image => {
-          if (image) {
-            this.allusers[index].imageUrl = image.imageData; // Assign image URL
-            console.log('image.imageData:',image.imageData );
-
-          }
-          // If needed, refresh part of your component to reflect the image updates
-
-        });
-    });
   }
 
 
