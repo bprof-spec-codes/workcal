@@ -103,6 +103,7 @@ namespace workcal.Services
                     StartTime = @event.StartTime,
                     EndTime = @event.EndTime,
                     LocationString = @event.LocationString,
+                    
                 };
 
              var instertedEvent=    await _eventRepository.InsertAsync(eventEntity);

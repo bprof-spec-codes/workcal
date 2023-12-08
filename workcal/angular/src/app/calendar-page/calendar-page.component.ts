@@ -315,7 +315,6 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       locationString: appointmentData.location || '',
       labels: selectedLabels,
       users: selectedUserIDs,
-      pictureData: this.selectedEvent?.pictureData // Add this line
 
     };
 

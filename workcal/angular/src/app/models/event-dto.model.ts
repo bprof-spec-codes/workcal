@@ -8,8 +8,7 @@ export type EventDto = {
   locationString: string;
   labels: LabelDto[];
   users: UserDto[];
-  pictureFile?: File;
-  pictureData?: string;
+
 };
 
 
@@ -22,8 +21,7 @@ export type SchedulerEvent = {
   locationString: string;
   labels: Array<{ name: string, color: string }>;
   users: UserDto[];
-  pictureFile?: File;
-  pictureData?: string;
+
 };
 
 export type LabelDto = {
