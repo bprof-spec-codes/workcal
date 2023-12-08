@@ -12,7 +12,7 @@ namespace workcal.Services
         Task CreateAsync(CreateEventDto @event);
         Task<EventDto> GetAsync(Guid id);
         Task<List<EventDto>> GetAllAsync();
-        Task UploadPicture(IFormFile file, Guid userId);
+        Task UploadEventPicture(IFormFile pictureFile, Guid eventId);
         Task DeleteAsync(Guid id);  
         Task UpdateAsync(Guid id, CreateEventDto @event);  
     }

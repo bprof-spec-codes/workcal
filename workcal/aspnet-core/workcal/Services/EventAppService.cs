@@ -46,57 +46,46 @@ namespace workcal.Services
 
 
         [HttpPost("upload")]
-        public async Task UploadPicture(IFormFile file, Guid userId)
+        public async Task UploadEventPicture( IFormFile pictureFile, Guid eventId)
         {
+            if (pictureFile == null || pictureFile.Length == 0)
+            {
+                throw new UserFriendlyException("Event not found.");
+            }
 
             try
             {
-                // Example validation criteria
-                var allowedFileTypes = new List<string> { "image/jpeg", "image/png" };
-                var maxFileSize = 5 * 1024 * 1024; // 5 MB
-
-                if (file.Length > maxFileSize)
+                // Retrieve the event from the database
+                var eventEntity = await _eventRepository.FindAsync(eventId);
+                if (eventEntity == null)
                 {
-                    throw new UserFriendlyException("File size exceeds the allowable limit.");
-
+                    throw new UserFriendlyException("Event not found.");
                 }
 
-                if (!allowedFileTypes.Contains(file.ContentType))
-                {
-                    throw new UserFriendlyException("Invalid file type.");
-                }
-
-                byte[] fileData;
+                // Convert IFormFile to byte array
+                byte[] pictureData;
                 using (var memoryStream = new MemoryStream())
                 {
-                    await file.CopyToAsync(memoryStream);
-                    fileData = memoryStream.ToArray();
+                    await pictureFile.CopyToAsync(memoryStream);
+                    pictureData = memoryStream.ToArray();
                 }
 
-                var picture = new Picture
-                {
-                    Title = userId.ToString(), // You can set this based on the user ID
-                    ImageData = fileData,
-                    ContentType = file.ContentType,
-                    UserId = userId // Assuming this is passed to the method
-                };
+                // Assign the picture data and MIME type to the event
+                eventEntity.PictureData = pictureData;
+                eventEntity.PictureMimeType = pictureFile.ContentType;
 
-                // Assuming you have a repository or context to interact with your database
-                await _pictureRepository.InsertAsync(picture);
+                // Save changes to the database
+                _eventRepository.UpdateAsync(eventEntity);
 
-            }
-            catch (UserFriendlyException ex)
-            {
-                throw;
             }
             catch (Exception ex)
             {
-                Logger.LogError("An error occurred while uploading: " + ex.Message);
-                throw new UserFriendlyException("An error occurred while uploading.");
+                // Log the exception
+                Logger.LogError("An error occurred while creating the event: " + ex.Message);
+                throw new UserFriendlyException("An error occurred while creating the event.");
             }
-
-
         }
+
 
 
         public async Task CreateAsync(CreateEventDto @event)
@@ -112,7 +101,7 @@ namespace workcal.Services
                     Name = @event.Name,
                     StartTime = @event.StartTime,
                     EndTime = @event.EndTime,
-                    Location = @event.Location,
+                    LocationString = @event.LocationString,
                 };
 
              var instertedEvent=    await _eventRepository.InsertAsync(eventEntity);
@@ -296,7 +285,7 @@ namespace workcal.Services
                 eventEntity.Name = @event.Name;
             eventEntity.StartTime = @event.StartTime;
             eventEntity.EndTime = @event.EndTime;
-            eventEntity.Location = @event.Location;
+            eventEntity.LocationString = @event.LocationString;
             await _eventRepository.UpdateAsync(eventEntity);
 
             var existingLabelsDict = eventEntity.Labels.ToDictionary(l => l.Name, l => l);

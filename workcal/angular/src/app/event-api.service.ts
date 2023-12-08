@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { EventDto, LabelDto } from './models/event-dto.model'; // Create this model based on your DTO
 
@@ -12,20 +12,41 @@ export class EventApiService {
 
   constructor(private http: HttpClient) { }
 
-  uploadPicture(file: File, userId: string): Observable<any> {
+  uploadPicture(file: File, eventId: string): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('userId', userId);
+    formData.append('eventId', eventId);
 
     return this.http.post('https://localhost:44387/upload', formData, {
       headers: { 'enctype': 'multipart/form-data' }
     });
   }
+  createOrUpdateEvent(event: EventDto, file?: File): Observable<any> {
+    const formData = new FormData();
+
+    // Append event data to the formData
+    formData.append('eventData', new Blob([JSON.stringify(event)], {
+      type: "application/json"
+    }));
+
+    // Append the file if it exists
+    if (file) {
+      formData.append('pictureFile', file, file.name);
+    }
+
+    // Determine whether it's a create or update operation
+    const url = event.id ? `api/events/update/${event.id}` : 'api/events/create';
+
+    return this.http.post(url, formData, {
+      headers: new HttpHeaders({
+        'enctype': 'multipart/form-data' // Ensure enctype is set for file upload
+      })
+    });
+  }
 
 
 
-
-  getAllEvents(): Observable<EventDto[] | null> {
+getAllEvents(): Observable<EventDto[] | null> {
     return this.http.get<EventDto[] | null>(`${this.baseEventUrl}`);
 }
 getAllLabels(): Observable<LabelDto[]> {

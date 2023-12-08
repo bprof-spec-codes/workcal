@@ -1,13 +1,15 @@
 
 export type EventDto = {
+
   id?: string ;
   name: string;
   startTime: Date;
   endTime: Date;
-  location: string;
+  locationString: string;
   labels: LabelDto[];
   users: UserDto[];
-
+  pictureFile?: File;
+  pictureData?: string;
 };
 
 
@@ -17,10 +19,11 @@ export type SchedulerEvent = {
   startDate: Date;
   endDate: Date;
   text: string;
-  location: string;
+  locationString: string;
   labels: Array<{ name: string, color: string }>;
   users: UserDto[];
-
+  pictureFile?: File;
+  pictureData?: string;
 };
 
 export type LabelDto = {
@@ -28,6 +31,7 @@ export type LabelDto = {
   name: string;
   color: string;
   eventId?: string;
+
 };
 
 export type UserDto = {
@@ -36,6 +40,7 @@ export type UserDto = {
  name: string;
  email: string;
  imageUrl?: string; // Add this line
+ pictureFile?: File;
 
 };
 

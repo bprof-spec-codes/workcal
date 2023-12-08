@@ -15,7 +15,7 @@ namespace workcal.Services.Dtos
         [Required]
         public DateTime EndTime { get; set; }
 
-        public string Location { get; set; }
+        public string LocationString { get; set; }
 
         public List<CreateLabelDto> Labels { get; set; }
 

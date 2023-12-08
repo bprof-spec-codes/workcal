@@ -40,6 +40,7 @@ export class CalendarPageComponent implements OnInit {
 
    allusers: UserDto[] = [];
    normalizedUserIDs: string[] = [];
+   selectedFile: File | null = null;
 
 
    defaultLabels : Array<{ name: string, color: string }> = [
@@ -90,7 +91,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           startDate: event.startTime,
           endDate: event.endTime,
           text: event.name,
-          location: event.location,
+          locationString: event.locationString,
           labels: event.labels,
           users: event.users.map(user => {
             // Find the corresponding user in 'allusers' to get the 'imageUrl'
@@ -223,7 +224,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       name: appointmentData.text,
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
-      location: appointmentData.location || '',
+      locationString: appointmentData.location || '',
       labels: selectedLabels,
       users:  selectedUserIDs,
 
@@ -309,7 +310,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       name: appointmentData.text,
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
-      location: appointmentData.location || '',
+      locationString: appointmentData.location || '',
       labels: selectedLabels,
       users: selectedUserIDs,
 
@@ -382,7 +383,7 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     if (oldAppointmentData.labels) {
       form.updateData('labels', oldAppointmentData.labels.map(l => l.name));
     }
-    if (!oldAppointmentData.location) {
+    if (!oldAppointmentData.locationString) {
       form.updateData('location', '');
     }
     if (!oldAppointmentData.labels) {
@@ -401,6 +402,17 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
           },
           label: {
             text: 'Location'
+          }
+        },
+        {
+          label: { text: 'Event Picture' },
+          template: () => {
+            return `
+            <div>
+            <input type="file" (change)="onPictureSelected($event)" />
+            <button type="button" (click)="uploadPicture(selectedEventId)">Add Picture</button>
+            </div>
+            `;
           }
         },
         {
@@ -526,5 +538,40 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
   }
 
 
+  onPictureSelected(event: any): void {
+    this.selectedFile = event.target.files[0];
+    if (this.selectedEvent && this.selectedFile) {
+      this.selectedEvent.pictureFile = this.selectedFile;
+    }
+  }
+
+  createOrUpdateEvent(): void {
+    if (this.selectedEvent) {
+      // Add logic to handle the event creation or update, including the picture
+      // Convert the picture to a Base64 string if needed
+      if (this.selectedEvent.pictureFile) {
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          this.selectedEvent.pictureData = e.target.result;
+          this.sendEventToServer();
+        };
+        reader.readAsDataURL(this.selectedEvent.pictureFile);
+      } else {
+        this.sendEventToServer();
+      }
+    }
+  }
+
+  private sendEventToServer(): void {
+    this.eventApiService.createOrUpdateEvent(this.selectedEvent).subscribe({
+      next: (response) => {
+        console.log('Event successfully saved', response);
+        // Refresh events or perform other actions as needed
+      },
+      error: (error) => {
+        console.error('Error saving event', error);
+      }
+    });
+  }
 
 }

@@ -12,7 +12,7 @@ namespace workcal.Services.Dtos
         public string Name { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public string Location { get; set; }
+        public string LocationString { get; set; }
         public List<Label> Labels { get; set; }
 
         public List<Volo.Abp.Identity.IdentityUser> Users { get; set; }
