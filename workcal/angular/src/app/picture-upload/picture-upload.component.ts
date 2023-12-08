@@ -25,9 +25,7 @@ export class PictureUploadComponent {
 
   }
 
-  onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0];
-  }
+
   fetchUsers(): void {
     this.userApiService.getAllUsers()
       .pipe(
@@ -55,19 +53,23 @@ export class PictureUploadComponent {
       });
 
   }
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+  }
   uploadPicture() {
     if (this.selectedFile && this.selectedUserId) {
       this.pictureService.uploadPicture(this.selectedFile, this.selectedUserId)
         .subscribe({
-          next: () => {
-            // Handle success
+          next: (response) => {
+            console.log('Picture uploaded successfully', response);
           },
-          error: () => {
-            // Handle error
+          error: (error) => {
+            console.error('Error uploading picture', error);
           }
         });
-    } else {
-      // Handle invalid input
+      } else {
+        console.error('No file selected or event ID missing');
     }
   }
 

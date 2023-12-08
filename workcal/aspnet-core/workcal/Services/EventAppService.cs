@@ -48,13 +48,14 @@ namespace workcal.Services
         [HttpPost("upload")]
         public async Task UploadEventPicture( IFormFile pictureFile, Guid eventId)
         {
-            if (pictureFile == null || pictureFile.Length == 0)
-            {
-                throw new UserFriendlyException("Event not found.");
-            }
+            
 
             try
             {
+                if (pictureFile == null || pictureFile.Length == 0)
+                {
+                    throw new UserFriendlyException("Not found.");
+                }
                 // Retrieve the event from the database
                 var eventEntity = await _eventRepository.FindAsync(eventId);
                 if (eventEntity == null)

@@ -12,14 +12,12 @@ export class EventApiService {
 
   constructor(private http: HttpClient) { }
 
-  uploadPicture(file: File, eventId: string): Observable<any> {
+  uploadPicture(pictureFile: File, eventId: string): Observable<any> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('pictureFile', pictureFile);
     formData.append('eventId', eventId);
 
-    return this.http.post('https://localhost:44387/upload', formData, {
-      headers: { 'enctype': 'multipart/form-data' }
-    });
+    return this.http.post('https://localhost:44387/upload', formData);
   }
   createOrUpdateEvent(event: EventDto, file?: File): Observable<any> {
     const formData = new FormData();
@@ -73,7 +71,9 @@ deleteLabelsByNameAndColor(labelName: string, labelColor: string): Observable<vo
   }
 
   updateEvent(id: string, event: EventDto): Observable<void> {
-    return this.http.put<void>(`${this.baseEventUrl}/${id}`, event);
+    const headers = new HttpHeaders({'Content-Type': 'application/json'});
+    const body = JSON.stringify(event);
+    return this.http.put<void>(`${this.baseEventUrl}/${id}`, body, {headers});
   }
 
   deleteEvent(id: string): Observable<void> {

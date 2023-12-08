@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, Renderer2 } from '@angular/core';
 import { EventApiService } from '../event-api.service';
 import { EventDto, LabelDto, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule, DxButtonComponent  } from 'devextreme-angular';
@@ -42,6 +42,7 @@ export class CalendarPageComponent implements OnInit {
    normalizedUserIDs: string[] = [];
    selectedFile: File | null = null;
 
+   selectedEventId: string;
 
    defaultLabels : Array<{ name: string, color: string }> = [
   { name: 'Meeting', color: '#FF0000' },
@@ -57,7 +58,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 ];
 
 
-  constructor(private eventApiService: EventApiService, private userApiService: UserApiService ,private pictureService: PictureService ,private router: Router )
+  constructor(private eventApiService: EventApiService, private userApiService: UserApiService ,    private renderer: Renderer2
+,  private pictureService: PictureService ,private router: Router )
   {   this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.router.onSameUrlNavigation = 'reload';}
 
@@ -313,6 +315,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       locationString: appointmentData.location || '',
       labels: selectedLabels,
       users: selectedUserIDs,
+      pictureData: this.selectedEvent?.pictureData // Add this line
 
     };
 
@@ -389,6 +392,9 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     if (!oldAppointmentData.labels) {
       form.updateData('labels', []);
     }
+
+    this.selectedEventId = oldAppointmentData.id;
+
     form.itemOption('mainGroup', {
 
 
@@ -404,17 +410,16 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
             text: 'Location'
           }
         },
-        {
-          label: { text: 'Event Picture' },
-          template: () => {
-            return `
-            <div>
-            <input type="file" (change)="onPictureSelected($event)" />
-            <button type="button" (click)="uploadPicture(selectedEventId)">Add Picture</button>
-            </div>
-            `;
-          }
-        },
+                {
+            label: { text: 'Event Picture' },
+            template: () => {
+              return `
+                <div>
+                  <input type="file" id="event-picture-input" (change)="onFileSelected($event)" />
+                </div>
+              `;
+            }
+          },
         {
           dataField: 'labels',
           editorType: 'dxTagBox',
@@ -516,6 +521,10 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
       this.labelsInteractedWith = true;
     });
 
+    setTimeout(() => {
+      const fileInput = document.getElementById('event-picture-input');
+      fileInput.addEventListener('change', this.onFileSelected.bind(this));
+    }, 0);
 
 
     this.fetchEvents();
@@ -538,21 +547,107 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
   }
 
 
-  onPictureSelected(event: any): void {
-    this.selectedFile = event.target.files[0];
-    if (this.selectedEvent && this.selectedFile) {
-      this.selectedEvent.pictureFile = this.selectedFile;
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+    }
+
+    if (this.selectedFile && this.selectedEventId) {
+      this.eventApiService.uploadPicture(this.selectedFile, this.selectedEventId).subscribe({
+        next: (response) => {
+          console.log('Picture uploaded successfully', response);
+        },
+        error: (error) => {
+          console.error('Error uploading picture', error);
+        }
+      });
+    } else {
+      console.error('No file selected or event ID missing');
     }
   }
 
+
+
+
+
+/*
+  onPictureSelected(event: any): void {
+    const fileInput = event.target;
+    if (fileInput.files && fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      this.selectedFile = file;
+
+      // Create a FileReader to read the file
+      const reader = new FileReader();
+
+      // Define the onload event handler for the FileReader
+      reader.onload = (e: any) => {
+        // The file's text will be in e.target.result
+        const base64String = e.target.result;
+
+        // Now the base64String contains the image data in Base64 format
+        // You can use this string to send it to the server or do other processing
+        console.log(base64String); // For debugging
+
+        // Assuming you have a property in your event DTO to hold the picture data
+        if (this.selectedEvent) {
+
+          console.log('selectedEventy');
+
+          this.selectedEvent.pictureData = base64String;
+
+          var selectedid = this.selectedEvent.id;
+
+          this.eventApiService.uploadPicture(this.selectedFile, selectedid).subscribe({
+            next: (response) => {
+                console.log('Picture uploaded successfully', response);
+                // Additional logic after successful upload
+            },
+            error: (error) => {
+                console.error('Error uploading picture', error);
+            }
+        });
+        }
+      };
+
+      // Read the file as a Data URL (Base64)
+      reader.readAsDataURL(file);
+    }
+
+
+  }
+
+  uploadPicture(): void {
+    console.log('uploadPicture called');
+
+    if (this.selectedFile && this.selectedEvent && this.selectedEvent.id) {
+      console.log('selectedFile and selectedEvent are present');
+
+      // Logic to upload the picture
+      this.eventApiService.uploadPicture(this.selectedFile, this.selectedEvent.id).subscribe({
+        next: (response) => {
+          console.log('Picture uploaded successfully', response);
+          // Additional logic after successful upload
+        },
+        error: (error) => {
+          console.error('Error uploading picture', error);
+        }
+      });
+    } else {
+      console.error('Selected file or event is missing');
+      // Handle the case where the file or event is not available
+    }
+  }
+
+
   createOrUpdateEvent(): void {
     if (this.selectedEvent) {
-      // Add logic to handle the event creation or update, including the picture
-      // Convert the picture to a Base64 string if needed
       if (this.selectedEvent.pictureFile) {
         const reader = new FileReader();
         reader.onload = (e: any) => {
           this.selectedEvent.pictureData = e.target.result;
+          console.log("Picture data:", this.selectedEvent.pictureData); // Add this log
           this.sendEventToServer();
         };
         reader.readAsDataURL(this.selectedEvent.pictureFile);
@@ -561,8 +656,10 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
       }
     }
   }
+*/
 
   private sendEventToServer(): void {
+    console.log("Sending event data:", this.selectedEvent);
     this.eventApiService.createOrUpdateEvent(this.selectedEvent).subscribe({
       next: (response) => {
         console.log('Event successfully saved', response);
