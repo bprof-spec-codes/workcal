@@ -370,12 +370,11 @@ createNewLabel(): void {
 
 }
 
-// Implement the AfterViewInit lifecycle hook to access the DOM elements
 
 
 
 labelsInteractedWith: boolean = false;
-/*
+
 onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): void {
   const form = data.form;
 
@@ -394,8 +393,13 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
       form.updateData('labels', []);
     }
 
+    if (!oldAppointmentData.pictureData) {
+      form.updateData('Event Picture', []);
+    }
+
     this.selectedEventId = oldAppointmentData.id;
-    this.fetchEventPicture(this.selectedEventId);
+    //this.fetchEventPicture(this.selectedEventId);
+    const image = data.appointmentData.pictureData
 
     form.itemOption('mainGroup', {
 
@@ -426,11 +430,10 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
             label: { text: 'Event Picture' },
             template: () => {
               return `
-              <div *ngIf="selectedEvent">
-
-              <img [src]="'data:image/jpeg;base64,' + selectedEvent.pictureData" alt="Event Picture">
-              </div>
-              `;
+              <a href="data:application/octet-stream;base64,${data.appointmentData.pictureData}" target="_blank">
+              <img src="data:image/jpeg;base64,${data.appointmentData.pictureData}" class="event-user-image" alt="Event Image"/>
+            </a>
+          `;
             }
           },
         {
@@ -544,8 +547,8 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     this.refreshPage();
 
   }
-*/
 
+/*
 onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): void {
   this.selectedEventId = data.appointmentData.id;
 
@@ -611,10 +614,14 @@ private openForm(data: { form: any, appointmentData: SchedulerEvent }): void {
           label: { text: 'Event Picture' },
           template: () => {
             return `
-            <div *ngIf="selectedEvent">
-            <img *ngIf="selectedEvent.pictureData" [src]="'data:image/jpeg;base64,' + data.appointmentData.pictureData" alt="No Picture">
-            </div>
-            `;
+            <div>
+            <a *ngIf="selectedEvent.pictureData"
+               href="'data:image/jpeg;base64,' + data.appointmentData.pictureData"
+               target="_blank">
+               Open Event Picture
+            </a>
+          </div>
+           `;
           }
         },
       {
@@ -726,7 +733,7 @@ private openForm(data: { form: any, appointmentData: SchedulerEvent }): void {
 
   this.fetchEvents();
 
-}
+}*/
 
   openLabelPopup(): void {
     this.labelPopupVisible = true;

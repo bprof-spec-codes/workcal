@@ -15,6 +15,10 @@ export class EventApiService {
   getEventPictureUrl(eventId: string):  Observable<Picture>  {
     return this.http.get<Picture>(`https://localhost:44387/get-event-picture/${eventId}`);
   }
+  getEventsForUserByDate(userId: string, date: string) {
+    return this.http.get(`https://localhost:44387/events?userId=${userId}&date=${date}`);
+  }
+
 
   uploadPicture(pictureFile: File, eventId: string): Observable<any> {
     const formData = new FormData();

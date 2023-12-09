@@ -10,8 +10,11 @@ namespace workcal.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+               name: "Location",
+               table: "Events");
 
-            migrationBuilder.AlterColumn<double>(
+            migrationBuilder.AddColumn<double>(
                 name: "Latitude",
                 table: "Events",
                 type: "float",
@@ -19,25 +22,25 @@ namespace workcal.Migrations
 
             
 
-            migrationBuilder.AlterColumn<string>(
+            migrationBuilder.AddColumn<string>(
                 name: "LocationString",
                 table: "Events",
                 type: "nvarchar(max)",
                 nullable: true);
 
-            migrationBuilder.AlterColumn<double>(
+            migrationBuilder.AddColumn<double>(
                 name: "Longitude",
                 table: "Events",
                 type: "float",
                 nullable: true);
 
-            migrationBuilder.AlterColumn<byte[]>(
+            migrationBuilder.AddColumn<byte[]>(
                 name: "PictureData",
                 table: "Events",
                 type: "varbinary(max)",
                 nullable: true);
 
-            migrationBuilder.AlterColumn<string>(
+            migrationBuilder.AddColumn<string>(
                 name: "PictureMimeType",
                 table: "Events",
                 type: "nvarchar(max)",

@@ -30,6 +30,7 @@ import { DxDateBoxModule } from 'devextreme-angular';
 import { DxButtonModule } from 'devextreme-angular';
 import { NgxPrintModule } from 'ngx-print';
 import { PictureUploadComponent } from './picture-upload/picture-upload.component';
+import { DailyEventsComponent } from './daily-events/daily-events.component';
 
 
 @NgModule({
@@ -65,7 +66,7 @@ import { PictureUploadComponent } from './picture-upload/picture-upload.componen
     DxScrollViewModule,
     DxColorBoxModule,
   ],
-  declarations: [AppComponent, CalendarPageComponent, WorkerStatisticsComponent, PictureUploadComponent],
+  declarations: [AppComponent, CalendarPageComponent, WorkerStatisticsComponent, PictureUploadComponent, DailyEventsComponent],
   providers: [APP_ROUTE_PROVIDER],
   bootstrap: [AppComponent],
 })
