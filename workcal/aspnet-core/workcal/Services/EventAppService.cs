@@ -273,52 +273,98 @@ namespace workcal.Services
 
         public async Task<List<EventDto>> GetAllAsync()
         {
-
             try
             {
-                // Fetch events with their associated Labels and EventUsers
-                var events = await _eventRepository
-                    .WithDetailsAsync(e => e.Labels, e => e.EventUsers);
-
-                // Convert to List for easier manipulation
-                var eventList = events.ToList();
-
-                // Map to DTO
-                var eventDtoList = ObjectMapper.Map<List<Event>, List<EventDto>>(eventList);
-
-                var alluser = await _userRepository.GetListAsync();
-
-                var allEventUsers = await _eventsUsersRepository.GetListAsync();
-
-                // Loop through each event DTO to populate the Users list
-                for (int i = 0; i < eventDtoList.Count; i++)
+                if (CurrentUser.Roles.FirstOrDefault() == "admin" || CurrentUser.Roles.FirstOrDefault() == "manager")
                 {
-                    // Fetch corresponding Event entity
-                    var correspondingEvent = eventList[i];
+                    // Fetch events with their associated Labels and EventUsers
+                    var events = await _eventRepository
+                        .WithDetailsAsync(e => e.Labels, e => e.EventUsers);
 
-                    // Initialize the Users list for the current event DTO
-                    eventDtoList[i].Users = new List<Volo.Abp.Identity.IdentityUser>();
+                    // Convert to List for easier manipulation
+                    var eventList = events.ToList();
 
+                    // Map to DTO
+                    var eventDtoList = ObjectMapper.Map<List<Event>, List<EventDto>>(eventList);
 
+                    var alluser = await _userRepository.GetListAsync();
 
+                    var allEventUsers = await _eventsUsersRepository.GetListAsync();
 
-                    foreach (var user in alluser)
+                    // Loop through each event DTO to populate the Users list
+                    for (int i = 0; i < eventDtoList.Count; i++)
                     {
-                        foreach (var eventuser in allEventUsers)
+                        // Fetch corresponding Event entity
+                        var correspondingEvent = eventList[i];
+
+                        // Initialize the Users list for the current event DTO
+                        eventDtoList[i].Users = new List<Volo.Abp.Identity.IdentityUser>();
+
+
+
+
+                        foreach (var user in alluser)
                         {
-                            if (user.Id == eventuser.UserId && correspondingEvent.Id == eventuser.EventId)
+                            foreach (var eventuser in allEventUsers)
                             {
-                                eventDtoList[i].Users.Add(user);
-                                break;
+                                if (user.Id == eventuser.UserId && correspondingEvent.Id == eventuser.EventId)
+                                {
+                                    eventDtoList[i].Users.Add(user);
+                                    break;
+                                }
                             }
+
                         }
 
+
                     }
+                    return eventDtoList;
+                }
+                else if (CurrentUser.Roles.FirstOrDefault() == "worker")
+                {
+                    // Fetch events with their associated Labels and EventUsers
+                    var events = await _eventRepository
+                        .WithDetailsAsync(e => e.Labels, e => e.EventUsers);
+
+                    // Convert to List for easier manipulation
+                    var eventList = events.ToList();
+
+                    // Map to DTO
+                    var eventDtoList = ObjectMapper.Map<List<Event>, List<EventDto>>(eventList);
+
+                    var alluser = await _userRepository.GetListAsync();
+
+                    var allEventUsers = await _eventsUsersRepository.GetListAsync();
+
+                    // Loop through each event DTO to populate the Users list
+                    for (int i = 0; i < eventDtoList.Count; i++)
+                    {
+                        // Fetch corresponding Event entity
+                        var correspondingEvent = eventList[i];
+
+                        // Initialize the Users list for the current event DTO
+                        eventDtoList[i].Users = new List<Volo.Abp.Identity.IdentityUser>();
 
 
+
+
+                        foreach (var user in alluser)
+                        {
+                            foreach (var eventuser in allEventUsers)
+                            {
+                                if (user.Id == eventuser.UserId && correspondingEvent.Id == eventuser.EventId)
+                                {
+                                    eventDtoList[i].Users.Add(user);
+                                    break;
+                                }
+                            }
+
+                        }
+                    }
+                    return eventDtoList.Where(e => e.Users.Any(u => u.Id == CurrentUser.Id)).ToList();
                 }
 
-                return eventDtoList;
+                return null;
             }
             catch (UserFriendlyException ex)
             {

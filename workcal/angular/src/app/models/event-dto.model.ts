@@ -8,7 +8,7 @@ export type EventDto = {
   locationString: string;
   labels: LabelDto[];
   users: UserDto[];
-  pictureData?: string; // Add this line
+  pictureData?: string;
   IsInRange: boolean
 
 };
@@ -23,7 +23,7 @@ export type SchedulerEvent = {
   locationString: string;
   labels: Array<{ name: string, color: string }>;
   users: UserDto[];
-  pictureData?: string; // Add this line
+  pictureData?: string;
   IsInRange: boolean
 
 };
@@ -41,7 +41,7 @@ export type UserDto = {
  userName: string;
  name: string;
  email: string;
- imageUrl?: string; // Add this line
+ imageUrl?: string;
  pictureFile?: File;
 
 };

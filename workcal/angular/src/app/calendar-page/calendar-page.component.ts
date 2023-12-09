@@ -220,6 +220,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
 
   onEventAdding(event): void {
+    console.log("kiskutya", event);
     const appointmentData = event.appointmentData;
 
     const selectedLabels = this.dynamicUniqueLabels .filter(label =>
@@ -236,8 +237,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
     const newEvent: EventDto = {
       name: appointmentData.text,
-      startTime: new Date(appointmentData.startDate),
-      endTime: new Date(appointmentData.endDate),
+      startTime: new Date(new Date(appointmentData.startDate).getTime() + 60 * 60 * 1000),
+      endTime: new Date(new Date(appointmentData.endDate).getTime() + 60 * 60 * 1000),
       locationString: appointmentData.location || '',
       labels: selectedLabels,
       users:  selectedUserIDs,
@@ -323,8 +324,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     const updatedEvent: EventDto = {
       id: appointmentDataOld.id,
       name: appointmentData.text,
-      startTime: new Date(appointmentData.startDate),
-      endTime: new Date(appointmentData.endDate),
+      startTime: new Date(new Date(appointmentData.startDate).getTime() + 60 * 60 * 1000),
+      endTime: new Date(new Date(appointmentData.endDate).getTime() + 60 * 60 * 1000),
       locationString: appointmentData.location || '',
       labels: selectedLabels,
       users: selectedUserIDs,
