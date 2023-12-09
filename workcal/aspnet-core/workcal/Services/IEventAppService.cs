@@ -14,7 +14,8 @@ namespace workcal.Services
         Task<List<EventDto>> GetAllAsync();
         Task UploadEventPicture(IFormFile pictureFile, Guid eventId);
         Task DeleteAsync(Guid id);  
-        Task UpdateAsync(Guid id, CreateEventDto @event);  
+        Task UpdateAsync(Guid id, CreateEventDto @event);
+        Task<object> GetCoordinates(string address);
     }
 
 }

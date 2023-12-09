@@ -9,6 +9,7 @@ import { UserApiService } from '../user-api.service';
 import { Location } from '@angular/common';
 import notify from 'devextreme/ui/notify';
 import { PictureService } from '../picture-api.service';
+import { BingMapsService } from '../geocoding.service';
 
 
 @Component({
@@ -59,9 +60,10 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   { name: 'Conference', color: '#0000FF',eventId:'' },
   { name: 'Webinar', color: '#FFFF00',eventId:'' }
 ];
+  httpClient: any;
 
 
-  constructor(private eventApiService: EventApiService, private userApiService: UserApiService ,    private renderer: Renderer2
+  constructor(private eventApiService: EventApiService, private userApiService: UserApiService , private bingMapsService: BingMapsService,   private renderer: Renderer2
 ,  private pictureService: PictureService ,private router: Router )
   {   this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.router.onSameUrlNavigation = 'reload';}
@@ -408,6 +410,13 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     this.selectedEventId = oldAppointmentData.id;
     //this.fetchEventPicture(this.selectedEventId);
     const image = data.appointmentData.pictureData
+    const locationString = data.appointmentData.locationString
+
+    this.fetchCoordinates(locationString).subscribe(addressCoords => {
+      // ... existing logic to handle coordinates ...
+    }, error => {
+      console.error('Error fetching coordinates:', error);
+    });
 
     form.itemOption('mainGroup', {
 
@@ -515,12 +524,41 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
           buttonOptions: {
             text: 'Current GPS',
             onClick: () => {
-
               if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                   (position) => {
                     this.latitude = position.coords.latitude.toFixed(6);
                     this.longitude = position.coords.longitude.toFixed(6);
+                    const oldAppointmentData = data.appointmentData;
+                    const locationString = oldAppointmentData.locationString;
+                    console.log("Location String:", locationString);
+                    // Assuming 'locationString' is available in your component
+
+                    if (locationString) {
+                      this.fetchCoordinates(locationString).subscribe(addressCoords => {
+                        // Logic to handle coordinates
+                        this.fetchCoordinates(locationString).subscribe(addressCoords => {
+                          const currentCoords = { latitude: parseFloat(this.latitude), longitude: parseFloat(this.longitude) };
+                          const isInRange = this.isWithinRange(currentCoords, addressCoords, 100); // 100 meters threshold
+
+                          if (isInRange) {
+                            // Handle success
+                            console.log('You are at the event location.');
+                          } else {
+                            // Handle failure
+                            console.error('Location mismatch.');
+                          }
+                        });
+
+                      }, error => {
+                        console.error('Error fetching coordinates:', error);
+                      });
+                    } else {
+                      console.error('Location string is empty');
+                    }
+
+
+
                   },
                   (error) => {
                     console.error('Error capturing location:', error);
@@ -529,12 +567,10 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
               } else {
                 console.error('Geolocation is not supported by this browser.');
               }
-              console.log("getCurrentPosition", this.latitude,this.longitude);
-
-              }
-
+            }
           }
         },
+
         {
           label: { text: 'Current Location' },
           template: () => {
@@ -606,6 +642,29 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     };
   }
 
+  fetchCoordinates(address: string): Observable<{ latitude: number, longitude: number }> {
+    return new Observable(observer => {
+      this.bingMapsService.getCoordinatesForAddress(address).subscribe(
+        response => {
+          if (response && response.resourceSets && response.resourceSets.length > 0 && response.resourceSets[0].resources.length > 0) {
+            const location = response.resourceSets[0].resources[0].point.coordinates;
+            observer.next({ latitude: location[0], longitude: location[1] });
+            observer.complete();
+          } else {
+            console.error('No results found for the address');
+            observer.error('No results found');
+          }
+        },
+        error => {
+          console.error('Error fetching coordinates:', error);
+          observer.error(error);
+        }
+      );
+    });
+  }
+
+
+
   captureCurrentLocation(): void {
     // Use Geolocation API to capture current location
     if (navigator.geolocation) {
@@ -627,6 +686,25 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
 
 
+  isWithinRange(coord1: { latitude: number, longitude: number }, coord2: { latitude: number, longitude: number }, thresholdInMeters: number): boolean {
+    const earthRadiusInMeters = 6371000; // Earth's radius in meters
+
+    const dLat = this.degreesToRadians(coord2.latitude - coord1.latitude);
+    const dLon = this.degreesToRadians(coord2.longitude - coord1.longitude);
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.degreesToRadians(coord1.latitude)) * Math.cos(this.degreesToRadians(coord2.latitude)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = earthRadiusInMeters * c;
+
+    return distance <= thresholdInMeters;
+  }
+
+  degreesToRadians(degrees: number): number {
+    return degrees * Math.PI / 180;
+  }
 
 
 

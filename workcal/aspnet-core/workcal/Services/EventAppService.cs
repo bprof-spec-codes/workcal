@@ -18,6 +18,8 @@ using static Volo.Abp.Identity.Settings.IdentitySettingNames;
 using workcal.Migrations;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace workcal.Services
 {
@@ -30,9 +32,10 @@ namespace workcal.Services
         private readonly IRepository<Entities.EventsUsers, Guid> _eventsUsersRepository;
         private readonly IRepository<Volo.Abp.Identity.IdentityUser, Guid> _userRepository; // Inject the user repository
 
+        private readonly HttpClient _httpClient;
+        private readonly string _bingMapsApiKey ;
 
-
-        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository , IRepository<Picture, Guid> pictureRepository, IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
+        public EventAppService(HttpClient httpClient, IConfiguration configuration,  IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository , IRepository<Picture, Guid> pictureRepository, IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
 
         {
             _eventRepository = eventRepository;
@@ -40,12 +43,50 @@ namespace workcal.Services
             _pictureRepository = pictureRepository;
             _eventsUsersRepository = eventsUsersRepository;
              _userRepository = userRepository;
-
+            _httpClient = httpClient;
+            _bingMapsApiKey = configuration["BingMaps:ApiKey"];
 
         }
 
+        [HttpGet("getCoordinates")]
+        public async Task<object> GetCoordinates(string address)
+        {
+            var bingMapsUrl = $"https://dev.virtualearth.net/REST/v1/Locations?query={Uri.EscapeDataString(address)}&key={_bingMapsApiKey}";
+            try
+            {
+                var response = await _httpClient.GetAsync(bingMapsUrl);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Logger.LogError($"Error fetching coordinates. Status: {response.StatusCode}, Content: {errorContent}");
+                    throw new UserFriendlyException("Error fetching coordinates.");
+                }
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
 
-        [HttpPost("upload")]
+                var bingResponse = JsonConvert.DeserializeObject<BingMapsResponse>(content);
+                if (bingResponse?.ResourceSets != null && bingResponse.ResourceSets.Any() && bingResponse.ResourceSets[0].Resources.Any())
+                {
+                    var location = bingResponse.ResourceSets[0].Resources[0].Point.Coordinates;
+                    return new { Latitude = location[0], Longitude = location[1] };
+                }
+                else
+                {
+                    throw new UserFriendlyException("An error occurred while getCoordinates.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Logger.LogError("An error occurred while getCoordinates: " + ex.Message);
+                throw new UserFriendlyException("An error occurred while getCoordinates.");
+            }
+        }
+
+
+
+
+            [HttpPost("upload")]
         public async Task UploadEventPicture( IFormFile pictureFile, Guid eventId)
         {
             
