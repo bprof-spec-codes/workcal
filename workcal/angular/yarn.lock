@@ -413,7 +413,7 @@
   dependencies:
     tslib "^2.3.0"
 
-"@angular/core@^16.0.0", "@angular/core@^16.0.0 || ^17.0.0", "@angular/core@>=11.0.2", "@angular/core@>=12.0.0", "@angular/core@>=14.0.0", "@angular/core@>=5.0.0", "@angular/core@>12.0.0", "@angular/core@~16.0.0", "@angular/core@16.0.6":
+"@angular/core@^16.0.0", "@angular/core@^16.0.0 || ^17.0.0", "@angular/core@^17.0.0", "@angular/core@>=11.0.2", "@angular/core@>=12.0.0", "@angular/core@>=14.0.0", "@angular/core@>=5.0.0", "@angular/core@>12.0.0", "@angular/core@~16.0.0", "@angular/core@16.0.6":
   version "16.0.6"
   resolved "https://registry.npmjs.org/@angular/core/-/core-16.0.6.tgz"
   integrity sha512-PICuJ3ectfE2CKEoAaO2tHmr7Y3yTzpnOJwAFtbYJGf/nZUzuGvsBCjhwFtMNbBrcSqDlygUG2auEvlnyoAkWg==
@@ -2821,6 +2821,11 @@
     "@types/express-serve-static-core" "^4.17.33"
     "@types/qs" "*"
     "@types/serve-static" "*"
+
+"@types/grecaptcha@^3.0.7":
+  version "3.0.7"
+  resolved "https://registry.npmjs.org/@types/grecaptcha/-/grecaptcha-3.0.7.tgz"
+  integrity sha512-ah5GDQfsiK3dnkaCbYcDFZXkZCG3o90VRu9hzXHnSe4kACrRB1KUI/ZyWHvYmqm1W5Tl8B5YxxT98uGTlkbf2Q==
 
 "@types/http-cache-semantics@*":
   version "4.0.2"
@@ -7357,6 +7362,14 @@ ng-packagr@^16.0.0:
     sass "^1.55.0"
   optionalDependencies:
     esbuild "^0.19.0"
+
+ng-recaptcha@^13.2.1:
+  version "13.2.1"
+  resolved "https://registry.npmjs.org/ng-recaptcha/-/ng-recaptcha-13.2.1.tgz"
+  integrity sha512-aBOoFla9t6AfT9t5paykoXomCDKreBKouB16VUFxSZwn1RCfDsdcaTmSNJKYLFz5j0Cq/V+szY9f3mHLgzRw5Q==
+  dependencies:
+    "@types/grecaptcha" "^3.0.7"
+    tslib "^2.2.0"
 
 ng-zorro-antd@^16.0.0:
   version "16.2.0"

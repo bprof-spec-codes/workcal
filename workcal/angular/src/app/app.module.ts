@@ -31,6 +31,7 @@ import { DxButtonModule } from 'devextreme-angular';
 import { NgxPrintModule } from 'ngx-print';
 import { PictureUploadComponent } from './picture-upload/picture-upload.component';
 import { DailyEventsComponent } from './daily-events/daily-events.component';
+import { RECAPTCHA_SETTINGS, RecaptchaFormsModule, RecaptchaModule, RecaptchaSettings } from 'ng-recaptcha';
 
 
 @NgModule({
@@ -65,9 +66,17 @@ import { DailyEventsComponent } from './daily-events/daily-events.component';
     DxDraggableModule,
     DxScrollViewModule,
     DxColorBoxModule,
+    RecaptchaModule,
+  RecaptchaFormsModule,
   ],
   declarations: [AppComponent, CalendarPageComponent, WorkerStatisticsComponent, PictureUploadComponent, DailyEventsComponent],
-  providers: [APP_ROUTE_PROVIDER],
+  providers: [APP_ROUTE_PROVIDER, {
+    provide: RECAPTCHA_SETTINGS,
+    useValue: {
+      siteKey: environment.recaptcha.siteKey,
+    } as RecaptchaSettings,
+  },],
+  
   bootstrap: [AppComponent],
 })
 export class AppModule {}
