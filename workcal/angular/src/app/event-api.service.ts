@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { EventDto, LabelDto } from './models/event-dto.model'; // Create this model based on your DTO
+import { EventDto, LabelDto, Picture } from './models/event-dto.model'; // Create this model based on your DTO
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +11,10 @@ export class EventApiService {
   private baseLabelUrl: string = 'https://localhost:44387/api/app/label';
 
   constructor(private http: HttpClient) { }
+
+  getEventPictureUrl(eventId: string):  Observable<Picture>  {
+    return this.http.get<Picture>(`https://localhost:44387/get-event-picture/${eventId}`);
+  }
 
   uploadPicture(pictureFile: File, eventId: string): Observable<any> {
     const formData = new FormData();

@@ -4,7 +4,7 @@ import { EventDto, LabelDto, SchedulerEvent , UserDto, UserResponse } from '../m
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule, DxButtonComponent  } from 'devextreme-angular';
 import { Router } from '@angular/router';
 import { catchError, finalize, map, switchMap } from 'rxjs/operators';
-import { forkJoin, of } from 'rxjs';
+import { Observable, forkJoin, of } from 'rxjs';
 import { UserApiService } from '../user-api.service';
 import { Location } from '@angular/common';
 import notify from 'devextreme/ui/notify';
@@ -43,6 +43,7 @@ export class CalendarPageComponent implements OnInit {
    selectedFile: File | null = null;
 
    selectedEventId: string;
+   selectedEventPicture: string;
 
    defaultLabels : Array<{ name: string, color: string }> = [
   { name: 'Meeting', color: '#FF0000' },
@@ -66,7 +67,6 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   ngOnInit(): void {
     this.fetchUsers();
     this.fetchUniqueLabels();
-
   }
 
   refreshPage() {
@@ -74,45 +74,6 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   }
 
 
-
-
-
-
-  fetchEvents(): void {
-    this.eventApiService.getAllEvents()
-      .pipe(
-        catchError(error => {
-          console.error('Error fetching events:', error);
-          return of([]);
-        })
-      )
-      .subscribe(data => {
-        this.events = data;
-        this.schedulerEvents = data.map(event => ({
-          id: event.id,
-          startDate: event.startTime,
-          endDate: event.endTime,
-          text: event.name,
-          locationString: event.locationString,
-          labels: event.labels,
-          users: event.users.map(user => {
-            // Find the corresponding user in 'allusers' to get the 'imageUrl'
-            const userWithImage = this.allusers.find(u => u.id === user.id);
-            return {
-              id: user.id,
-              userName: user.userName,
-              imageUrl: userWithImage ? userWithImage.imageUrl : undefined // Set imageUrl here
-            };
-
-          }),
-
-        }));
-        console.log('fetchEvents');
-
-        console.log(data);
-
-      });
-  }
 
   fetchUsers(): void {
     this.userApiService.getAllUsers()
@@ -143,6 +104,46 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       )
       .subscribe(usersWithImages => {
         this.allusers = usersWithImages;
+      });
+  }
+
+
+
+
+  fetchEvents(): void {
+    this.eventApiService.getAllEvents()
+      .pipe(
+        catchError(error => {
+          console.error('Error fetching events:', error);
+          return of([]);
+        })
+      )
+      .subscribe(data => {
+        this.events = data;
+        this.schedulerEvents = data.map(event => ({
+          id: event.id,
+          startDate: event.startTime,
+          endDate: event.endTime,
+          text: event.name,
+          locationString: event.locationString,
+          pictureData: event.pictureData,
+          labels: event.labels,
+          users: event.users.map(user => {
+            // Find the corresponding user in 'allusers' to get the 'imageUrl'
+            const userWithImage = this.allusers.find(u => u.id === user.id);
+            return {
+              id: user.id,
+              userName: user.userName,
+              imageUrl: userWithImage ? userWithImage.imageUrl : undefined // Set imageUrl here
+            };
+
+          }),
+
+        }));
+        console.log('fetchEvents');
+
+        console.log(data);
+
       });
   }
 
@@ -374,9 +375,10 @@ createNewLabel(): void {
 
 
 labelsInteractedWith: boolean = false;
-
+/*
 onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): void {
   const form = data.form;
+
 
 
 
@@ -393,6 +395,7 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     }
 
     this.selectedEventId = oldAppointmentData.id;
+    this.fetchEventPicture(this.selectedEventId);
 
     form.itemOption('mainGroup', {
 
@@ -416,6 +419,17 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
                 <div>
                   <input type="file" id="event-picture-input" (change)="onFileSelected($event)" />
                 </div>
+              `;
+            }
+          },
+          {
+            label: { text: 'Event Picture' },
+            template: () => {
+              return `
+              <div *ngIf="selectedEvent">
+
+              <img [src]="'data:image/jpeg;base64,' + selectedEvent.pictureData" alt="Event Picture">
+              </div>
               `;
             }
           },
@@ -530,7 +544,189 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     this.refreshPage();
 
   }
+*/
 
+onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): void {
+  this.selectedEventId = data.appointmentData.id;
+
+  // Fetch the image and then open the form
+  this.fetchEventPicture(this.selectedEventId).subscribe(pictureData => {
+    if (pictureData) {
+      // If picture data is received, set it to the selected event
+      this.selectedEventPicture = pictureData;
+    }
+    // Now open the form
+    this.openForm(data);
+  });
+}
+
+private openForm(data: { form: any, appointmentData: SchedulerEvent }): void {
+  const form = data.form;
+
+  console.log('Picture uploaded successfully', data.appointmentData.pictureData);
+
+
+
+
+  const oldAppointmentData = data.appointmentData;
+  if (oldAppointmentData.labels) {
+    form.updateData('labels', oldAppointmentData.labels.map(l => l.name));
+  }
+  if (!oldAppointmentData.locationString) {
+    form.updateData('location', '');
+  }
+  if (!oldAppointmentData.labels) {
+    form.updateData('labels', []);
+  }
+
+  this.selectedEventId = oldAppointmentData.id;
+  this.fetchEventPicture(this.selectedEventId);
+
+  form.itemOption('mainGroup', {
+
+
+    items: [
+      ...form.itemOption('mainGroup').items,
+      {
+        dataField: 'location',
+        editorType: 'dxTextBox',
+        editorOptions: {
+          placeholder: 'Enter location...'
+        },
+        label: {
+          text: 'Location'
+        }
+      },
+              {
+          label: { text: 'Event Picture' },
+          template: () => {
+            return `
+              <div>
+                <input type="file" id="event-picture-input" (change)="onFileSelected($event)" />
+              </div>
+            `;
+          }
+        },
+        {
+          label: { text: 'Event Picture' },
+          template: () => {
+            return `
+            <div *ngIf="selectedEvent">
+            <img *ngIf="selectedEvent.pictureData" [src]="'data:image/jpeg;base64,' + data.appointmentData.pictureData" alt="No Picture">
+            </div>
+            `;
+          }
+        },
+      {
+        dataField: 'labels',
+        editorType: 'dxTagBox',
+        editorOptions: {
+          dataSource: this.dynamicUniqueLabels ,
+          displayExpr: 'name',
+          valueExpr: 'name',
+          itemTemplate: function(itemData, _, itemElement) {
+            itemElement.textContent = itemData.name;
+            itemElement.style.backgroundColor = itemData.color;
+          },
+          placeholder: 'Add labels...'
+        },
+        label: {
+          text: 'Labels'
+        }
+      },
+      {
+        dataField: 'newLabelName',
+        editorType: 'dxTextBox',
+        editorOptions: {
+          placeholder: 'Enter new label name...'
+        },
+        label: {
+          text: 'New Label Name'
+        }
+      },
+      {
+        dataField: 'newLabelColor',
+        editorType: 'dxColorBox',
+        editorOptions: {
+          placeholder: 'Pick a color...'
+        },
+        label: {
+          text: 'New Label Color'
+        }
+      },
+
+      {
+        itemType: 'button',
+        horizontalAlignment: 'left',
+        buttonOptions: {
+          text: 'Create Label',
+          onClick: () => {
+            const newLabelName = form.option('formData').newLabelName;
+            const newLabelColor = form.option('formData').newLabelColor;
+
+            if (newLabelName && newLabelColor) {
+              // Add the new label to the default labels array
+              this.dynamicUniqueLabels .push({
+                name: newLabelName,
+                color: newLabelColor
+              });
+
+              // Clear the fields
+              form.updateData('newLabelName', '');
+              form.updateData('newLabelColor', '');
+
+              // Optionally, you can add this new label to the current event's label list
+              const existingLabels = form.option('formData').labels || [];
+              form.updateData('labels', [...existingLabels, newLabelName]);
+            }
+          }
+        }
+      },
+      {
+      dataField: 'users',
+  editorType: 'dxTagBox',
+  editorOptions: {
+    dataSource: this.allusers,
+    displayExpr: 'userName',
+    valueExpr: 'id',
+    placeholder: 'Assign to...',
+    onValueChanged: (e) => {
+      const selectedUserIDs = e.value.map(userObjOrId => {
+        return typeof userObjOrId === 'object' ? userObjOrId.id : userObjOrId;
+      });
+
+      data.appointmentData.users = selectedUserIDs;
+
+      console.log("Updated appointmentData.users:", data.appointmentData.users);
+    },
+    onItemRemoved: (e) => {
+      // This event should be triggered when an item is removed.
+      // Add your custom logic here.
+
+      // You can access the removed item using e.itemData or e.itemElement depending on your needs
+    }
+  },
+  label: {
+    text: 'Assign To'
+  }
+      },
+
+    ]
+  });
+
+  form.getEditor('labels').option('onValueChanged', () => {
+    this.labelsInteractedWith = true;
+  });
+
+  setTimeout(() => {
+    const fileInput = document.getElementById('event-picture-input');
+    fileInput.addEventListener('change', this.onFileSelected.bind(this));
+  }, 0);
+
+
+  this.fetchEvents();
+
+}
 
   openLabelPopup(): void {
     this.labelPopupVisible = true;
@@ -543,6 +739,16 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
       name: user.name,
       email: user.email
     };
+  }
+  fetchEventPicture(eventId: string): Observable<string | null> {
+    return this.eventApiService.getEventPictureUrl(eventId).pipe(
+      map(response => {
+        if (response && response.imageData) {
+          return `data:${response.contentType};base64,${response.imageData}`;
+        }
+        return null; // Return null if no image data
+      })
+    );
   }
 
 
@@ -570,92 +776,6 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
 
 
-/*
-  onPictureSelected(event: any): void {
-    const fileInput = event.target;
-    if (fileInput.files && fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-      this.selectedFile = file;
-
-      // Create a FileReader to read the file
-      const reader = new FileReader();
-
-      // Define the onload event handler for the FileReader
-      reader.onload = (e: any) => {
-        // The file's text will be in e.target.result
-        const base64String = e.target.result;
-
-        // Now the base64String contains the image data in Base64 format
-        // You can use this string to send it to the server or do other processing
-        console.log(base64String); // For debugging
-
-        // Assuming you have a property in your event DTO to hold the picture data
-        if (this.selectedEvent) {
-
-          console.log('selectedEventy');
-
-          this.selectedEvent.pictureData = base64String;
-
-          var selectedid = this.selectedEvent.id;
-
-          this.eventApiService.uploadPicture(this.selectedFile, selectedid).subscribe({
-            next: (response) => {
-                console.log('Picture uploaded successfully', response);
-                // Additional logic after successful upload
-            },
-            error: (error) => {
-                console.error('Error uploading picture', error);
-            }
-        });
-        }
-      };
-
-      // Read the file as a Data URL (Base64)
-      reader.readAsDataURL(file);
-    }
-
-
-  }
-
-  uploadPicture(): void {
-    console.log('uploadPicture called');
-
-    if (this.selectedFile && this.selectedEvent && this.selectedEvent.id) {
-      console.log('selectedFile and selectedEvent are present');
-
-      // Logic to upload the picture
-      this.eventApiService.uploadPicture(this.selectedFile, this.selectedEvent.id).subscribe({
-        next: (response) => {
-          console.log('Picture uploaded successfully', response);
-          // Additional logic after successful upload
-        },
-        error: (error) => {
-          console.error('Error uploading picture', error);
-        }
-      });
-    } else {
-      console.error('Selected file or event is missing');
-      // Handle the case where the file or event is not available
-    }
-  }
-
-
-  createOrUpdateEvent(): void {
-    if (this.selectedEvent) {
-      if (this.selectedEvent.pictureFile) {
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.selectedEvent.pictureData = e.target.result;
-          console.log("Picture data:", this.selectedEvent.pictureData); // Add this log
-          this.sendEventToServer();
-        };
-        reader.readAsDataURL(this.selectedEvent.pictureFile);
-      } else {
-        this.sendEventToServer();
-      }
-    }
-  }
-*/
 
   private sendEventToServer(): void {
     console.log("Sending event data:", this.selectedEvent);

@@ -87,6 +87,28 @@ namespace workcal.Services
             }
         }
 
+        [HttpGet("get-event-picture/{eventId}")]
+        public async Task<PictureDto> GetEventPicture(Guid eventId)
+        {
+            var eventEntity = await _eventRepository.GetAsync(eventId);
+            if (eventEntity == null || eventEntity.PictureData == null)
+            {
+                throw new UserFriendlyException("An error occurred while creating the event.");
+            }
+
+            
+
+
+            PictureDto p = new PictureDto
+            {
+                
+                Title = eventEntity.Id.ToString(),
+                ImageData = eventEntity.PictureData,
+                ContentType = eventEntity.PictureMimeType
+            };
+
+            return p;
+        }
 
 
         public async Task CreateAsync(CreateEventDto @event)

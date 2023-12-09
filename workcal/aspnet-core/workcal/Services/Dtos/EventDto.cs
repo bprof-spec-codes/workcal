@@ -14,6 +14,7 @@ namespace workcal.Services.Dtos
         public DateTime EndTime { get; set; }
         public string LocationString { get; set; }
         public List<Label> Labels { get; set; }
+        public byte[]? PictureData { get; set; } // Binary data of the picture
 
         public List<Volo.Abp.Identity.IdentityUser> Users { get; set; }
 
