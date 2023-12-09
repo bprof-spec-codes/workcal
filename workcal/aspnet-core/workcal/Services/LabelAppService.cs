@@ -1,4 +1,5 @@
 ﻿using AutoMapper.Internal.Mappers;
+using Microsoft.AspNetCore.Mvc;
 using Volo.Abp;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
@@ -75,6 +76,32 @@ namespace workcal.Services
                 throw new UserFriendlyException("An error occurred while fetching the label.");
             }
         }
+
+       
+        [HttpGet("unique")]
+        public async Task<List<LabelDto>> GetUniqueLabelsAsync()
+        {
+            var labels = await _labelRepository.GetQueryableAsync();
+            var uniqueLabels = labels
+                .GroupBy(label => new { label.Name, label.Color })
+                .Select(group => group.First())
+                .ToList();
+
+            return ObjectMapper.Map<List<Label>, List<LabelDto>>(uniqueLabels);
+        }
+
+        [HttpDelete("deleteByNameAndColor")]
+        public async Task DeleteLabelsAsync(string labelName, string labelColor)
+        {
+            var labels = await _labelRepository.GetListAsync(label => label.Name == labelName && label.Color == labelColor);
+
+            foreach (var label in labels)
+            {
+                await _labelRepository.DeleteAsync(label);
+            }
+        }
+
+
 
         public async Task DeleteAsync(Guid id)
         {

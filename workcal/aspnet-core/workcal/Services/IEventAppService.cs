@@ -11,9 +11,13 @@ namespace workcal.Services
     {
         Task CreateAsync(CreateEventDto @event);
         Task<EventDto> GetAsync(Guid id);
-        Task<List<EventDto>> GetAllAsync();  
+        Task<List<EventDto>> GetAllAsync();
+        Task UploadEventPicture(IFormFile pictureFile, Guid eventId);
         Task DeleteAsync(Guid id);  
-        Task UpdateAsync(Guid id, CreateEventDto @event);  
+        Task UpdateAsync(Guid id, CreateEventDto @event);
+        Task<object> GetCoordinates(string address);
+
+        Task UpdateEventGpsDataAsync(EventGpsDto input);
     }
 
 }

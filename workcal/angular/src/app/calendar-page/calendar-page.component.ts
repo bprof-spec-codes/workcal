@@ -1,12 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, Renderer2 } from '@angular/core';
 import { EventApiService } from '../event-api.service';
-import { EventDto, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
-import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule  } from 'devextreme-angular';
+import { EventDto, LabelDto, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
+import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule, DxButtonComponent  } from 'devextreme-angular';
 import { Router } from '@angular/router';
-import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { catchError, finalize, map, switchMap } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs';
 import { UserApiService } from '../user-api.service';
 import { Location } from '@angular/common';
+import notify from 'devextreme/ui/notify';
+import { PictureService } from '../picture-api.service';
+import { BingMapsService } from '../geocoding.service';
+
 
 @Component({
   selector: 'app-calendar-page',
@@ -16,10 +20,19 @@ import { Location } from '@angular/common';
 
 
 export class CalendarPageComponent implements OnInit {
+
+  latitude: string = 'Not captured';
+  longitude: string = 'Not captured';
+  currentLocation: { latitude?: number, longitude?: number } = {};
+
+  todayEvents: SchedulerEvent[] = [];
+
   events: EventDto[] = [];
   schedulerEvents: SchedulerEvent[] = [];
 
   selectedEvent: EventDto;
+
+  dynamicUniqueLabels: LabelDto[] = [];
 
   currentDate: Date = new Date();
   currentView: string = 'day';
@@ -30,9 +43,12 @@ export class CalendarPageComponent implements OnInit {
 
    allusers: UserDto[] = [];
    normalizedUserIDs: string[] = [];
+   selectedFile: File | null = null;
 
+   selectedEventId: string;
+   selectedEventPicture: string;
 
-defaultLabels: Array<{ name: string, color: string }> = [
+   defaultLabels : Array<{ name: string, color: string }> = [
   { name: 'Meeting', color: '#FF0000' },
   { name: 'Workshop', color: '#00FF00'},
   { name: 'Conference', color: '#0000FF' },
@@ -44,21 +60,63 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   { name: 'Conference', color: '#0000FF',eventId:'' },
   { name: 'Webinar', color: '#FFFF00',eventId:'' }
 ];
+  httpClient: any;
 
 
-  constructor(private eventApiService: EventApiService, private userApiService: UserApiService ,private router: Router )
+  constructor(private eventApiService: EventApiService, private userApiService: UserApiService , private bingMapsService: BingMapsService,   private renderer: Renderer2
+,  private pictureService: PictureService ,private router: Router )
   {   this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.router.onSameUrlNavigation = 'reload';}
 
   ngOnInit(): void {
-    this.fetchEvents();
     this.fetchUsers();
-
+    this.fetchUniqueLabels();
   }
 
   refreshPage() {
     //this.router.navigate([this.router.url]);
   }
+
+  ngAfterViewInit(): void {
+    // Here you can safely manipulate the DOM or interact with rendered elements
+    const button = document.getElementById('capture-location-button');
+    if (button) {
+      button.addEventListener('click', () => this.captureCurrentLocation());
+    }
+  }
+
+  fetchUsers(): void {
+    this.userApiService.getAllUsers()
+      .pipe(
+        catchError(error => {
+          console.error('Error fetching users:', error);
+          return of({ items: [] } as UserResponse); // Provide a fallback value
+        }),
+        switchMap((response: UserResponse) => {
+          if (response.items.length === 0) {
+            return of([]); // If no users, return an empty array
+          }
+          // Create an array of observables for each user to fetch the picture
+          const userObservables = response.items.map(user =>
+            this.pictureService.getPictureById(user.id).pipe(
+              catchError(() => of(undefined)), // Handle errors in image fetching
+              map(picture => ({
+                ...user,
+                imageUrl: picture ? picture.imageData : undefined
+              }))
+            )
+          );
+          return forkJoin(userObservables); // Combine all observables
+        }),
+        finalize(() => {
+          this.fetchEvents(); // Call fetchEvents after all user images are loaded
+        })
+      )
+      .subscribe(usersWithImages => {
+        this.allusers = usersWithImages;
+      });
+  }
+
 
 
 
@@ -77,44 +135,37 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           startDate: event.startTime,
           endDate: event.endTime,
           text: event.name,
-          location: event.location,
+          locationString: event.locationString,
+          pictureData: event.pictureData,
           labels: event.labels,
-          users: event.users.map(user => ({ id: user.id, userName: user.userName }))
+          IsInRange: event.IsInRange,
+          users: event.users.map(user => {
+            // Find the corresponding user in 'allusers' to get the 'imageUrl'
+            const userWithImage = this.allusers.find(u => u.id === user.id);
+            return {
+              id: user.id,
+              userName: user.userName,
+              imageUrl: userWithImage ? userWithImage.imageUrl : undefined // Set imageUrl here
+            };
+
+          }),
+
         }));
-      });
+        console.log('fetchEvents');
 
+        console.log(data);
+
+      });
   }
 
 
 
-  fetchUsers(): void {
-    this.userApiService.getAllUsers()
-      .pipe(
-        catchError(error => {
-          console.error('Error fetching users:', error);
-          return of([]);
-        })
-      )
-      .subscribe((data: UserResponse | any[]) => { // Explicitly type data
-        if (Array.isArray(data)) {
-          console.error('Received an array, expected an object with an items key:', data);
-          return;
-        }
-
-        if (data && data.items) {
-          this.allusers = data.items.map(user => ({
-            id: user.id,
-            userName: user.userName,
-            name: user.name,
-            email: user.email
-          }));
-        } else {
-          console.error('Items key not found in response:', data);
-        }
+  fetchUniqueLabels(): void {
+    this.eventApiService.getUniqueLabels()
+      .subscribe(labels => {
+        this.dynamicUniqueLabels = labels;
       });
-
   }
-
 
   createEvent(newEvent: EventDto): void {
     this.eventApiService.createEvent(newEvent).subscribe(
@@ -157,10 +208,21 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
   }
 
+  deleteLabelPermanent(labelname: string,labelcolor: string): void {
+    console.log(labelname,labelcolor );
+    this.eventApiService.deleteLabelsByNameAndColor(labelname, labelcolor)
+      .subscribe(() => {
+        this.fetchUniqueLabels(); // Refresh the label list
+      });
+      this.refreshPage();
+
+  }
+
+
   onEventAdding(event): void {
     const appointmentData = event.appointmentData;
 
-    const selectedLabels = this.defaultLabels.filter(label =>
+    const selectedLabels = this.dynamicUniqueLabels .filter(label =>
       appointmentData.labels?.includes(label.name)
     );
 
@@ -176,9 +238,11 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       name: appointmentData.text,
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
-      location: appointmentData.location || '',
+      locationString: appointmentData.location || '',
       labels: selectedLabels,
-      users:  selectedUserIDs
+      users:  selectedUserIDs,
+      IsInRange: event.IsInRange,
+
     };
 
     this.createEvent(newEvent);
@@ -224,7 +288,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     let selectedLabels = [];
 
     if (this.labelsInteractedWith) {
-      selectedLabels = this.defaultLabels.filter(label => appointmentData.labels.includes(label.name));
+      selectedLabels = this.dynamicUniqueLabels .filter(label => appointmentData.labels.includes(label.name));
     } else {
       selectedLabels = appointmentDataOld.labels;
     }
@@ -261,9 +325,12 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       name: appointmentData.text,
       startTime: new Date(appointmentData.startDate),
       endTime: new Date(appointmentData.endDate),
-      location: appointmentData.location || '',
+      locationString: appointmentData.location || '',
       labels: selectedLabels,
-      users: selectedUserIDs
+      users: selectedUserIDs,
+      IsInRange: event.IsInRange,
+
+
     };
 
     console.log('Final selectedUserIDs:', selectedUserIDs);
@@ -284,7 +351,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     const appointmentData = event.appointmentData;
 
     if (!appointmentData.id) {
-      console.error("Event ID is missing, cannot delete");
+      console.error("Event ID is missing, can not delete");
       event.cancel = true;
       return;
     }
@@ -297,11 +364,11 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   }
 
 
-// Function to create a new label and update defaultLabels
+// Function to create a new label and update dynamicUniqueLabels
 createNewLabel(): void {
   if (this.newLabel.name && this.newLabel.color) {
-    // Update the defaultLabels array
-    this.defaultLabels.push({
+    // Update the dynamicUniqueLabels  array
+    this.dynamicUniqueLabels .push({
       name: this.newLabel.name,
       color: this.newLabel.color
     });
@@ -317,7 +384,6 @@ createNewLabel(): void {
 
 }
 
-// Implement the AfterViewInit lifecycle hook to access the DOM elements
 
 
 
@@ -328,17 +394,49 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
 
 
-
     const oldAppointmentData = data.appointmentData;
     if (oldAppointmentData.labels) {
       form.updateData('labels', oldAppointmentData.labels.map(l => l.name));
     }
-    if (!oldAppointmentData.location) {
+    if (!oldAppointmentData.locationString) {
       form.updateData('location', '');
     }
     if (!oldAppointmentData.labels) {
       form.updateData('labels', []);
     }
+
+    if (!oldAppointmentData.pictureData) {
+      form.updateData('Event Picture', []);
+    }
+    if (oldAppointmentData.locationString) {
+      form.updateData('location', oldAppointmentData.locationString);
+    }
+    this.selectedEventId = oldAppointmentData.id;
+    //this.fetchEventPicture(this.selectedEventId);
+    const image = data.appointmentData.pictureData
+    const locationString = data.appointmentData.locationString
+
+    this.fetchCoordinates(locationString).subscribe(addressCoords => {
+      // ... existing logic to handle coordinates ...
+    }, error => {
+      console.error('Error fetching coordinates:', error);
+    });
+
+
+    let locationStatus = 'Checking location...';
+    let distanceToLocation = null;
+
+    const isInRange = oldAppointmentData.IsInRange;
+
+
+    const updateLocationStatus = (isInRange, distance) => {
+      locationStatus = isInRange ? 'Inside location range' : 'Outside location range';
+      distanceToLocation = isInRange ? null : `Get ${distance.toFixed(2)} meters closer`;
+      form.repaint(); // Refresh the form to update the display
+    };
+
+
+
     form.itemOption('mainGroup', {
 
 
@@ -354,11 +452,31 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
             text: 'Location'
           }
         },
+                {
+            label: { text: 'Event Picture' },
+            template: () => {
+              return `
+                <div>
+                  <input type="file" id="event-picture-input" (change)="onFileSelected($event)" />
+                </div>
+              `;
+            }
+          },
+          {
+            label: { text: 'Event Picture' },
+            template: () => {
+              return `
+              <a href="data:application/octet-stream;base64,${data.appointmentData.pictureData}" target="_blank">
+              <img src="data:image/jpeg;base64,${data.appointmentData.pictureData}" class="event-user-image" alt="Event Image"/>
+            </a>
+          `;
+            }
+          },
         {
           dataField: 'labels',
           editorType: 'dxTagBox',
           editorOptions: {
-            dataSource: this.defaultLabels,
+            dataSource: this.dynamicUniqueLabels ,
             displayExpr: 'name',
             valueExpr: 'name',
             itemTemplate: function(itemData, _, itemElement) {
@@ -403,7 +521,7 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
               if (newLabelName && newLabelColor) {
                 // Add the new label to the default labels array
-                this.defaultLabels.push({
+                this.dynamicUniqueLabels .push({
                   name: newLabelName,
                   color: newLabelColor
                 });
@@ -418,6 +536,56 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
               }
             }
           }
+        },
+        {
+          itemType: 'button',
+          horizontalAlignment: 'left',
+          buttonOptions: {
+            text: 'Submit GPS Data',
+            onClick: () => {
+              if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                    const latitude = position.coords.latitude.toFixed(6);
+                    const longitude = position.coords.longitude.toFixed(6);
+
+                    // Assuming 'fetchCoordinates' and 'isWithinRange' are defined in your component
+                    this.fetchCoordinates(oldAppointmentData.locationString).subscribe(addressCoords => {
+                      const isInRange = this.isWithinRange({ latitude: parseFloat(latitude), longitude: parseFloat(longitude) }, addressCoords, 10000); // Adjust the threshold as needed
+
+                      // Call your service to submit GPS data
+                      this.eventApiService.updateEventGpsData(oldAppointmentData.id, parseFloat(latitude), parseFloat(longitude), isInRange)
+                        .subscribe(() => {
+                          // Handle success
+                          console.log('GPS data submitted successfully');
+                        }, error => {
+                          // Handle error
+                          console.error('Error submitting GPS data:', error);
+                        });
+                    });
+                  },
+                  (error) => {
+                    console.error('Error capturing location:', error);
+                  }
+                );
+              } else {
+                console.error('Geolocation is not supported by this browser.');
+              }
+            }
+          }
+        },
+
+        {
+          label: { text: 'Is in range' },
+          template: () => {
+            let rangeStatus = 'Range status unknown';
+            if (typeof data.appointmentData.IsInRange === 'boolean') {
+              rangeStatus = data.appointmentData.IsInRange ? 'Within range' : 'Out of range';
+            }
+            return `<div><span>${rangeStatus}</span></div>`;
+          }
+
+
         },
         {
         dataField: 'users',
@@ -455,13 +623,16 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
       this.labelsInteractedWith = true;
     });
 
+    setTimeout(() => {
+      const fileInput = document.getElementById('event-picture-input');
+      fileInput.addEventListener('change', this.onFileSelected.bind(this));
+    }, 0);
 
 
     this.fetchEvents();
     this.refreshPage();
 
   }
-
 
   openLabelPopup(): void {
     this.labelPopupVisible = true;
@@ -474,7 +645,126 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
       name: user.name,
       email: user.email
     };
+
+
   }
+
+  private calculateDistance(coord1: { latitude: number, longitude: number }, coord2: { latitude: number, longitude: number }): number {
+    const earthRadiusInMeters = 6371000; // Earth's radius in meters
+
+    const dLat = this.degreesToRadians(coord2.latitude - coord1.latitude);
+    const dLon = this.degreesToRadians(coord2.longitude - coord1.longitude);
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(this.degreesToRadians(coord1.latitude)) * Math.cos(this.degreesToRadians(coord2.latitude)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = earthRadiusInMeters * c;
+
+    return distance; // Distance in meters
+  }
+
+
+
+  fetchCoordinates(address: string): Observable<{ latitude: number, longitude: number }> {
+    return new Observable(observer => {
+        this.bingMapsService.getCoordinates(address).subscribe(
+            response => {
+                if (response && response.latitude && response.longitude) {
+                    observer.next({ latitude: response.latitude, longitude: response.longitude });
+                    observer.complete();
+                } else {
+                    console.error('No results found for the address');
+                    observer.error('No results found');
+                }
+            },
+            error => {
+                console.error('Error fetching coordinates:', error);
+                observer.error(error);
+            }
+        );
+    });
+}
+
+
+
+  captureCurrentLocation(): void {
+    // Use Geolocation API to capture current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.latitude = position.coords.latitude.toFixed(6);
+          this.longitude = position.coords.longitude.toFixed(6);
+        },
+        (error) => {
+          console.error('Error capturing location:', error);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  }
+
+
+
+
+
+  isWithinRange(coord1: { latitude: number, longitude: number }, coord2: { latitude: number, longitude: number }, thresholdInMeters: number): boolean {
+    const earthRadiusInMeters = 6371000; // Earth's radius in meters
+
+    const dLat = this.degreesToRadians(coord2.latitude - coord1.latitude);
+    const dLon = this.degreesToRadians(coord2.longitude - coord1.longitude);
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.degreesToRadians(coord1.latitude)) * Math.cos(this.degreesToRadians(coord2.latitude)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = earthRadiusInMeters * c;
+
+    return distance <= thresholdInMeters;
+  }
+
+  degreesToRadians(degrees: number): number {
+    return degrees * Math.PI / 180;
+  }
+
+
+
+
+  fetchEventPicture(eventId: string): Observable<string | null> {
+    return this.eventApiService.getEventPictureUrl(eventId).pipe(
+      map(response => {
+        if (response && response.imageData) {
+          return `data:${response.contentType};base64,${response.imageData}`;
+        }
+        return null; // Return null if no image data
+      })
+    );
+  }
+
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+    }
+
+    if (this.selectedFile && this.selectedEventId) {
+      this.eventApiService.uploadPicture(this.selectedFile, this.selectedEventId).subscribe({
+        next: (response) => {
+          console.log('Picture uploaded successfully', response);
+        },
+        error: (error) => {
+          console.error('Error uploading picture', error);
+        }
+      });
+    } else {
+      console.error('No file selected or event ID missing');
+    }
+  }
+
 
 
 

@@ -1,0 +1,14 @@
+<div *ngIf="events.length > 0; else noEvents">
+  <h2>Today's Events</h2>
+  <ul>
+    <li *ngFor="let event of events">
+      <h3>{{ event.name }}</h3>
+      <p>{{ event.startTime | date: 'shortTime' }} - {{ event.endTime | date: 'shortTime' }}</p>
+      <p>Location: {{ event.location }}</p>
+    </li>
+  </ul>
+</div>
+
+<ng-template #noEvents>
+  <p>No events for today.</p>
+</ng-template>

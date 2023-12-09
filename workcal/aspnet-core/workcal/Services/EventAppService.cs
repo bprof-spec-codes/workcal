@@ -17,6 +17,10 @@ using Volo.Abp.Identity;
 using static Volo.Abp.Identity.Settings.IdentitySettingNames;
 using workcal.Migrations;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
+using Newtonsoft.Json;
+using Volo.Abp.Domain.Entities;
 
 namespace workcal.Services
 {
@@ -24,21 +28,91 @@ namespace workcal.Services
     {
         private readonly IRepository<Event, Guid> _eventRepository;
         private readonly IRepository<Label, Guid> _labelRepository;
+        private readonly IRepository<Picture, Guid> _pictureRepository;
+
         private readonly IRepository<Entities.EventsUsers, Guid> _eventsUsersRepository;
         private readonly IRepository<Volo.Abp.Identity.IdentityUser, Guid> _userRepository; // Inject the user repository
 
+        private readonly HttpClient _httpClient;
+        private readonly string _bingMapsApiKey ;
 
-
-        public EventAppService(IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository ,IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
+        public EventAppService(HttpClient httpClient, IConfiguration configuration,  IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository , IRepository<Picture, Guid> pictureRepository, IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
 
         {
             _eventRepository = eventRepository;
             _labelRepository = labelRepository;
+            _pictureRepository = pictureRepository;
             _eventsUsersRepository = eventsUsersRepository;
-            _userRepository = userRepository;
+    _userRepository = userRepository;
 
 
+
+
+            [HttpPost("upload")]
+        public async Task UploadEventPicture( IFormFile pictureFile, Guid eventId)
+        {
+            
+
+            try
+            {
+                if (pictureFile == null || pictureFile.Length == 0)
+                {
+                    throw new UserFriendlyException("Not found.");
+                }
+                // Retrieve the event from the database
+                var eventEntity = await _eventRepository.FindAsync(eventId);
+                if (eventEntity == null)
+                {
+                    throw new UserFriendlyException("Event not found.");
+                }
+
+                // Convert IFormFile to byte array
+                byte[] pictureData;
+                using (var memoryStream = new MemoryStream())
+                {
+                    await pictureFile.CopyToAsync(memoryStream);
+                    pictureData = memoryStream.ToArray();
+                }
+
+                // Assign the picture data and MIME type to the event
+                eventEntity.PictureData = pictureData;
+                eventEntity.PictureMimeType = pictureFile.ContentType;
+
+                // Save changes to the database
+                _eventRepository.UpdateAsync(eventEntity);
+
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Logger.LogError("An error occurred while creating the event: " + ex.Message);
+                throw new UserFriendlyException("An error occurred while creating the event.");
+            }
         }
+
+        [HttpGet("get-event-picture/{eventId}")]
+        public async Task<PictureDto> GetEventPicture(Guid eventId)
+        {
+            var eventEntity = await _eventRepository.GetAsync(eventId);
+            if (eventEntity == null || eventEntity.PictureData == null)
+            {
+                throw new UserFriendlyException("An error occurred while creating the event.");
+            }
+
+            
+
+
+            PictureDto p = new PictureDto
+            {
+                
+                Title = eventEntity.Id.ToString(),
+                ImageData = eventEntity.PictureData,
+                ContentType = eventEntity.PictureMimeType
+            };
+
+            return p;
+        }
+
 
         public async Task CreateAsync(CreateEventDto @event)
         {
@@ -53,7 +127,8 @@ namespace workcal.Services
                     Name = @event.Name,
                     StartTime = @event.StartTime,
                     EndTime = @event.EndTime,
-                    Location = @event.Location,
+                    LocationString = @event.LocationString,
+                    
                 };
 
              var instertedEvent=    await _eventRepository.InsertAsync(eventEntity);
@@ -237,7 +312,7 @@ namespace workcal.Services
                 eventEntity.Name = @event.Name;
             eventEntity.StartTime = @event.StartTime;
             eventEntity.EndTime = @event.EndTime;
-            eventEntity.Location = @event.Location;
+            eventEntity.LocationString = @event.LocationString;
             await _eventRepository.UpdateAsync(eventEntity);
 
             var existingLabelsDict = eventEntity.Labels.ToDictionary(l => l.Name, l => l);

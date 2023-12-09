@@ -1,1 +1,17 @@
+button {
+    background: transparent;
+    border: none !important;
+}
 
+.event-user-images {
+  display: flex;
+  justify-content: center;
+  margin-top: 5px;
+}
+
+.event-user-image {
+  width: 20px;   /* Adjust as needed */
+  height: 20px;  /* Adjust as needed */
+  border-radius: 50%; /* Circular images */
+  margin-right: 2px; /* Space between images */
+}

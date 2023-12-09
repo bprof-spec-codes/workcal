@@ -255,10 +255,16 @@ public class workcalModule : AbpModule
         });
     }
 
+    public void ConfigureServices(IServiceCollection services)
+    {
+        // Other service registrations
+
+        services.AddHttpClient(); // Registers IHttpClientFactory
+    }
     private void ConfigureSwagger(IServiceCollection services, IConfiguration configuration)
     {
 
-
+        services.AddHttpClient();
         services.AddAbpSwaggerGenWithOAuth(
             configuration["AuthServer:Authority"],
             new Dictionary<string, string>

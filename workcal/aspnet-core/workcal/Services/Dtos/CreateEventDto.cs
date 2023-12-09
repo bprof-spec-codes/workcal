@@ -15,7 +15,12 @@ namespace workcal.Services.Dtos
         [Required]
         public DateTime EndTime { get; set; }
 
-        public string Location { get; set; }
+        public string LocationString { get; set; } // User-provided location description
+        public double? Latitude { get; set; } // GPS latitude
+        public double? Longitude { get; set; } // GPS longitude
+        public byte[]? PictureData { get; set; } // Binary data of the picture
+        public string? PictureMimeType { get; set; } // MIME type of the picture
+        public bool? IsInRange { get; set; }
 
         public List<CreateLabelDto> Labels { get; set; }
 

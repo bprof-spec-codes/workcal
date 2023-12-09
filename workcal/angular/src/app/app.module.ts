@@ -7,7 +7,7 @@ import { TenantManagementConfigModule } from '@abp/ng.tenant-management/config';
 import { ThemeLeptonXModule } from '@abp/ng.theme.lepton-x';
 import { SideMenuLayoutModule } from '@abp/ng.theme.lepton-x/layouts';
 import { ThemeSharedModule } from '@abp/ng.theme.shared';
-import { NgModule, Component, enableProdMode } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../environments/environment';
@@ -27,18 +27,24 @@ import { WorkerStatisticsComponent } from './worker-statistics/worker-statistics
 import { DxChartModule, DxSelectBoxModule } from 'devextreme-angular';
 import { FormsModule } from '@angular/forms';
 import { DxDateBoxModule } from 'devextreme-angular';
+import { DxButtonModule } from 'devextreme-angular';
+import { NgxPrintModule } from 'ngx-print';
+import { PictureUploadComponent } from './picture-upload/picture-upload.component';
+import { DailyEventsComponent } from './daily-events/daily-events.component';
 
 
 @NgModule({
   imports: [
+    NgxPrintModule,
     DxDateBoxModule,
     DxChartModule,
     DxSelectBoxModule,
+    DxButtonModule,
     FormsModule,
     HttpClientModule,
     MatButtonModule,
     MatToolbarModule,
-   MatChipsModule ,
+    MatChipsModule ,
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
@@ -60,7 +66,7 @@ import { DxDateBoxModule } from 'devextreme-angular';
     DxScrollViewModule,
     DxColorBoxModule,
   ],
-  declarations: [AppComponent, CalendarPageComponent, WorkerStatisticsComponent],
+  declarations: [AppComponent, CalendarPageComponent, WorkerStatisticsComponent, PictureUploadComponent, DailyEventsComponent],
   providers: [APP_ROUTE_PROVIDER],
   bootstrap: [AppComponent],
 })
