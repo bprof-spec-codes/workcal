@@ -35,6 +35,17 @@ public class Program
         try
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    policy =>
+                    {
+                        policy.WithHeaders("*");
+                        policy.WithOrigins("*");
+                        policy.WithMethods("*");
+                    });
+            });
+
             builder.Host.AddAppSettingsSecretsJson()
                 .UseAutofac()
                 .UseSerilog();
