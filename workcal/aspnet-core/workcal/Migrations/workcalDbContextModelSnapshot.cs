@@ -1637,6 +1637,9 @@ namespace workcal.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool?>("IsInRange")
+                        .HasColumnType("bit");
+
                     b.Property<double?>("Latitude")
                         .HasColumnType("float");
 

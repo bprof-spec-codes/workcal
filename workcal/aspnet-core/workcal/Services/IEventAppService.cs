@@ -16,6 +16,8 @@ namespace workcal.Services
         Task DeleteAsync(Guid id);  
         Task UpdateAsync(Guid id, CreateEventDto @event);
         Task<object> GetCoordinates(string address);
+
+        Task UpdateEventGpsDataAsync(EventGpsDto input);
     }
 
 }

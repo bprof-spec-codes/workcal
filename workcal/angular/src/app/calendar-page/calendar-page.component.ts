@@ -347,7 +347,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     const appointmentData = event.appointmentData;
 
     if (!appointmentData.id) {
-      console.error("Event ID is missing, cannot delete");
+      console.error("Event ID is missing, can not delete");
       event.cancel = true;
       return;
     }
@@ -406,7 +406,9 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     if (!oldAppointmentData.pictureData) {
       form.updateData('Event Picture', []);
     }
-
+    if (oldAppointmentData.locationString) {
+      form.updateData('location', oldAppointmentData.locationString);
+    }
     this.selectedEventId = oldAppointmentData.id;
     //this.fetchEventPicture(this.selectedEventId);
     const image = data.appointmentData.pictureData
@@ -417,6 +419,9 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     }, error => {
       console.error('Error fetching coordinates:', error);
     });
+
+    this.addGpsDataSubmissionButton(form, data.appointmentData.locationString, data.appointmentData.id);
+
 
     form.itemOption('mainGroup', {
 
@@ -522,43 +527,28 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
           itemType: 'button',
           horizontalAlignment: 'left',
           buttonOptions: {
-            text: 'Current GPS',
+            text: 'Submit GPS Data',
             onClick: () => {
               if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                   (position) => {
-                    this.latitude = position.coords.latitude.toFixed(6);
-                    this.longitude = position.coords.longitude.toFixed(6);
-                    const oldAppointmentData = data.appointmentData;
-                    const locationString = oldAppointmentData.locationString;
-                    console.log("Location String:", locationString);
-                    // Assuming 'locationString' is available in your component
+                    const latitude = position.coords.latitude.toFixed(6);
+                    const longitude = position.coords.longitude.toFixed(6);
 
-                    if (locationString) {
-                      this.fetchCoordinates(locationString).subscribe(addressCoords => {
-                        // Logic to handle coordinates
-                        this.fetchCoordinates(locationString).subscribe(addressCoords => {
-                          const currentCoords = { latitude: parseFloat(this.latitude), longitude: parseFloat(this.longitude) };
-                          const isInRange = this.isWithinRange(currentCoords, addressCoords, 100); // 100 meters threshold
+                    // Assuming 'fetchCoordinates' and 'isWithinRange' are defined in your component
+                    this.fetchCoordinates(oldAppointmentData.locationString).subscribe(addressCoords => {
+                      const isInRange = this.isWithinRange({ latitude: parseFloat(latitude), longitude: parseFloat(longitude) }, addressCoords, 10000); // Adjust the threshold as needed
 
-                          if (isInRange) {
-                            // Handle success
-                            console.log('You are at the event location.');
-                          } else {
-                            // Handle failure
-                            console.error('Location mismatch.');
-                          }
+                      // Call your service to submit GPS data
+                      this.eventApiService.updateEventGpsData(oldAppointmentData.id, parseFloat(latitude), parseFloat(longitude), isInRange)
+                        .subscribe(() => {
+                          // Handle success
+                          console.log('GPS data submitted successfully');
+                        }, error => {
+                          // Handle error
+                          console.error('Error submitting GPS data:', error);
                         });
-
-                      }, error => {
-                        console.error('Error fetching coordinates:', error);
-                      });
-                    } else {
-                      console.error('Location string is empty');
-                    }
-
-
-
+                    });
                   },
                   (error) => {
                     console.error('Error capturing location:', error);
@@ -576,9 +566,10 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
           template: () => {
             return `
             <div>
-            <span>Latitude: {{ this.latitude }}</span>
+            <span>Latitude: {{ old.latitude }}</span>
             <span>Longitude: {{ this.longitude }}</span>
-          </div>
+
+            </div>
             `;
           }
         },
@@ -640,28 +631,74 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
       name: user.name,
       email: user.email
     };
+
+
+  }
+
+
+  private addGpsDataSubmissionButton(form: any, locationString: string, eventId: string): void {
+    form.itemOption('mainGroup', {
+      // ...existing items...
+      items: [
+        // ...other form items...
+        {
+          itemType: 'button',
+          horizontalAlignment: 'left',
+          buttonOptions: {
+            text: 'Submit GPS Data',
+            onClick: () => {
+              if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                    const latitude = position.coords.latitude.toFixed(6);
+                    const longitude = position.coords.longitude.toFixed(6);
+
+                    this.fetchCoordinates(locationString).subscribe(addressCoords => {
+                      const isInRange = this.isWithinRange({ latitude: parseFloat(latitude), longitude: parseFloat(longitude) }, addressCoords, 100); // 100 meters threshold
+
+                      this.eventApiService.updateEventGpsData(eventId, parseFloat(latitude), parseFloat(longitude), isInRange)
+                        .subscribe(() => {
+                          console.log('GPS data updated successfully');
+                          // Additional success handling
+                        }, error => {
+                          console.error('Error updating GPS data:', error);
+                          // Additional error handling
+                        });
+                    });
+                  },
+                  (error) => {
+                    console.error('Error capturing location:', error);
+                  }
+                );
+              } else {
+                console.error('Geolocation is not supported by this browser.');
+              }
+            }
+          }
+        },
+      ]
+    });
   }
 
   fetchCoordinates(address: string): Observable<{ latitude: number, longitude: number }> {
     return new Observable(observer => {
-      this.bingMapsService.getCoordinatesForAddress(address).subscribe(
-        response => {
-          if (response && response.resourceSets && response.resourceSets.length > 0 && response.resourceSets[0].resources.length > 0) {
-            const location = response.resourceSets[0].resources[0].point.coordinates;
-            observer.next({ latitude: location[0], longitude: location[1] });
-            observer.complete();
-          } else {
-            console.error('No results found for the address');
-            observer.error('No results found');
-          }
-        },
-        error => {
-          console.error('Error fetching coordinates:', error);
-          observer.error(error);
-        }
-      );
+        this.bingMapsService.getCoordinates(address).subscribe(
+            response => {
+                if (response && response.latitude && response.longitude) {
+                    observer.next({ latitude: response.latitude, longitude: response.longitude });
+                    observer.complete();
+                } else {
+                    console.error('No results found for the address');
+                    observer.error('No results found');
+                }
+            },
+            error => {
+                console.error('Error fetching coordinates:', error);
+                observer.error(error);
+            }
+        );
     });
-  }
+}
 
 
 

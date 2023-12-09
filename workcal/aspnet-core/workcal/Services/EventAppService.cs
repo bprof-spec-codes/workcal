@@ -20,6 +20,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using Newtonsoft.Json;
+using Volo.Abp.Domain.Entities;
 
 namespace workcal.Services
 {
@@ -47,6 +48,26 @@ namespace workcal.Services
             _bingMapsApiKey = configuration["BingMaps:ApiKey"];
 
         }
+
+
+        [HttpPut]
+        [Route("update-gps")]
+        public async Task UpdateEventGpsDataAsync(EventGpsDto input)
+        {
+            var eventEntity = await _eventRepository.GetAsync(input.EventId);
+            if (eventEntity == null)
+            {
+                throw new EntityNotFoundException(typeof(Event), input.EventId);
+            }
+
+            eventEntity.Latitude = input.Latitude;
+            eventEntity.Longitude = input.Longitude;
+            eventEntity.IsInRange = input.IsInRange;
+
+            await _eventRepository.UpdateAsync(eventEntity);
+        }
+
+      
 
         [HttpGet("getCoordinates")]
         public async Task<object> GetCoordinates(string address)

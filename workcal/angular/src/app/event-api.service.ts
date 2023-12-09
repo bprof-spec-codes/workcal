@@ -19,7 +19,9 @@ export class EventApiService {
     return this.http.get(`https://localhost:44387/events?userId=${userId}&date=${date}`);
   }
 
-
+  updateEventGpsData(eventId: string, latitude: number, longitude: number, isInRange: boolean): Observable<any> {
+    return this.http.put(`https://localhost:44387/update-gps`, { eventId, latitude, longitude, isInRange });
+  }
   uploadPicture(pictureFile: File, eventId: string): Observable<any> {
     const formData = new FormData();
     formData.append('pictureFile', pictureFile);
