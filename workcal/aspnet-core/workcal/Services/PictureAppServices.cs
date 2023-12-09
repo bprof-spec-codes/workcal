@@ -83,19 +83,26 @@ namespace workcal.Services
 
             var image = images.FirstOrDefault(x=> x.Title == id);
 
-          // var image = await _pictureRepository.GetAsync(id);
+            // var image = await _pictureRepository.GetAsync(id);
 
-          // return ObjectMapper.Map<Picture, PictureDto>(image);
-
-            PictureDto p = new PictureDto
+            // return ObjectMapper.Map<Picture, PictureDto>(image);
+            if (image == null)
             {
-                Id = image.Id,
-                Title = image.Title,
-                ImageData = image.ImageData,
-                ContentType = image.ContentType
-            };
-
-            return p;
+                return null;
+            }
+            else
+            {
+                PictureDto p = new PictureDto
+                {
+                    Id = image.Id,
+                    Title = image.Title,
+                    ImageData = image.ImageData,
+                    ContentType = image.ContentType
+                };
+                return p;
+            }
+          
+           
 
         }
 
