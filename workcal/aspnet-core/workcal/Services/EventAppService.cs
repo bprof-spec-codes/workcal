@@ -34,24 +34,83 @@ namespace workcal.Services
         private readonly IRepository<Volo.Abp.Identity.IdentityUser, Guid> _userRepository; // Inject the user repository
 
         private readonly HttpClient _httpClient;
-        private readonly string _bingMapsApiKey ;
+        private readonly string _bingMapsApiKey;
 
-        public EventAppService(HttpClient httpClient, IConfiguration configuration,  IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository , IRepository<Picture, Guid> pictureRepository, IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
+        public EventAppService(HttpClient httpClient, IConfiguration configuration, IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository, IRepository<Picture, Guid> pictureRepository, IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
 
         {
             _eventRepository = eventRepository;
             _labelRepository = labelRepository;
             _pictureRepository = pictureRepository;
             _eventsUsersRepository = eventsUsersRepository;
-    _userRepository = userRepository;
+            _userRepository = userRepository;
+            _httpClient = httpClient;
+            _bingMapsApiKey = configuration["BingMaps:ApiKey"];
+
+        }
 
 
-
-
-            [HttpPost("upload")]
-        public async Task UploadEventPicture( IFormFile pictureFile, Guid eventId)
+        [HttpPut]
+        [Route("update-gps")]
+        public async Task UpdateEventGpsDataAsync(EventGpsDto input)
         {
-            
+            var eventEntity = await _eventRepository.GetAsync(input.EventId);
+            if (eventEntity == null)
+            {
+                throw new EntityNotFoundException(typeof(Event), input.EventId);
+            }
+
+            eventEntity.Latitude = input.Latitude;
+            eventEntity.Longitude = input.Longitude;
+            eventEntity.IsInRange = input.IsInRange;
+
+            await _eventRepository.UpdateAsync(eventEntity);
+        }
+
+
+
+        [HttpGet("getCoordinates")]
+        public async Task<object> GetCoordinates(string address)
+        {
+            var bingMapsUrl = $"https://dev.virtualearth.net/REST/v1/Locations?query={Uri.EscapeDataString(address)}&key={_bingMapsApiKey}";
+            try
+            {
+                var response = await _httpClient.GetAsync(bingMapsUrl);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Logger.LogError($"Error fetching coordinates. Status: {response.StatusCode}, Content: {errorContent}");
+                    throw new UserFriendlyException("Error fetching coordinates.");
+                }
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+
+                var bingResponse = JsonConvert.DeserializeObject<BingMapsResponse>(content);
+                if (bingResponse?.ResourceSets != null && bingResponse.ResourceSets.Any() && bingResponse.ResourceSets[0].Resources.Any())
+                {
+                    var location = bingResponse.ResourceSets[0].Resources[0].Point.Coordinates;
+                    return new { Latitude = location[0], Longitude = location[1] };
+                }
+                else
+                {
+                    throw new UserFriendlyException("An error occurred while getCoordinates.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Logger.LogError("An error occurred while getCoordinates: " + ex.Message);
+                throw new UserFriendlyException("An error occurred while getCoordinates.");
+            }
+        }
+
+
+
+
+        [HttpPost("upload")]
+        public async Task UploadEventPicture(IFormFile pictureFile, Guid eventId)
+        {
+
 
             try
             {
@@ -99,12 +158,12 @@ namespace workcal.Services
                 throw new UserFriendlyException("An error occurred while creating the event.");
             }
 
-            
+
 
 
             PictureDto p = new PictureDto
             {
-                
+
                 Title = eventEntity.Id.ToString(),
                 ImageData = eventEntity.PictureData,
                 ContentType = eventEntity.PictureMimeType
@@ -128,10 +187,10 @@ namespace workcal.Services
                     StartTime = @event.StartTime,
                     EndTime = @event.EndTime,
                     LocationString = @event.LocationString,
-                    
+
                 };
 
-             var instertedEvent=    await _eventRepository.InsertAsync(eventEntity);
+                var instertedEvent = await _eventRepository.InsertAsync(eventEntity);
 
                 if (@event.Labels != null && @event.Labels.Count > 0)
                 {
@@ -146,7 +205,7 @@ namespace workcal.Services
                         await _labelRepository.InsertAsync(labelEntity);
                     }
                 }
-              
+
                 foreach (var userId in @event.Users)
                 {
                     var eventUser = new Entities.EventsUsers
@@ -158,7 +217,7 @@ namespace workcal.Services
                 }
 
             }
-              catch (Exception ex)
+            catch (Exception ex)
             {
                 Logger.LogError("An error occurred while creating the event: " + ex.Message);
                 throw new UserFriendlyException("An error occurred while creating the event.");
@@ -187,7 +246,7 @@ namespace workcal.Services
                 }
                 var eventDto = ObjectMapper.Map<Event, EventDto>(eventEntity);
 
-                List<Entities.EventsUsers> eventusesEventid = alleventUsers.Where(i => i.EventId == eventEntity.Id  ).ToList();
+                List<Entities.EventsUsers> eventusesEventid = alleventUsers.Where(i => i.EventId == eventEntity.Id).ToList();
 
                 var usersInEvent = alluser.Where(u => eventusesEventid.Any(eu => eu.UserId == u.Id)).ToList();
                 eventDto.Users = new List<Volo.Abp.Identity.IdentityUser>();
@@ -240,23 +299,23 @@ namespace workcal.Services
                     // Initialize the Users list for the current event DTO
                     eventDtoList[i].Users = new List<Volo.Abp.Identity.IdentityUser>();
 
-                     
-                    
+
+
 
                     foreach (var user in alluser)
                     {
                         foreach (var eventuser in allEventUsers)
                         {
-                            if (user.Id == eventuser.UserId && correspondingEvent.Id ==eventuser.EventId)
+                            if (user.Id == eventuser.UserId && correspondingEvent.Id == eventuser.EventId)
                             {
                                 eventDtoList[i].Users.Add(user);
                                 break;
                             }
                         }
-                       
+
                     }
 
-                 
+
                 }
 
                 return eventDtoList;
@@ -272,7 +331,7 @@ namespace workcal.Services
             }
         }
 
-      
+
 
         public async Task DeleteAsync(Guid id)
         {
@@ -310,48 +369,48 @@ namespace workcal.Services
                 }
 
                 eventEntity.Name = @event.Name;
-            eventEntity.StartTime = @event.StartTime;
-            eventEntity.EndTime = @event.EndTime;
-            eventEntity.LocationString = @event.LocationString;
-            await _eventRepository.UpdateAsync(eventEntity);
+                eventEntity.StartTime = @event.StartTime;
+                eventEntity.EndTime = @event.EndTime;
+                eventEntity.LocationString = @event.LocationString;
+                await _eventRepository.UpdateAsync(eventEntity);
 
-            var existingLabelsDict = eventEntity.Labels.ToDictionary(l => l.Name, l => l);
+                var existingLabelsDict = eventEntity.Labels.ToDictionary(l => l.Name, l => l);
 
-            var finalLabels = new List<Label>();
+                var finalLabels = new List<Label>();
 
-            foreach (var oldLabel in eventEntity.Labels)
-            {
-
-                await _labelRepository.DeleteAsync(oldLabel); 
-               }
-
-            foreach (var eventLabel in @event.Labels)
-            {
-
-                if (existingLabelsDict.TryGetValue(eventLabel.Name, out var existingLabel))
+                foreach (var oldLabel in eventEntity.Labels)
                 {
-                    existingLabel.Color = eventLabel.Color;
 
-
-                    await _labelRepository.InsertAsync(new Label
-                    {
-                        Name = eventLabel.Name,
-                        Color = eventLabel.Color,
-                        EventId = id
-                    });
+                    await _labelRepository.DeleteAsync(oldLabel);
                 }
-                else
+
+                foreach (var eventLabel in @event.Labels)
                 {
-                   
 
-                    await _labelRepository.InsertAsync(new Label
+                    if (existingLabelsDict.TryGetValue(eventLabel.Name, out var existingLabel))
                     {
-                        Name = eventLabel.Name,
-                        Color = eventLabel.Color,
-                        EventId = id
-                    });
+                        existingLabel.Color = eventLabel.Color;
+
+
+                        await _labelRepository.InsertAsync(new Label
+                        {
+                            Name = eventLabel.Name,
+                            Color = eventLabel.Color,
+                            EventId = id
+                        });
+                    }
+                    else
+                    {
+
+
+                        await _labelRepository.InsertAsync(new Label
+                        {
+                            Name = eventLabel.Name,
+                            Color = eventLabel.Color,
+                            EventId = id
+                        });
+                    }
                 }
-            }
                 var allEventUsers = await _eventsUsersRepository.GetListAsync();
                 var existingEventUsers = allEventUsers.Where(eu => eu.EventId == id).ToList();
 
@@ -380,13 +439,10 @@ namespace workcal.Services
             {
                 Logger.LogError("An error occurred while updating the event: " + ex.Message);
                 throw new UserFriendlyException("An error occurred while updating the event.");
-}
+            }
 
 
         }
-
-
-
     }
 
 }
