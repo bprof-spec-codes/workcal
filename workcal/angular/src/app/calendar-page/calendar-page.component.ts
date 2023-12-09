@@ -138,6 +138,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           locationString: event.locationString,
           pictureData: event.pictureData,
           labels: event.labels,
+          IsInRange: event.IsInRange,
           users: event.users.map(user => {
             // Find the corresponding user in 'allusers' to get the 'imageUrl'
             const userWithImage = this.allusers.find(u => u.id === user.id);
@@ -240,6 +241,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       locationString: appointmentData.location || '',
       labels: selectedLabels,
       users:  selectedUserIDs,
+      IsInRange: event.IsInRange,
 
     };
 
@@ -326,6 +328,8 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       locationString: appointmentData.location || '',
       labels: selectedLabels,
       users: selectedUserIDs,
+      IsInRange: event.IsInRange,
+
 
     };
 
@@ -390,8 +394,6 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
 
 
-
-
     const oldAppointmentData = data.appointmentData;
     if (oldAppointmentData.labels) {
       form.updateData('labels', oldAppointmentData.labels.map(l => l.name));
@@ -420,7 +422,19 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
       console.error('Error fetching coordinates:', error);
     });
 
-    this.addGpsDataSubmissionButton(form, data.appointmentData.locationString, data.appointmentData.id);
+
+    let locationStatus = 'Checking location...';
+    let distanceToLocation = null;
+
+    const isInRange = oldAppointmentData.IsInRange;
+
+
+    const updateLocationStatus = (isInRange, distance) => {
+      locationStatus = isInRange ? 'Inside location range' : 'Outside location range';
+      distanceToLocation = isInRange ? null : `Get ${distance.toFixed(2)} meters closer`;
+      form.repaint(); // Refresh the form to update the display
+    };
+
 
 
     form.itemOption('mainGroup', {
@@ -562,16 +576,16 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
         },
 
         {
-          label: { text: 'Current Location' },
+          label: { text: 'Is in range' },
           template: () => {
-            return `
-            <div>
-            <span>Latitude: {{ old.latitude }}</span>
-            <span>Longitude: {{ this.longitude }}</span>
-
-            </div>
-            `;
+            let rangeStatus = 'Range status unknown';
+            if (typeof data.appointmentData.IsInRange === 'boolean') {
+              rangeStatus = data.appointmentData.IsInRange ? 'Within range' : 'Out of range';
+            }
+            return `<div><span>${rangeStatus}</span></div>`;
           }
+
+
         },
         {
         dataField: 'users',
@@ -635,50 +649,23 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
   }
 
+  private calculateDistance(coord1: { latitude: number, longitude: number }, coord2: { latitude: number, longitude: number }): number {
+    const earthRadiusInMeters = 6371000; // Earth's radius in meters
 
-  private addGpsDataSubmissionButton(form: any, locationString: string, eventId: string): void {
-    form.itemOption('mainGroup', {
-      // ...existing items...
-      items: [
-        // ...other form items...
-        {
-          itemType: 'button',
-          horizontalAlignment: 'left',
-          buttonOptions: {
-            text: 'Submit GPS Data',
-            onClick: () => {
-              if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                  (position) => {
-                    const latitude = position.coords.latitude.toFixed(6);
-                    const longitude = position.coords.longitude.toFixed(6);
+    const dLat = this.degreesToRadians(coord2.latitude - coord1.latitude);
+    const dLon = this.degreesToRadians(coord2.longitude - coord1.longitude);
 
-                    this.fetchCoordinates(locationString).subscribe(addressCoords => {
-                      const isInRange = this.isWithinRange({ latitude: parseFloat(latitude), longitude: parseFloat(longitude) }, addressCoords, 100); // 100 meters threshold
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(this.degreesToRadians(coord1.latitude)) * Math.cos(this.degreesToRadians(coord2.latitude)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
-                      this.eventApiService.updateEventGpsData(eventId, parseFloat(latitude), parseFloat(longitude), isInRange)
-                        .subscribe(() => {
-                          console.log('GPS data updated successfully');
-                          // Additional success handling
-                        }, error => {
-                          console.error('Error updating GPS data:', error);
-                          // Additional error handling
-                        });
-                    });
-                  },
-                  (error) => {
-                    console.error('Error capturing location:', error);
-                  }
-                );
-              } else {
-                console.error('Geolocation is not supported by this browser.');
-              }
-            }
-          }
-        },
-      ]
-    });
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = earthRadiusInMeters * c;
+
+    return distance; // Distance in meters
   }
+
+
 
   fetchCoordinates(address: string): Observable<{ latitude: number, longitude: number }> {
     return new Observable(observer => {

@@ -19,6 +19,9 @@ namespace workcal.Services.Dtos
 
         public byte[]? PictureData { get; set; } // Binary data of the picture
         public string? PictureMimeType { get; set; } // MIME type of the picture
+
+        public bool? IsInRange { get; set; }
+
         public List<Label> Labels { get; set; }
 
         public List<Volo.Abp.Identity.IdentityUser> Users { get; set; }

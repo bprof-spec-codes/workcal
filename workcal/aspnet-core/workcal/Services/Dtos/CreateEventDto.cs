@@ -20,6 +20,7 @@ namespace workcal.Services.Dtos
         public double? Longitude { get; set; } // GPS longitude
         public byte[]? PictureData { get; set; } // Binary data of the picture
         public string? PictureMimeType { get; set; } // MIME type of the picture
+        public bool? IsInRange { get; set; }
 
         public List<CreateLabelDto> Labels { get; set; }
 

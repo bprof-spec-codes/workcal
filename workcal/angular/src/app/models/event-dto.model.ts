@@ -9,6 +9,7 @@ export type EventDto = {
   labels: LabelDto[];
   users: UserDto[];
   pictureData?: string; // Add this line
+  IsInRange: boolean
 
 };
 
@@ -23,6 +24,7 @@ export type SchedulerEvent = {
   labels: Array<{ name: string, color: string }>;
   users: UserDto[];
   pictureData?: string; // Add this line
+  IsInRange: boolean
 
 };
 
