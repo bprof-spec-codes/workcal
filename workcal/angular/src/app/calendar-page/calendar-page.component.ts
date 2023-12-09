@@ -20,7 +20,9 @@ import { PictureService } from '../picture-api.service';
 
 export class CalendarPageComponent implements OnInit {
 
-
+  latitude: string = 'Not captured';
+  longitude: string = 'Not captured';
+  currentLocation: { latitude?: number, longitude?: number } = {};
 
   todayEvents: SchedulerEvent[] = [];
 
@@ -73,7 +75,13 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     //this.router.navigate([this.router.url]);
   }
 
-
+  ngAfterViewInit(): void {
+    // Here you can safely manipulate the DOM or interact with rendered elements
+    const button = document.getElementById('capture-location-button');
+    if (button) {
+      button.addEventListener('click', () => this.captureCurrentLocation());
+    }
+  }
 
   fetchUsers(): void {
     this.userApiService.getAllUsers()
@@ -502,6 +510,43 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
           }
         },
         {
+          itemType: 'button',
+          horizontalAlignment: 'left',
+          buttonOptions: {
+            text: 'Current GPS',
+            onClick: () => {
+
+              if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                    this.latitude = position.coords.latitude.toFixed(6);
+                    this.longitude = position.coords.longitude.toFixed(6);
+                  },
+                  (error) => {
+                    console.error('Error capturing location:', error);
+                  }
+                );
+              } else {
+                console.error('Geolocation is not supported by this browser.');
+              }
+              console.log("getCurrentPosition", this.latitude,this.longitude);
+
+              }
+
+          }
+        },
+        {
+          label: { text: 'Current Location' },
+          template: () => {
+            return `
+            <div>
+            <span>Latitude: {{ this.latitude }}</span>
+            <span>Longitude: {{ this.longitude }}</span>
+          </div>
+            `;
+          }
+        },
+        {
         dataField: 'users',
     editorType: 'dxTagBox',
     editorOptions: {
@@ -548,193 +593,6 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
   }
 
-/*
-onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): void {
-  this.selectedEventId = data.appointmentData.id;
-
-  // Fetch the image and then open the form
-  this.fetchEventPicture(this.selectedEventId).subscribe(pictureData => {
-    if (pictureData) {
-      // If picture data is received, set it to the selected event
-      this.selectedEventPicture = pictureData;
-    }
-    // Now open the form
-    this.openForm(data);
-  });
-}
-
-private openForm(data: { form: any, appointmentData: SchedulerEvent }): void {
-  const form = data.form;
-
-  console.log('Picture uploaded successfully', data.appointmentData.pictureData);
-
-
-
-
-  const oldAppointmentData = data.appointmentData;
-  if (oldAppointmentData.labels) {
-    form.updateData('labels', oldAppointmentData.labels.map(l => l.name));
-  }
-  if (!oldAppointmentData.locationString) {
-    form.updateData('location', '');
-  }
-  if (!oldAppointmentData.labels) {
-    form.updateData('labels', []);
-  }
-
-  this.selectedEventId = oldAppointmentData.id;
-  this.fetchEventPicture(this.selectedEventId);
-
-  form.itemOption('mainGroup', {
-
-
-    items: [
-      ...form.itemOption('mainGroup').items,
-      {
-        dataField: 'location',
-        editorType: 'dxTextBox',
-        editorOptions: {
-          placeholder: 'Enter location...'
-        },
-        label: {
-          text: 'Location'
-        }
-      },
-              {
-          label: { text: 'Event Picture' },
-          template: () => {
-            return `
-              <div>
-                <input type="file" id="event-picture-input" (change)="onFileSelected($event)" />
-              </div>
-            `;
-          }
-        },
-        {
-          label: { text: 'Event Picture' },
-          template: () => {
-            return `
-            <div>
-            <a *ngIf="selectedEvent.pictureData"
-               href="'data:image/jpeg;base64,' + data.appointmentData.pictureData"
-               target="_blank">
-               Open Event Picture
-            </a>
-          </div>
-           `;
-          }
-        },
-      {
-        dataField: 'labels',
-        editorType: 'dxTagBox',
-        editorOptions: {
-          dataSource: this.dynamicUniqueLabels ,
-          displayExpr: 'name',
-          valueExpr: 'name',
-          itemTemplate: function(itemData, _, itemElement) {
-            itemElement.textContent = itemData.name;
-            itemElement.style.backgroundColor = itemData.color;
-          },
-          placeholder: 'Add labels...'
-        },
-        label: {
-          text: 'Labels'
-        }
-      },
-      {
-        dataField: 'newLabelName',
-        editorType: 'dxTextBox',
-        editorOptions: {
-          placeholder: 'Enter new label name...'
-        },
-        label: {
-          text: 'New Label Name'
-        }
-      },
-      {
-        dataField: 'newLabelColor',
-        editorType: 'dxColorBox',
-        editorOptions: {
-          placeholder: 'Pick a color...'
-        },
-        label: {
-          text: 'New Label Color'
-        }
-      },
-
-      {
-        itemType: 'button',
-        horizontalAlignment: 'left',
-        buttonOptions: {
-          text: 'Create Label',
-          onClick: () => {
-            const newLabelName = form.option('formData').newLabelName;
-            const newLabelColor = form.option('formData').newLabelColor;
-
-            if (newLabelName && newLabelColor) {
-              // Add the new label to the default labels array
-              this.dynamicUniqueLabels .push({
-                name: newLabelName,
-                color: newLabelColor
-              });
-
-              // Clear the fields
-              form.updateData('newLabelName', '');
-              form.updateData('newLabelColor', '');
-
-              // Optionally, you can add this new label to the current event's label list
-              const existingLabels = form.option('formData').labels || [];
-              form.updateData('labels', [...existingLabels, newLabelName]);
-            }
-          }
-        }
-      },
-      {
-      dataField: 'users',
-  editorType: 'dxTagBox',
-  editorOptions: {
-    dataSource: this.allusers,
-    displayExpr: 'userName',
-    valueExpr: 'id',
-    placeholder: 'Assign to...',
-    onValueChanged: (e) => {
-      const selectedUserIDs = e.value.map(userObjOrId => {
-        return typeof userObjOrId === 'object' ? userObjOrId.id : userObjOrId;
-      });
-
-      data.appointmentData.users = selectedUserIDs;
-
-      console.log("Updated appointmentData.users:", data.appointmentData.users);
-    },
-    onItemRemoved: (e) => {
-      // This event should be triggered when an item is removed.
-      // Add your custom logic here.
-
-      // You can access the removed item using e.itemData or e.itemElement depending on your needs
-    }
-  },
-  label: {
-    text: 'Assign To'
-  }
-      },
-
-    ]
-  });
-
-  form.getEditor('labels').option('onValueChanged', () => {
-    this.labelsInteractedWith = true;
-  });
-
-  setTimeout(() => {
-    const fileInput = document.getElementById('event-picture-input');
-    fileInput.addEventListener('change', this.onFileSelected.bind(this));
-  }, 0);
-
-
-  this.fetchEvents();
-
-}*/
-
   openLabelPopup(): void {
     this.labelPopupVisible = true;
   }
@@ -747,6 +605,32 @@ private openForm(data: { form: any, appointmentData: SchedulerEvent }): void {
       email: user.email
     };
   }
+
+  captureCurrentLocation(): void {
+    // Use Geolocation API to capture current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.latitude = position.coords.latitude.toFixed(6);
+          this.longitude = position.coords.longitude.toFixed(6);
+        },
+        (error) => {
+          console.error('Error capturing location:', error);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  }
+
+
+
+
+
+
+
+
+
   fetchEventPicture(eventId: string): Observable<string | null> {
     return this.eventApiService.getEventPictureUrl(eventId).pipe(
       map(response => {
@@ -782,19 +666,5 @@ private openForm(data: { form: any, appointmentData: SchedulerEvent }): void {
 
 
 
-
-
-  private sendEventToServer(): void {
-    console.log("Sending event data:", this.selectedEvent);
-    this.eventApiService.createOrUpdateEvent(this.selectedEvent).subscribe({
-      next: (response) => {
-        console.log('Event successfully saved', response);
-        // Refresh events or perform other actions as needed
-      },
-      error: (error) => {
-        console.error('Error saving event', error);
-      }
-    });
-  }
 
 }
