@@ -76,7 +76,6 @@ import { RECAPTCHA_SETTINGS, RecaptchaFormsModule, RecaptchaModule, RecaptchaSet
       siteKey: environment.recaptcha.siteKey,
     } as RecaptchaSettings,
   },],
-  
   bootstrap: [AppComponent],
 })
 export class AppModule {}
