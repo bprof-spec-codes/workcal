@@ -222,7 +222,10 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   onEventAdding(event): void {
     console.log("kiskutya", event);
     const appointmentData = event.appointmentData;
-
+    if(event.appointmentData.allDay){
+      event.appointmentData.endDate = new Date(event.appointmentData.endDate);
+      event.appointmentData.endDate = new Date(event.appointmentData.endDate.getTime() + (24 * 60 * 60 * 1000));
+    }
     const selectedLabels = this.dynamicUniqueLabels .filter(label =>
       appointmentData.labels?.includes(label.name)
     );
