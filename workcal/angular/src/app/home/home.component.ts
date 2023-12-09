@@ -26,13 +26,14 @@ export class HomeComponent  implements OnInit{
   getUserRole(): void {
     console.log('Fetching user role...');
     this.userService.getUserRole().subscribe(
-      role => {
-        console.log('User role fetched successfully:', role);
-        this.userRole = role;
+      response => {
+        console.log('API Response:', response);
+        this.userRole = response.role;
       },
       error => {
         console.error('Error fetching user role', error);
       }
     );
   }
+
 }

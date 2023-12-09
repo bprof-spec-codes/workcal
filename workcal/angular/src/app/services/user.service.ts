@@ -7,11 +7,12 @@ import { Observable } from 'rxjs';
 })
 export class UserService {
 
-  private apiUrl = 'https://localhost:44387'; // Replace with your actual API endpoint
+  private apiUrl = 'https://localhost:44387';
 
   constructor(private http: HttpClient) { }
 
-  getUserRole(): Observable<string> {
-    return this.http.get<string>(`${this.apiUrl}/api/app/identity/user-roles`);
+  getUserRole(): Observable<{ role: string }> {
+    return this.http.get<{ role: string }>(`${this.apiUrl}/api/app/identity/user-roles`);
   }
+
 }

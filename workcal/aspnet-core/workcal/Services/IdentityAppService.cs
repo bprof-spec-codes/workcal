@@ -17,7 +17,8 @@ namespace workcal.Services
 
         public async Task<string> GetUserRolesAsync()
         {
-            return CurrentUser.Roles.FirstOrDefault();
+            string role = CurrentUser.Roles.FirstOrDefault();
+            return "{\"role\": \"" + role + "\"}";
         }
 
     }
