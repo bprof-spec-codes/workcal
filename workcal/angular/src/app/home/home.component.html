@@ -2,61 +2,83 @@
   <p>Your role is: {{ userRole }}</p>
 </div>
 
+
+
+
+<div class="card-body">
+
+  <button class="btn btn-light" mat-raised-button color="primary" [routerLink]="['/calendar']">
+    Go to Calendar Page
+  </button>
+
+  &nbsp;
+  <button class="btn btn-light" mat-raised-button color="primary" [routerLink]="['/statistics']">
+    Go to statistics Page
+  </button>
+  &nbsp;
+  <button class="btn btn-light" mat-raised-button color="primary" [routerLink]="['/pictures']">
+    Go to pictures Page
+  </button>
+</div>
+<br>
+
 <div class="container">
   <div class="card">
     <div class="card-header">
         <h5 class="card-title">
-            {{ '::Welcome_Title' | abpLocalization }}
+            {{ '::Welcome_Title' | abpLocalization }} this is the WorkCal team's project
         </h5>
     </div>
-    <div class="card-body">
-        {{ '::Welcome_Text' | abpLocalization }}
-    </div>
+    
+  <div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">First Name</th>
+          <th scope="col">Last Name</th>
+          <th scope="col">Position/th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">1</th>
+          <td>Levente</td>
+          <td>Kiss</td>
+          <td>Product Owner</td>
+        </tr>
+        <tr>
+          <th scope="row">2</th>
+          <td>Gergő</td>
+          <td>Csizmadia</td>
+          <td>Architect</td>
+        </tr>
+        <tr>
+          <th scope="row">3</th>
+          <td>Bence</td>
+          <td>Bognár</td>
+          <td>Full Stack</td>
+        </tr>
+        <tr>
+          <th scope="row">4</th>
+          <td>Márton Bendegúz</td>
+          <td>Juhász</td>
+          <td>Full Stack</td>
+        </tr>
+        <tr>
+          <th scope="row">5</th>
+          <td>Márk</td>
+          <td>Varga</td>
+          <td>Full Stack</td>
+        </tr>
+        <tr>
+          <th scope="row">6</th>
+          <td>Bence</td>
+          <td>Sörös</td>
+          <td>Scrum Master</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-  <div class="card mt-5">
-    <div class="card-body">
-      <div class="row">
-        <div class="col-md-auto text-center">
-          <img src="https://abp.io/assets/png/mastering-abp-framework.webp" style="max-width: 400px;"
-               class="w-100 mb-5 my-md-3">
-        </div>
-        <div class="col-md d-flex align-items-center">
-          <div class="pe-0 pe-md-4">
-            <small class="text-uppercase text-muted">THE OFFICIAL GUIDE</small>
-            <h2 class="mb-4">Mastering ABP Framework</h2>
-            <p class="mb-4">Written by the creator of the ABP Framework, this book will help you gain a complete
-              understanding of the framework and modern web application development techniques.</p>
-            <div class="mb-4">
-              <a href="https://www.amazon.com/gp/product/B097Z2DM8Q/ref=dbs_a_def_rwt_hsch_vapi_tkin_p1_i0"
-                 class="btn btn-success mb-1">
-                Buy on Amazon US
-              </a>
-              &nbsp;
-              <a href="https://www.packtpub.com/product/mastering-abp-framework/9781801079242"
-                 class="btn btn-primary mb-1">
-                Buy on PACKT
-              </a>
-              &nbsp;
-              <a href="https://www.packtpub.com/product/mastering-abp-framework/9781801079242"
-                 class="btn btn-primary mb-1">
-                Buy on PACKT
-              </a>
-              &nbsp;
-              <button mat-raised-button color="primary" [routerLink]="['/calendar']">
-                Go to Calendar Page
-              </button>
-              &nbsp;
-              <button mat-raised-button color="primary" [routerLink]="['/statistics']">
-                Go to statistics Page
-              </button>
-              &nbsp;
-              <button mat-raised-button color="primary" [routerLink]="['/pictures']">
-                Go to pictures Page
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
