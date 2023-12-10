@@ -7,6 +7,8 @@ import { catchError } from 'rxjs/operators';
 import { UserApiService } from '../user-api.service';
 import { fromEvent, of } from 'rxjs';
 import { mergeMap, delay } from 'rxjs/operators';
+import { UserService } from '../services/user.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-worker-statistics',
@@ -16,12 +18,14 @@ import { mergeMap, delay } from 'rxjs/operators';
 export class WorkerStatisticsComponent implements OnInit {
   workerHours: Array<any> = [];
 
-
+  myId:string;
+  userRole: string;
   reportType: string = 'weekly';
   selectedWorkerIds: string[] = [];
   selectedWorkers: UserDto[] = [];
 
   workers: UserDto[] = [];
+  filteredworkers: UserDto[] = [];
   events: EventDto[] = [];
 
   startDate: Date;
@@ -33,11 +37,10 @@ export class WorkerStatisticsComponent implements OnInit {
   filteredEvents: EventDto[] = [];
 
 
-  constructor(private eventService: EventApiService,  private userApiService: UserApiService
-  ) {}
+  constructor(private eventService: EventApiService,  private userApiService: UserApiService,private userService: UserService,private http: HttpClient  ) {}
 
   ngOnInit(): void {
-
+    this.getUserRole();
     let now = new Date();
     this.startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     this.endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -65,12 +68,38 @@ export class WorkerStatisticsComponent implements OnInit {
         }
 
         if (data && data.items) {
+          
           this.workers = data.items.map(user => ({
-            id: user.id,
+             id: user.id,
             userName: user.userName,
             name: user.name,
             email: user.email
+           
+            
           }));
+          //Worker static view
+          if(this.userRole=="worker"){
+           
+            const apiUrl = 'https://localhost:44387/api/app/identity/my-id';
+
+            const headers = new HttpHeaders({
+              'accept': 'text/plain',
+              'RequestVerificationToken': 'CfDJ8BBTzyL2vblHpwESLunpy2R_rjrr2GopN6oiZ4sx1Ya9KHKjnQ_KxwNbJfyqwE-wxoTEoJ7zHAGpC43Upt7Ndzw3ttZLbotjApDE5tdfbar1T-LhppV8o0Ux0rD8f977pcv8VWUX-0c0j9tPRPMKa3f-lv7Q-IQL5vMZBjmGNRxEab-K7YTkz5GCf0bB4lMlfw',
+              'X-Requested-With': 'XMLHttpRequest',
+            });
+        
+            this.http.get<string>(apiUrl, { headers }).subscribe(
+              (data) => {
+              
+                this.workers=this.workers.filter(user=> user.id==data)      
+              },
+              (error) => {
+                console.error('Error fetching my ID', error);
+              }
+            );
+          
+          
+        }
         } else {
           console.error('Items key not found in response:', data);
         }
@@ -78,7 +107,21 @@ export class WorkerStatisticsComponent implements OnInit {
 
       });
   }
-
+  getUserRole(): void {
+    console.log('Fetching user role...');
+    this.userService.getUserRole().subscribe(
+      response => {
+        console.log('API Response:', response);
+        this.userRole = response.role;
+        
+      },
+      error => {
+        console.error('Error fetching user role', error);
+        
+      }
+    );
+   
+  }
   fetchEvents(): void {
     this.eventService.getAllEvents().subscribe(events => {
       this.events = events;
