@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild, Renderer2 } from '@angular/core';
 import { EventApiService } from '../event-api.service';
-import { EventDto, LabelDto, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
+import { EventDto, LabelDto, SchedulerEvent , UserDto, UserResponse, dailyEvent } from '../models/event-dto.model';
 import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule, DxButtonComponent  } from 'devextreme-angular';
 import { Router } from '@angular/router';
 import { catchError, finalize, map, switchMap } from 'rxjs/operators';
@@ -219,7 +219,7 @@ private filterEventsForCurrentDay(events: EventDto[]): EventDto[] {
 }
 
 
-private mapEventToSchedulerEvent(event: EventDto): SchedulerEvent {
+private mapEventToSchedulerEvent(event: EventDto): dailyEvent {
   // Map EventDto to SchedulerEvent, handling null values
   return {
     id: event.id || '',
@@ -231,7 +231,9 @@ private mapEventToSchedulerEvent(event: EventDto): SchedulerEvent {
     users: event.users || [],
     pictureData: event.pictureData || '',
     IsInRange: event.IsInRange || false,
-    description: event.description || ''
+    description: event.description || '',
+    labelNames: event.labels?.map(label => label.name).join(', ') || '',
+    userNames: event.users?.map(user => user.name).join(', ') || ''
   };
 }
 

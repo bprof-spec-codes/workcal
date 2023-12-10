@@ -27,7 +27,25 @@ export type SchedulerEvent = {
   pictureData?: string;
   IsInRange: boolean
   description: string;
+
 };
+
+export type dailyEvent = {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+  name: string;
+  locationString: string;
+  labels: Array<{ name: string, color: string }>;
+  users: UserDto[];
+  pictureData?: string;
+  IsInRange: boolean
+  description: string;
+  labelNames: string;
+  userNames: string;
+};
+
+
 
 export type LabelDto = {
   id?: string;
