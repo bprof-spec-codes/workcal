@@ -1,20 +1,25 @@
 <div>
-  <h2>Events for Today</h2>
-  &nbsp;
-  <div *ngFor="let event of currentDayEvents">
-    &nbsp;
-    &nbsp;
 
-    <h3>{{ event.name }}</h3>
-    <p><strong>Start Time:</strong> {{ event.startDate | date:'medium' }}</p>
-    <p><strong>End Time:</strong> {{ event.endDate | date:'medium' }}</p>
-    <p><strong>Location:</strong> {{ event.locationString }}</p>
-    <p><strong>Labels:</strong> {{ event.labelNames }}</p>
-    <p><strong>Participants:</strong> {{ event.userNames }}</p>
-    <p><strong>Description:</strong> {{ event.description }}</p>
-    <div *ngIf="event.pictureData">
-      <img [src]="'data:image/jpeg;base64,' + event.pictureData" alt="Event Picture">
-    </div>
-    <!-- Additional details can be added here -->
-  </div>
+
+    <button (click)="print()">Print</button>
+
+
+
+  <h2>Events for Today</h2>
+  <mat-card *ngFor="let event of currentDayEvents" class="event-card">
+    <mat-card-header>
+      <mat-card-title>{{ event.name }}</mat-card-title>
+      <mat-card-subtitle>{{ event.startDate | date:'medium' }} - {{ event.endDate | date:'medium' }}</mat-card-subtitle>
+    </mat-card-header>
+    <img mat-card-image *ngIf="event.pictureData"
+    [src]="'data:image/png;base64,' + event.pictureData"
+    alt="Event Picture"
+    class="event-image">
+    <mat-card-content>
+      <p><strong>Location:</strong> {{ event.locationString }}</p>
+      <p><strong>Labels:</strong> {{ event.labelNames }}</p>
+      <p><strong>Participants:</strong> {{ event.userNames }}</p>
+      <p><strong>Description:</strong> {{ event.description }}</p>
+    </mat-card-content>
+  </mat-card>
 </div>

@@ -1,11 +1,7 @@
-picture-thumbnail {
-  width: 100px;   /* Adjust width as needed */
-  height: 100px;  /* Adjust height as needed */
-  object-fit: cover; /* This will ensure that the aspect ratio is maintained */
-  border-radius: 5px; /* Optional: for rounded corners */
-}
-.picture-item {
-  display: inline-block; /* Display images inline */
-  margin: 5px; /* Spacing around each image */
-  text-align: center; /* Center the image in its container */
+.picture-thumbnail {
+  height: 100px; /* Example fixed height */
+  width: 100px; /* Example fixed width */
+  object-fit: cover; /* Ensures the image covers the area */
+  border-radius: 5px; /* Optional: adds rounded corners */
+  margin: 5px; /* Optional: adds space around the image */
 }

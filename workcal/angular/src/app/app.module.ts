@@ -31,10 +31,12 @@ import { DxButtonModule } from 'devextreme-angular';
 import { NgxPrintModule } from 'ngx-print';
 import { PictureUploadComponent } from './picture-upload/picture-upload.component';
 import { DailyEventsComponent } from './daily-events/daily-events.component';
+import { MatCardModule } from '@angular/material/card';
 
 
 @NgModule({
   imports: [
+    MatCardModule,
     NgxPrintModule,
     DxDateBoxModule,
     DxChartModule,

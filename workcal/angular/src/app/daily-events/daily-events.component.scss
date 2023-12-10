@@ -1,0 +1,11 @@
+.event-card {
+  margin: 10px;
+}
+.event-image {
+  height: 200px; // or your desired height
+  width: auto; // Adjust the width as needed
+  object-fit: cover; // This will crop the image to fill the area
+  object-position: left; // This centers the image in the frame
+  margin: auto;
+
+}

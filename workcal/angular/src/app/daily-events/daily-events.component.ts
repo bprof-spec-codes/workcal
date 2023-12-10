@@ -236,6 +236,8 @@ private mapEventToSchedulerEvent(event: EventDto): dailyEvent {
     userNames: event.users?.map(user => user.name).join(', ') || ''
   };
 }
-
+print() {
+  window.print();
+}
 
 }
