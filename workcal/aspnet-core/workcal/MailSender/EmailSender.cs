@@ -50,9 +50,13 @@ namespace workcal.MailSender
                                    : $"Failure Email to {toEmail}");
         }
 
-        public Task SendAsync(string to, string subject, string body, bool isBodyHtml = true)
+        public async Task SendAsync(string to, string subject, string body, bool isBodyHtml = true)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(Options.SendGridKey))
+            {
+                throw new Exception("Null SendGridKey");
+            }
+            await Execute(Options.SendGridKey, subject, body, to);
         }
 
         public Task SendAsync(string from, string to, string subject, string body, bool isBodyHtml = true)
