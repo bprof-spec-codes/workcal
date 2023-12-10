@@ -190,6 +190,7 @@ namespace workcal.Services
                     StartTime = @event.StartTime,
                     EndTime = @event.EndTime,
                     LocationString = @event.LocationString,
+                    Description = @event.Description,
 
                 };
 
@@ -442,6 +443,8 @@ namespace workcal.Services
                 eventEntity.StartTime = @event.StartTime;
                 eventEntity.EndTime = @event.EndTime;
                 eventEntity.LocationString = @event.LocationString;
+                eventEntity.Description = @event.Description;
+
                 await _eventRepository.UpdateAsync(eventEntity);
 
                 var existingLabelsDict = eventEntity.Labels.ToDictionary(l => l.Name, l => l);
