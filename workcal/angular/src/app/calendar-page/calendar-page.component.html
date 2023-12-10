@@ -1,0 +1,115 @@
+<div>
+  <h1>Calendar Page</h1>
+
+    <dx-button
+            stylingMode="contained"
+            type="normal"
+            [width]="120"
+
+          >
+          <button printSectionId="printSection1" ngxPrint>
+            Print
+            </button>
+          </dx-button>
+
+    <div id="printSection1">
+  <dx-scheduler
+
+  [dataSource]="schedulerEvents"
+  [currentDate]="currentDate"
+  [startDayHour]="6"
+  [endDayHour]="22"
+  [views]="['print','day', 'week', 'workWeek', 'month']"
+  [currentView]="'week'"
+  (onAppointmentAdding)="onEventAdding($event)"
+  (onAppointmentUpdating)="onEventUpdating($event)"
+  (onAppointmentDeleting)="onEventDeleting($event)"
+  (onAppointmentFormOpening)="onAppointmentFormOpening($event)"
+  (onDragStart)="onAppointmentDragStart($event)"
+  (onDragEnd)="onAppointmentDragEnd($event)"
+
+  appointmentTemplate="appointment-template"
+
+>
+
+<dxi-view
+type="day"
+[cellDuration]="60">
+</dxi-view>
+<dxi-view
+type="week"
+[cellDuration]="60">
+</dxi-view>
+<dxi-view
+type="month"
+[cellDuration]="60">
+</dxi-view>
+
+
+
+
+
+
+
+
+
+<div *dxTemplate="let model of 'appointment-template'">
+  <div style="height: 100%; width: 100%;">
+
+    <div class="dx-scheduler-appointment-title">
+      {{ model.appointmentData.text }}
+
+    </div>
+
+
+    <div class="dx-scheduler-appointment-content-date" >
+      {{ (model.targetedAppointmentData.startDate | date : "shortTime")
+      + " - " +
+      (model.targetedAppointmentData.endDate | date : "shortTime") }}
+    </div>
+
+
+
+
+    <div class=" dx-scheduler-appointment-content-details">
+      <ng-container *ngFor="let label of model.appointmentData.labels">
+        <span [style.backgroundColor]="label.color"
+              style="color: white; padding: 4px; margin-right: 4px;">
+          {{label.name}}
+        </span>
+      </ng-container>
+
+    </div>
+
+    <div>
+      <img *ngFor="let user of model.appointmentData.users" [src]="'data:image/jpeg;base64,' + user.imageUrl" class="event-user-image" alt="User Image"/>
+
+  </div>
+
+  </div>
+
+
+  </div>
+</dx-scheduler>
+
+
+</div>
+
+
+
+<div class="label-list">
+  <div *ngFor="let label of dynamicUniqueLabels">
+    {{ label.name }} ({{ label.color }})
+    <button (click)="deleteLabelPermanent(label.name, label.color)">Delete</button>
+  </div>
+</div>
+<img  [src]="selectedEventPicture" class="event-user-image" alt="User Image"/>
+
+
+</div>
+
+<div>
+  <span>Latitude: {{ latitude }}</span>
+  <span>Longitude: {{ longitude }}</span>
+  <button id="capture-location-button" type="button">Capture Location</button>
+</div>

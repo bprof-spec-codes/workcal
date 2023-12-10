@@ -48,6 +48,11 @@ using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
 using workcal.MailSender;
 using workcal.Services;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Autofac.Core;
+using Microsoft.AspNetCore.Identity;
+using IdentityUser = Microsoft.AspNetCore.Identity.IdentityUser;
+using IdentityRole = Microsoft.AspNetCore.Identity.IdentityRole;
 
 namespace workcal;
 
@@ -135,6 +140,15 @@ public class workcalModule : AbpModule
         context.Services.AddTransient<IEmailSender, EmailSender>();
         context.Services.AddTransient<IUserService, UserService>();
         context.Services.Configure<AuthMessageSenderOptions>(configuration);
+
+        Configure<AbpAspNetCoreMvcOptions>(options =>
+        {
+            options.ConventionalControllers.Create(typeof(workcalModule).Assembly);
+        });
+        var services = context.Services;
+
+     
+
 
         ConfigureAuthentication(context);
         ConfigureBundles();
@@ -246,8 +260,16 @@ public class workcalModule : AbpModule
         });
     }
 
+    public void ConfigureServices(IServiceCollection services)
+    {
+        // Other service registrations
+
+        services.AddHttpClient(); // Registers IHttpClientFactory
+    }
     private void ConfigureSwagger(IServiceCollection services, IConfiguration configuration)
     {
+
+        services.AddHttpClient();
         services.AddAbpSwaggerGenWithOAuth(
             configuration["AuthServer:Authority"],
             new Dictionary<string, string>

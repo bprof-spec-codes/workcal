@@ -1,7 +1,10 @@
-using workcal.Data;
+﻿using workcal.Data;
 using Serilog;
 using Serilog.Events;
 using Volo.Abp.Data;
+using workcal.Controllers;
+
+
 
 namespace workcal;
 
@@ -32,6 +35,17 @@ public class Program
         try
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    policy =>
+                    {
+                        policy.WithHeaders("*");
+                        policy.WithOrigins("*");
+                        policy.WithMethods("*");
+                    });
+            });
+
             builder.Host.AddAppSettingsSecretsJson()
                 .UseAutofac()
                 .UseSerilog();

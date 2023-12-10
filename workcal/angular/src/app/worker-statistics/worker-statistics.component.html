@@ -1,0 +1,62 @@
+<div>
+  <h2>Worker Hours Report</h2>
+
+  <div>
+    <label for="reportType">Report Type:</label>
+    <select [(ngModel)]="reportType" (change)="onReportTypeChange()">
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+      <option value="yearly">Yearly</option>
+    </select>
+
+    <div *ngFor="let worker of workers">
+      <input type="checkbox" [id]="worker.id" [value]="worker.id"
+             (change)="onWorkerSelectionChange(worker.id, $event.target.checked)"
+             [checked]="selectedWorkerIds.includes(worker.id)">
+      <label [for]="worker.id">{{ worker.name }}</label>
+    </div>
+
+    <div *ngFor="let labelName of distinctLabelNames">
+      <input type="checkbox" [id]="'label-' + labelName" [value]="labelName"
+             (change)="onLabelSelectionChange(labelName, $event.target.checked)"
+             [checked]="selectedLabelNames.includes(labelName)">
+      <label [for]="'label-' + labelName">{{ labelName }}</label>
+    </div>
+
+    <dx-date-box
+    [(value)]="startDate"
+    (valueChange)="onDateChange()"
+    type="date"
+    placeholder="Start Date">
+  </dx-date-box>
+
+  <dx-date-box
+    [(value)]="endDate"
+    (valueChange)="onDateChange()"
+    type="date"
+    placeholder="End Date">
+  </dx-date-box>
+
+  </div>
+
+
+
+  <!-- Chart for displaying hours -->
+  <dx-chart
+  [dataSource]="workerHours"
+  title="Worker Hours Report">
+  <dxi-series
+    *ngFor="let worker of selectedWorkers"
+    argumentField="segment"
+    [valueField]="worker.name"
+    [name]="worker.name"
+    type="bar">
+  </dxi-series>
+
+
+  </dx-chart>
+
+
+</div>
+

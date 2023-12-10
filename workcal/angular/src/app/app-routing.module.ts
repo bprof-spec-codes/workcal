@@ -1,7 +1,18 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { CalendarPageComponent } from './calendar-page/calendar-page.component';
+import { WorkerStatisticsComponent } from './worker-statistics/worker-statistics.component';
+import { PictureUploadComponent } from './picture-upload/picture-upload.component';
+import { DailyEventsComponent } from './daily-events/daily-events.component';
+
 
 const routes: Routes = [
+  { path: 'calendar', component: CalendarPageComponent },
+  { path: 'statistics', component: WorkerStatisticsComponent },
+  { path: 'pictures', component: PictureUploadComponent },
+  { path: 'dailyevents', component: DailyEventsComponent },
+
+
   {
     path: '',
     pathMatch: 'full',

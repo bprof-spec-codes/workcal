@@ -16,9 +16,35 @@ import { AppComponent } from './app.component';
 import { APP_ROUTE_PROVIDER } from './route.provider';
 import { FeatureManagementModule } from '@abp/ng.feature-management';
 import { AbpOAuthModule } from '@abp/ng.oauth';
+import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule,DxColorBoxModule } from 'devextreme-angular';
+import { CalendarPageComponent } from './calendar-page/calendar-page.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { HttpClientModule } from '@angular/common/http';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { MatChipsModule } from '@angular/material/chips';
+import { WorkerStatisticsComponent } from './worker-statistics/worker-statistics.component';
+import { DxChartModule, DxSelectBoxModule } from 'devextreme-angular';
+import { FormsModule } from '@angular/forms';
+import { DxDateBoxModule } from 'devextreme-angular';
+import { DxButtonModule } from 'devextreme-angular';
+import { NgxPrintModule } from 'ngx-print';
+import { PictureUploadComponent } from './picture-upload/picture-upload.component';
+import { DailyEventsComponent } from './daily-events/daily-events.component';
+
 
 @NgModule({
   imports: [
+    NgxPrintModule,
+    DxDateBoxModule,
+    DxChartModule,
+    DxSelectBoxModule,
+    DxButtonModule,
+    FormsModule,
+    HttpClientModule,
+    MatButtonModule,
+    MatToolbarModule,
+    MatChipsModule ,
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
@@ -35,9 +61,15 @@ import { AbpOAuthModule } from '@abp/ng.oauth';
     ThemeLeptonXModule.forRoot(),
     SideMenuLayoutModule.forRoot(),
     FeatureManagementModule.forRoot(),
+    DxSchedulerModule,
+    DxDraggableModule,
+    DxScrollViewModule,
+    DxColorBoxModule,
   ],
-  declarations: [AppComponent],
+  declarations: [AppComponent, CalendarPageComponent, WorkerStatisticsComponent, PictureUploadComponent, DailyEventsComponent],
   providers: [APP_ROUTE_PROVIDER],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
+
+platformBrowserDynamic().bootstrapModule(AppModule);
