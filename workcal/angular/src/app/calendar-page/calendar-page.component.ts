@@ -10,7 +10,7 @@ import { Location } from '@angular/common';
 import notify from 'devextreme/ui/notify';
 import { PictureService } from '../picture-api.service';
 import { BingMapsService } from '../geocoding.service';
-import { MarkdownModule } from 'ngx-markdown';
+
 
 
 @Component({
