@@ -476,6 +476,17 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
           `;
             }
           },
+          {
+            itemType: 'button',
+            horizontalAlignment: 'left',
+            buttonOptions: {
+              text: 'Print this event',
+              onClick: () => {
+                window.print();
+                
+              }
+            }
+          },
         {
           dataField: 'labels',
           editorType: 'dxTagBox',
