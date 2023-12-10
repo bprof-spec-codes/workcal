@@ -31,12 +31,10 @@ import { DxButtonModule } from 'devextreme-angular';
 import { NgxPrintModule } from 'ngx-print';
 import { PictureUploadComponent } from './picture-upload/picture-upload.component';
 import { DailyEventsComponent } from './daily-events/daily-events.component';
-import { MarkdownModule } from 'ngx-markdown';
 
 
 @NgModule({
   imports: [
-    MarkdownModule.forRoot(),
     NgxPrintModule,
     DxDateBoxModule,
     DxChartModule,
@@ -50,8 +48,6 @@ import { MarkdownModule } from 'ngx-markdown';
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
-        MarkdownModule.forRoot(),
-
     CoreModule.forRoot({
       environment,
       registerLocaleFn: registerLocale(),
