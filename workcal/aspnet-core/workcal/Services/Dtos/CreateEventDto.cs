@@ -14,6 +14,7 @@ namespace workcal.Services.Dtos
 
         [Required]
         public DateTime EndTime { get; set; }
+        public string Description { get; set; }
 
         public string LocationString { get; set; } // User-provided location description
         public double? Latitude { get; set; } // GPS latitude

@@ -10,6 +10,7 @@ import { Location } from '@angular/common';
 import notify from 'devextreme/ui/notify';
 import { PictureService } from '../picture-api.service';
 import { BingMapsService } from '../geocoding.service';
+import { MarkdownModule } from 'ngx-markdown';
 
 
 @Component({
@@ -134,11 +135,13 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           id: event.id,
           startDate: event.startTime,
           endDate: event.endTime,
-          text: event.name,
+          name: event.name,
           locationString: event.locationString,
           pictureData: event.pictureData,
           labels: event.labels,
           IsInRange: event.IsInRange,
+          Description: event.Description,
+
           users: event.users.map(user => {
             // Find the corresponding user in 'allusers' to get the 'imageUrl'
             const userWithImage = this.allusers.find(u => u.id === user.id);
@@ -246,6 +249,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       labels: selectedLabels,
       users:  selectedUserIDs,
       IsInRange: event.IsInRange,
+      Description: event.Description,
 
     };
 
@@ -333,6 +337,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       labels: selectedLabels,
       users: selectedUserIDs,
       IsInRange: event.IsInRange,
+      Description: event.Description,
 
 
     };

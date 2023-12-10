@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using Newtonsoft.Json;
 using Volo.Abp.Domain.Entities;
+using workcal.MailSender;
 
 namespace workcal.Services
 {
@@ -32,11 +33,12 @@ namespace workcal.Services
 
         private readonly IRepository<Entities.EventsUsers, Guid> _eventsUsersRepository;
         private readonly IRepository<Volo.Abp.Identity.IdentityUser, Guid> _userRepository; // Inject the user repository
+      //  private readonly EmailSender _emailSender; // Injected EmailSender service
 
         private readonly HttpClient _httpClient;
         private readonly string _bingMapsApiKey;
 
-        public EventAppService(HttpClient httpClient, IConfiguration configuration, IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository, IRepository<Picture, Guid> pictureRepository, IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
+        public EventAppService(/*EmailSender emailSender,*/ HttpClient httpClient, IConfiguration configuration, IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository, IRepository<Picture, Guid> pictureRepository, IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
 
         {
             _eventRepository = eventRepository;
@@ -46,6 +48,7 @@ namespace workcal.Services
             _userRepository = userRepository;
             _httpClient = httpClient;
             _bingMapsApiKey = configuration["BingMaps:ApiKey"];
+          //  _emailSender = emailSender;
 
         }
 
@@ -187,6 +190,7 @@ namespace workcal.Services
                     StartTime = @event.StartTime,
                     EndTime = @event.EndTime,
                     LocationString = @event.LocationString,
+                    Description = @event.Description,
 
                 };
 
@@ -215,6 +219,27 @@ namespace workcal.Services
                     };
                     await _eventsUsersRepository.InsertAsync(eventUser);
                 }
+
+               /* foreach (var userId in @event.Users)
+                {
+                    var user = await _userRepository.GetAsync(userId);
+                    var userEmail = user.Email; // Assuming the User entity has an Email property
+
+                    // Compose your email message
+                    string subject = "New Event Created";
+                    string message = $"A new event named '{@event.Name}' has been created.";
+
+                    // Send email
+                    try
+                    {
+                        await _emailSender.SendEmailAsync(userEmail, subject, message);
+                    }
+                    catch (Exception emailEx)
+                    {
+                        Logger.LogWarning($"Failed to send email: {emailEx.Message}");
+                        // Do not throw; just log the exception
+                    }
+                }*/
 
             }
             catch (Exception ex)
@@ -418,6 +443,8 @@ namespace workcal.Services
                 eventEntity.StartTime = @event.StartTime;
                 eventEntity.EndTime = @event.EndTime;
                 eventEntity.LocationString = @event.LocationString;
+                eventEntity.Description = @event.Description;
+
                 await _eventRepository.UpdateAsync(eventEntity);
 
                 var existingLabelsDict = eventEntity.Labels.ToDictionary(l => l.Name, l => l);

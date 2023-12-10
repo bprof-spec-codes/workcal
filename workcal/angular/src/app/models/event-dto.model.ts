@@ -10,6 +10,7 @@ export type EventDto = {
   users: UserDto[];
   pictureData?: string;
   IsInRange: boolean
+  Description: String
 
 };
 
@@ -19,13 +20,13 @@ export type SchedulerEvent = {
   id: string;
   startDate: Date;
   endDate: Date;
-  text: string;
+  name: string;
   locationString: string;
   labels: Array<{ name: string, color: string }>;
   users: UserDto[];
   pictureData?: string;
   IsInRange: boolean
-
+  Description: String
 };
 
 export type LabelDto = {
