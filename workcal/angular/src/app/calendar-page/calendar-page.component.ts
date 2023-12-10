@@ -140,7 +140,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           pictureData: event.pictureData,
           labels: event.labels,
           IsInRange: event.IsInRange,
-          Description: event.Description,
+          description: event.description,
 
           users: event.users.map(user => {
             // Find the corresponding user in 'allusers' to get the 'imageUrl'
@@ -249,7 +249,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       labels: selectedLabels,
       users:  selectedUserIDs,
       IsInRange: event.IsInRange,
-      Description: event.Description,
+      description:  appointmentData.description || '',
 
     };
 
@@ -330,14 +330,14 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
     const updatedEvent: EventDto = {
       id: appointmentDataOld.id,
-      name: appointmentData.text,
+      name: appointmentData.name,
       startTime: new Date(new Date(appointmentData.startDate).getTime() + 60 * 60 * 1000),
       endTime: new Date(new Date(appointmentData.endDate).getTime() + 60 * 60 * 1000),
       locationString: appointmentData.location || '',
       labels: selectedLabels,
       users: selectedUserIDs,
       IsInRange: event.IsInRange,
-      Description: event.Description,
+      description: appointmentData.description || '',
 
 
     };
@@ -404,22 +404,44 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
 
     const oldAppointmentData = data.appointmentData;
+
     if (oldAppointmentData.labels) {
       form.updateData('labels', oldAppointmentData.labels.map(l => l.name));
     }
     if (!oldAppointmentData.locationString) {
       form.updateData('location', '');
     }
-    if (!oldAppointmentData.labels) {
-      form.updateData('labels', []);
-    }
-
-    if (!oldAppointmentData.pictureData) {
-      form.updateData('Event Picture', []);
+    if (!oldAppointmentData.description) {
+      form.updateData('description', '');
     }
     if (oldAppointmentData.locationString) {
       form.updateData('location', oldAppointmentData.locationString);
     }
+    if (oldAppointmentData.description) {
+      form.updateData('description', oldAppointmentData.description);
+    }
+
+
+    if (!oldAppointmentData.labels) {
+      form.updateData('labels', []);
+    }
+    if (!oldAppointmentData.pictureData) {
+      form.updateData('Event Picture', []);
+    }
+
+
+
+    console.log("Description:", oldAppointmentData.locationString);
+
+    console.log("Description:", oldAppointmentData.description);
+
+
+
+
+
+
+
+
     this.selectedEventId = oldAppointmentData.id;
     //this.fetchEventPicture(this.selectedEventId);
     const image = data.appointmentData.pictureData
@@ -488,7 +510,7 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
               text: 'Print this event',
               onClick: () => {
                 window.print();
-                
+
               }
             }
           },
