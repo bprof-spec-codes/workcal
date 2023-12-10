@@ -505,12 +505,15 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
             label: { text: 'Event Picture' },
             template: () => {
               return `
-              <a href="data:application/octet-stream;base64,${data.appointmentData.pictureData}" target="_blank">
-              <img src="data:image/jpeg;base64,${data.appointmentData.pictureData}" class="event-user-image" alt="Event Image"/>
-            </a>
-          `;
+                <a href="data:application/octet-stream;base64,${data.appointmentData.pictureData}" target="_blank">
+                  <img src="data:image/jpeg;base64,${data.appointmentData.pictureData}"
+                       alt="Event Image"
+                       style="height: 150px; width: 150px; object-fit: cover; border-radius: 10px; margin: 5px;" />
+                </a>
+              `;
             }
-          },
+          }
+          ,
           {
             itemType: 'button',
             horizontalAlignment: 'left',
