@@ -20,6 +20,14 @@ namespace workcal.Services
             string role = CurrentUser.Roles.FirstOrDefault();
             return "{\"role\": \"" + role + "\"}";
         }
+        public async Task<Guid> GetMyIdAsync()
+        {
+            if (CurrentUser.Id.HasValue)
+            {
+                return CurrentUser.Id.Value;
+            }
 
+            return Guid.Empty;
+        }
     }
 }
