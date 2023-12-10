@@ -57,7 +57,7 @@ type="month"
   <div style="height: 100%; width: 100%;">
 
     <div class="dx-scheduler-appointment-title">
-      {{ model.appointmentData.text }}
+      {{ model.appointmentData.name }}
 
     </div>
 
@@ -81,6 +81,9 @@ type="month"
 
     </div>
 
+    <div>
+
+  </div>
     <div>
       <img *ngFor="let user of model.appointmentData.users" [src]="'data:image/jpeg;base64,' + user.imageUrl" class="event-user-image" alt="User Image"/>
 

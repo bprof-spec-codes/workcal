@@ -422,6 +422,15 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     }
 
 
+
+  if (!oldAppointmentData.name) {
+    form.updateData('text', '');
+  }
+  if (oldAppointmentData.name) {
+    form.updateData('text', oldAppointmentData.name);
+  }
+
+
     if (!oldAppointmentData.labels) {
       form.updateData('labels', []);
     }
@@ -431,9 +440,8 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
 
 
-    console.log("Description:", oldAppointmentData.locationString);
+    console.log("Description:", oldAppointmentData.name);
 
-    console.log("Description:", oldAppointmentData.description);
 
 
 
