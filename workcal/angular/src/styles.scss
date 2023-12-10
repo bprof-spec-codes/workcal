@@ -30,5 +30,34 @@
 
 }
 
-html, body { height: 100%; }
+html, body { height: 100%; color: #000000 }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+/* Side-bar menü színezése */
+.lpx-sidebar-container > .lpx-sidebar{
+  color: #96E5ED  !important;
+}
+
+.lpx-menu-item-text{
+  color: #96E5ED  ;
+}
+
+
+.bi{
+  color: #96E5ED !important;
+}
+
+.lpx-icon{
+  color: #96E5ED 
+}
+
+
+.lpx-nav, .lpx-nav-menu, .lpx-menu-item-link, .lpx-logo-container, .lpx-topbar-container{
+  background-color:  #784F41 !important;
+}
+
+.lpx-topbar, .lpx-content{
+  background-color:  #F5EDF0 !important;
+}
+
