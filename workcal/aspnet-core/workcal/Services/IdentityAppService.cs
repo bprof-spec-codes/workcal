@@ -24,7 +24,7 @@ namespace workcal.Services
 
         public async Task<string> GetCurrentUserID()
         {
-            return CurrentUser.Id.ToString();
+            return "{\"id\": \"" + CurrentUser.Id.ToString() + "\"}";
         }
     }
 }
