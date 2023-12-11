@@ -21,5 +21,10 @@ namespace workcal.Services
             return "{\"role\": \"" + role + "\"}";
         }
 
+
+        public async Task<string> GetCurrentUserID()
+        {
+            return CurrentUser.Id.ToString();
+        }
     }
 }
