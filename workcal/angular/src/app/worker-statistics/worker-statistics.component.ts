@@ -7,6 +7,8 @@ import { catchError } from 'rxjs/operators';
 import { UserApiService } from '../user-api.service';
 import { fromEvent, of } from 'rxjs';
 import { mergeMap, delay } from 'rxjs/operators';
+import { AuthService } from '@abp/ng.core';
+import { UserService} from '../services/user.service';
 
 @Component({
   selector: 'app-worker-statistics',
@@ -32,8 +34,11 @@ export class WorkerStatisticsComponent implements OnInit {
 
   filteredEvents: EventDto[] = [];
 
+  userRole: string;
+  currentUserId: string;
+  isWorker: boolean;
 
-  constructor(private eventService: EventApiService,  private userApiService: UserApiService
+  constructor(private authService: AuthService, private userService: UserService,private eventService: EventApiService,  private userApiService: UserApiService
   ) {}
 
   ngOnInit(): void {
@@ -42,13 +47,52 @@ export class WorkerStatisticsComponent implements OnInit {
     this.startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     this.endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
+    //this.getUserRole();
 
-    this.fetchEvents();
-    this.fetchWorkers();
+   // this.fetchEvents();
+    this.getCurrentUser();
+
   }
 
+  getCurrentUser(): void {
+    this.userService.getUserId().subscribe(
+      response => {
+        console.log('API Response:', response);
+        this.currentUserId = response.id;
 
+        // Now that you have the current user ID, fetch the user role
+        this.getUserRole();
+      },
+      error => {
+        console.error('Error fetching user ID', error);
+      }
+    );
+  }
 
+  getUserRole(): void {
+    console.log('Fetching user role...');
+    this.userService.getUserRole().subscribe(
+      response => {
+        console.log('API Response:', response);
+        this.userRole = response.role;
+        console.log(' this.currentUserId:', this.currentUserId);
+
+        if (this.userRole === 'worker') {
+          this.isWorker = true;
+          this.selectedWorkerIds = [this.currentUserId];
+        } else {
+          this.isWorker = false;
+        }
+
+        // Fetch workers and events after getting the role
+        this.fetchWorkers();
+        this.fetchEvents();
+      },
+      error => {
+        console.error('Error fetching user role', error);
+      }
+    );
+  }
 
   fetchWorkers(): void {
     this.userApiService.getAllUsers()
@@ -71,6 +115,10 @@ export class WorkerStatisticsComponent implements OnInit {
             name: user.name,
             email: user.email
           }));
+          if (this.isWorker) {
+            this.workers = this.workers.filter(worker => worker.id === this.currentUserId);
+          }
+
         } else {
           console.error('Items key not found in response:', data);
         }
