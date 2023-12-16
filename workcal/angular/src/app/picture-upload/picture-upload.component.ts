@@ -17,28 +17,30 @@ export class PictureUploadComponent {
   allusers: UserDto[] = [];
   pictures: Picture[] = []; // Replace Picture with your picture model
 
-  constructor(private userApiService: UserApiService, private pictureService: PictureService,private userService: UserService,private router: Router) {}
   userRole: string;
+  constructor(private userApiService: UserApiService, private pictureService: PictureService,private userService: UserService,private router: Router) {}
+  
   ngOnInit() {
     this.getUserRole();
-if(this.userRole!="admin"){
-  this.router.navigate(['']); 
- }
     this.fetchUsers();
     this.fetchPictures();
 
   }
+ 
   getUserRole(): void {
-    console.log('Fetching user role...');
+    
     this.userService.getUserRole().subscribe(
       response => {
-        console.log('API Response:', response);
         this.userRole = response.role;
+        if(this.userRole!="admin"){
+          this.router.navigate(['']); 
+         }
       },
       error => {
         console.error('Error fetching user role', error);
       }
-    );
+      );
+   
   }
 
   fetchUsers(): void {
