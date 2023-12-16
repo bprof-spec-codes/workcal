@@ -16,7 +16,7 @@
     Go to statistics Page
   </button>
   &nbsp;
-  <button class="btn btn-light" mat-raised-button color="primary" [routerLink]="['/pictures']">
+  <button *ngIf="IsAdmin()" class="btn btn-light" mat-raised-button color="primary" [routerLink]="['/pictures']">
     Go to pictures Page
   </button>
   &nbsp;

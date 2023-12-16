@@ -35,5 +35,12 @@ export class HomeComponent  implements OnInit{
       }
     );
   }
+  IsAdmin(){
+if (this.userRole=="admin") {
+  return true;
+}else{
+  return false;
+}
+  }
 
 }
