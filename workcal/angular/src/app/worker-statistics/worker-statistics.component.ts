@@ -18,10 +18,13 @@ import { UserService} from '../services/user.service';
 export class WorkerStatisticsComponent implements OnInit {
   workerHours: Array<any> = [];
 
+  reportTypeList: string[] = ['daily', 'weekly', 'monthly', 'yearly'];
 
   reportType: string = 'weekly';
   selectedWorkerIds: string[] = [];
   selectedWorkers: UserDto[] = [];
+
+  workerHoursSum: number;
 
   workers: UserDto[] = [];
   events: EventDto[] = [];
@@ -286,6 +289,8 @@ export class WorkerStatisticsComponent implements OnInit {
     });
 
     console.log('Final workerHours:', this.workerHours);
+
+    this.workerHoursSum=this.workerHours.reduce((sum, item) => sum+item.worker.name, 0);
   }
 
 
