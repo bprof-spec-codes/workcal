@@ -7,8 +7,6 @@ import { catchError } from 'rxjs/operators';
 import { UserApiService } from '../user-api.service';
 import { fromEvent, of } from 'rxjs';
 import { mergeMap, delay } from 'rxjs/operators';
-import { AuthService } from '@abp/ng.core';
-import { UserService} from '../services/user.service';
 import { ViewChild } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
@@ -24,13 +22,10 @@ export class WorkerStatisticsComponent implements OnInit {
   workerHours: Array<any> = [];
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid: DxDataGridComponent;
 
-  reportTypeList: string[] = ['daily', 'weekly', 'monthly', 'yearly'];
 
   reportType: string = 'weekly';
   selectedWorkerIds: string[] = [];
   selectedWorkers: UserDto[] = [];
-
-  workerHoursSum: number;
 
   workers: UserDto[] = [];
   events: EventDto[] = [];
@@ -43,7 +38,7 @@ export class WorkerStatisticsComponent implements OnInit {
 
   filteredEvents: EventDto[] = [];
 
-
+  public gridColumns: any[];
   constructor(private eventService: EventApiService,  private userApiService: UserApiService
   ) {}
 
@@ -54,11 +49,108 @@ export class WorkerStatisticsComponent implements OnInit {
     this.startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     this.endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    //this.getUserRole();
 
     this.fetchEvents();
     this.fetchWorkers();
+
+    this.gridColumns = this.generateColumns(this.workerHours);
+
   }
+
+  refreshDataGrid(): void {
+    if (this.dataGrid && this.dataGrid.instance) {
+      this.dataGrid.instance.refresh();
+    }  }
+
+// worker-statistics.component.ts
+
+formatDate(date) {
+  // Format the date as you prefer, e.g., YYYY-MM-DD
+  return date.toISOString().split('T')[0];
+}
+exportGrid(gridInstance: any) {
+  if (gridInstance instanceof dxDataGrid) {
+    console.log("exportGrid start");
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Main sheet');
+
+    // Get the data source and assert it as an array
+    const dataSource = gridInstance.option('dataSource') as Array<any>;
+
+    // Define the first column header as 'segment'
+    let columnHeaders = ['segment'];
+
+
+     // Example of gathering naming components
+  const selectedUsers = this.selectedWorkers.map(w => w.name).join("_");
+  const selectedLabels = this.selectedLabelNames.join("_");
+  const reportType = this.reportType;
+  const timeFrame = `${this.formatDate(this.startDate)}_to_${this.formatDate(this.endDate)}`;
+
+  // Construct the file name
+  const fileName = `Report_${reportType}_${selectedUsers}_${selectedLabels}_${timeFrame}.xlsx`;
+
+  const infoRow = `Report Type: ${reportType}, Users: ${selectedUsers}, Labels: ${selectedLabels}, Time Frame: ${timeFrame}`;
+
+
+    // If dataSource is not empty, add user columns dynamically
+    if (Array.isArray(dataSource) && dataSource.length) {
+      // Extract user columns from the first data row
+      // Skip the 'segment' key as it's already added
+      const userColumns = Object.keys(dataSource[0]).filter(key => key !== 'segment');
+      columnHeaders = columnHeaders.concat(userColumns);
+
+      worksheet.addRow([infoRow]);
+
+      // Add column headers to the worksheet
+      worksheet.addRow(columnHeaders);
+
+      // Iterate over the data and add rows to the worksheet
+      dataSource.forEach(dataRow => {
+        const row = columnHeaders.map(header => dataRow[header] || ""); // Handle undefined values
+        worksheet.addRow(row);
+      });
+    } else {
+      console.error("Data source is not an array or is empty");
+    }
+
+    // Save the workbook
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      FileSaver.saveAs(
+        new Blob([buffer], { type: 'application/octet-stream' }),
+        fileName
+      );
+      console.log("exportGrid saveAs");
+    }).catch((bufferError) => {
+      console.error("Buffer generation error:", bufferError);
+    });
+
+
+    console.log("exportGrid end");
+  }
+}
+
+
+
+
+
+
+
+// worker-statistics.component.ts
+
+generateColumns(data: any[]): any[] {
+  const columns = [];
+
+  // Assuming all data objects have the same structure
+  if (data.length > 0) {
+    Object.keys(data[0]).forEach(key => {
+      columns.push({ dataField: key, caption: key });
+    });
+  }
+
+  return columns;
+}
 
 
 
@@ -84,10 +176,6 @@ export class WorkerStatisticsComponent implements OnInit {
             name: user.name,
             email: user.email
           }));
-          if (this.isWorker) {
-            this.workers = this.workers.filter(worker => worker.id === this.currentUserId);
-          }
-
         } else {
           console.error('Items key not found in response:', data);
         }
@@ -268,33 +356,6 @@ export class WorkerStatisticsComponent implements OnInit {
     });
 
     console.log('Final workerHours:', this.workerHours);
-
-    // Initialize the total sum of worker hours
-    this.workerHoursSum = 0;
-
-    // Iterate over each segment to calculate the total hours and update the workerHoursSum
-    for (const segmentData of this.workerHours) {
-      // Extract the relevant numeric values from the segment
-      const segmentValues = Object.values(segmentData)
-        .filter(val => typeof val === 'number')
-        .map(val => val as number); // Explicitly cast to number
-
-      // Sum the relevant numeric values and round to integer
-      const segmentSum = Math.round(segmentValues.reduce((acc, value) => acc + value, 0));
-
-      // Add the rounded sum to the total sum
-      if (!isNaN(segmentSum)) {
-        this.workerHoursSum += segmentSum;
-      } else {
-        console.warn('Encountered NaN in segment values:', segmentValues);
-      }
-    }
-
-    if (isNaN(this.workerHoursSum)) {
-      console.error('Final workerHoursSum is NaN. Please check your data and calculations.');
-    } else {
-      console.log('Sum of relevant worker hours:', this.workerHoursSum);
-    }
   }
 
 
