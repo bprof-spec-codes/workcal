@@ -3,14 +3,6 @@
 
   <div>
 
-<div *ngIf="isWorker">
-  <div *ngFor="let worker of workers">
-    <input type="checkbox" [id]="worker.id" [value]="worker.id"
-           (change)="onWorkerSelectionChange(worker.id, $event.target.checked)"
-           [checked]="selectedWorkerIds.includes(worker.id)">
-    <label [for]="worker.id">{{ worker.name }}</label>
-  </div>
-</div>
     <div>
       <label for="reportType">Report Type:</label>
       <select [(ngModel)]="reportType" (change)="onReportTypeChange()">
@@ -28,16 +20,6 @@
              [checked]="selectedWorkerIds.includes(worker.id)">
       <label [for]="worker.id">{{ worker.name }}</label>
     </div>
-
-<div *ngIf="!isWorker">
-  <div *ngFor="let worker of workers">
-    <input type="checkbox" [id]="worker.id" [value]="worker.id"
-           (change)="onWorkerSelectionChange(worker.id, $event.target.checked)"
-           [checked]="selectedWorkerIds.includes(worker.id)">
-    <label [for]="worker.id">{{ worker.name }}</label>
-  </div>
-</div>
-
 
 <!--    <dx-drop-down-box-->
 <!--      [(value)]="reportType"-->
