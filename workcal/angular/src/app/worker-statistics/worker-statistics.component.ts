@@ -360,7 +360,32 @@ generateColumns(data: any[]): any[] {
 
     console.log('Final workerHours:', this.workerHours);
 
-    this.workerHoursSum=this.workerHours.reduce((sum, item) => sum+item.worker.name, 0);
+    // Initialize the total sum of worker hours
+    this.workerHoursSum = 0;
+
+    // Iterate over each segment to calculate the total hours and update the workerHoursSum
+    for (const segmentData of this.workerHours) {
+      // Extract the relevant numeric values from the segment
+      const segmentValues = Object.values(segmentData)
+        .filter(val => typeof val === 'number')
+        .map(val => val as number); // Explicitly cast to number
+
+      // Sum the relevant numeric values and round to integer
+      const segmentSum = Math.round(segmentValues.reduce((acc, value) => acc + value, 0));
+
+      // Add the rounded sum to the total sum
+      if (!isNaN(segmentSum)) {
+        this.workerHoursSum += segmentSum;
+      } else {
+        console.warn('Encountered NaN in segment values:', segmentValues);
+      }
+    }
+
+    if (isNaN(this.workerHoursSum)) {
+      console.error('Final workerHoursSum is NaN. Please check your data and calculations.');
+    } else {
+      console.log('Sum of relevant worker hours:', this.workerHoursSum);
+    }
   }
 
 
