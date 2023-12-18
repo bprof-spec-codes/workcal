@@ -16,7 +16,13 @@ import { AppComponent } from './app.component';
 import { APP_ROUTE_PROVIDER } from './route.provider';
 import { FeatureManagementModule } from '@abp/ng.feature-management';
 import { AbpOAuthModule } from '@abp/ng.oauth';
-import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule,DxColorBoxModule } from 'devextreme-angular';
+import {
+  DxSchedulerModule,
+  DxDraggableModule,
+  DxScrollViewModule,
+  DxColorBoxModule,
+  DxCheckBoxModule, DxDropDownBoxModule, DxListModule
+} from 'devextreme-angular';
 import { CalendarPageComponent } from './calendar-page/calendar-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -32,13 +38,14 @@ import { NgxPrintModule } from 'ngx-print';
 import { PictureUploadComponent } from './picture-upload/picture-upload.component';
 import { DailyEventsComponent } from './daily-events/daily-events.component';
 import { MatCardModule } from '@angular/material/card';
-
+import { DxDataGridModule } from 'devextreme-angular';
 
 @NgModule({
   imports: [
     MatCardModule,
     NgxPrintModule,
     DxDateBoxModule,
+    DxDataGridModule,
     DxChartModule,
     DxSelectBoxModule,
     DxButtonModule,
@@ -46,13 +53,13 @@ import { MatCardModule } from '@angular/material/card';
     HttpClientModule,
     MatButtonModule,
     MatToolbarModule,
-    MatChipsModule ,
+    MatChipsModule,
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
     CoreModule.forRoot({
       environment,
-      registerLocaleFn: registerLocale(),
+      registerLocaleFn: registerLocale()
     }),
     AbpOAuthModule.forRoot(),
     ThemeSharedModule.forRoot(),
@@ -67,6 +74,9 @@ import { MatCardModule } from '@angular/material/card';
     DxDraggableModule,
     DxScrollViewModule,
     DxColorBoxModule,
+    DxCheckBoxModule,
+    DxDropDownBoxModule,
+    DxListModule
   ],
   declarations: [AppComponent, CalendarPageComponent, WorkerStatisticsComponent, PictureUploadComponent, DailyEventsComponent],
   providers: [APP_ROUTE_PROVIDER],
