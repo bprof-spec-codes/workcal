@@ -71,16 +71,15 @@ type="month"
 
 
 
-    <div class="dx-scheduler-appointment-content-details" style="display: flex; flex-wrap: wrap;">
+    <div class=" dx-scheduler-appointment-content-details">
       <ng-container *ngFor="let label of model.appointmentData.labels">
-    <span [style.backgroundColor]="label.color"
-          style="color: white; padding: 4px; margin-right: 4px; margin-bottom: 4px;">
-      {{label.name}}
-    </span>
+        <span [style.backgroundColor]="label.color"
+              style="color: white; padding: 4px; margin-right: 4px;">
+          {{label.name}}
+        </span>
       </ng-container>
+
     </div>
-
-
 
     <div>
 

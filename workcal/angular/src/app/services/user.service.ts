@@ -14,9 +14,5 @@ export class UserService {
   getUserRole(): Observable<{ role: string }> {
     return this.http.get<{ role: string }>(`${this.apiUrl}/api/app/identity/user-roles`);
   }
-  getUserId(): Observable<{ id: string }> {
-    return this.http.get<{ id: string }>(`${this.apiUrl}/api/app/identity/current-user-iD`);
-  }
-
 
 }

@@ -139,7 +139,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
           locationString: event.locationString,
           pictureData: event.pictureData,
           labels: event.labels,
-          isInRange: event.isInRange,
+          IsInRange: event.IsInRange,
           description: event.description,
 
           users: event.users.map(user => {
@@ -248,7 +248,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       locationString: appointmentData.location || '',
       labels: selectedLabels,
       users:  selectedUserIDs,
-      isInRange: appointmentData.isInRange ,
+      IsInRange: event.IsInRange,
       description:  appointmentData.description || '',
 
     };
@@ -336,7 +336,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
       locationString: appointmentData.location || '',
       labels: selectedLabels,
       users: selectedUserIDs,
-      isInRange: appointmentData.isInRange,
+      IsInRange: event.IsInRange,
       description: appointmentData.description || '',
 
 
@@ -465,7 +465,7 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
     let locationStatus = 'Checking location...';
     let distanceToLocation = null;
 
-    const isInRange = oldAppointmentData.isInRange;
+    const isInRange = oldAppointmentData.IsInRange;
 
 
     const updateLocationStatus = (isInRange, distance) => {
@@ -474,12 +474,7 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
       form.repaint(); // Refresh the form to update the display
     };
 
-    console.log('GPS data range isinrange', oldAppointmentData.isInRange);
 
-    let rangeStatus = 'Range status unknown';
-    if (typeof data.appointmentData.isInRange === 'boolean') {
-      rangeStatus = data.appointmentData.isInRange ? 'Within range' : 'Out of range';
-    }
 
     form.itemOption('mainGroup', {
 
@@ -635,15 +630,13 @@ onAppointmentFormOpening(data: { form: any, appointmentData: SchedulerEvent }): 
 
         {
           label: { text: 'Is in range' },
-
           template: () => {
-
-            console.log('GPS data range rangeStatus', rangeStatus);
-
+            let rangeStatus = 'Range status unknown';
+            if (typeof data.appointmentData.IsInRange === 'boolean') {
+              rangeStatus = data.appointmentData.IsInRange ? 'Within range' : 'Out of range';
+            }
             return `<div><span>${rangeStatus}</span></div>`;
-
           }
-
 
 
         },
