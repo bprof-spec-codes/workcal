@@ -10,6 +10,8 @@ import { Location, formatDate } from '@angular/common';
 import notify from 'devextreme/ui/notify';
 import { PictureService } from '../picture-api.service';
 import { BingMapsService } from '../geocoding.service';
+import * as marked from 'marked';
+import { DomSanitizer } from '@angular/platform-browser';
 
 
 @Component({
@@ -64,7 +66,7 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
   currentDayEvents: SchedulerEvent[] = []; // Add this to store today's events
 
 
- constructor(private eventApiService: EventApiService, private userApiService: UserApiService , private bingMapsService: BingMapsService,   private renderer: Renderer2
+ constructor(private sanitizer: DomSanitizer,private eventApiService: EventApiService, private userApiService: UserApiService , private bingMapsService: BingMapsService,   private renderer: Renderer2
 ,  private pictureService: PictureService ,private router: Router )
  {   this.router.routeReuseStrategy.shouldReuseRoute = () => false;
    this.router.onSameUrlNavigation = 'reload';}
@@ -74,6 +76,17 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
    this.fetchUniqueLabels();
    this.fetchCurrentDayEvents();
  }
+
+ convertMarkdownToHtml(markdown: string): string {
+  const html = marked.parse(markdown) as string; // Type assertion here
+  return html;
+}
+
+getHtmlContent(markdown: string) {
+  const rawHtml = this.convertMarkdownToHtml(markdown);
+  return this.sanitizer.bypassSecurityTrustHtml(rawHtml);
+}
+
 
  refreshPage() {
    //this.router.navigate([this.router.url]);
