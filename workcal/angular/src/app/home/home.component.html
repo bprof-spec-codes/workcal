@@ -7,22 +7,42 @@
 
 <div class="card-body">
 
-  <button class="btn btn-light" mat-raised-button color="primary" [routerLink]="['/calendar']">
-    Go to Calendar Page
-  </button>
+  <dx-button
+    stylingMode="contained"
+    text="Calendar"
+    type="normal"
+    [width]="120"
+    [routerLink]="['/calendar']"
+  >
+  </dx-button>
 
-  &nbsp;
-  <button class="btn btn-light" mat-raised-button color="primary" [routerLink]="['/statistics']">
-    Go to statistics Page
-  </button>
-  &nbsp;
-  <button *ngIf="IsAdmin()" class="btn btn-light" mat-raised-button color="primary" [routerLink]="['/pictures']">
-    Go to pictures Page
-  </button>
-  &nbsp;
-  <button class="btn btn-light" mat-raised-button color="primary" [routerLink]="['/dailyevents']">
-    Go to Daily View Page
-  </button>
+  <dx-button
+    stylingMode="contained"
+    text="Statistics"
+    type="normal"
+    [width]="120"
+    [routerLink]="['/statistics']"
+  >
+  </dx-button>
+
+  <dx-button
+    *ngIf="IsAdmin()"
+    stylingMode="contained"
+    text="Pictures"
+    type="normal"
+    [width]="120"
+    [routerLink]="['/pictures']"
+  >
+  </dx-button>
+
+  <dx-button
+    stylingMode="contained"
+    text="Daily events"
+    type="normal"
+    [width]="120"
+    [routerLink]="['/dailyevents']"
+  >
+  </dx-button>
   &nbsp;
 </div>
 <br>

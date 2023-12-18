@@ -9,7 +9,7 @@ export type EventDto = {
   labels: LabelDto[];
   users: UserDto[];
   pictureData?: string;
-  IsInRange: boolean;
+  isInRange: boolean;
   description: string;
 
 };
@@ -25,7 +25,7 @@ export type SchedulerEvent = {
   labels: Array<{ name: string, color: string }>;
   users: UserDto[];
   pictureData?: string;
-  IsInRange: boolean
+  isInRange: boolean
   description: string;
 
 };
@@ -39,7 +39,7 @@ export type dailyEvent = {
   labels: Array<{ name: string, color: string }>;
   users: UserDto[];
   pictureData?: string;
-  IsInRange: boolean
+  isInRange: boolean
   description: string;
   labelNames: string;
   userNames: string;

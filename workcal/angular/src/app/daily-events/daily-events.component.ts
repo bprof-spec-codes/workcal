@@ -153,7 +153,7 @@ getHtmlContent(markdown: string) {
          locationString: event.locationString,
          pictureData: event.pictureData,
          labels: event.labels,
-         IsInRange: event.IsInRange,
+         isInRange: event.isInRange,
          description: event.description,
 
          users: event.users.map(user => {
@@ -243,7 +243,7 @@ private mapEventToSchedulerEvent(event: EventDto): dailyEvent {
     labels: event.labels || [],
     users: event.users || [],
     pictureData: event.pictureData || '',
-    IsInRange: event.IsInRange || false,
+    isInRange: event.isInRange || false,
     description: event.description || '',
     labelNames: event.labels?.map(label => label.name).join(', ') || '',
     userNames: event.users?.map(user => user.name).join(', ') || ''

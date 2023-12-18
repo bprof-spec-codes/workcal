@@ -22,6 +22,14 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using Volo.Abp.Domain.Entities;
 using workcal.MailSender;
+using workcal.Data;
+using Microsoft.Extensions.Options;
+using SendGrid.Helpers.Mail;
+using SendGrid;
+using System.Net.Mail;
+using Volo.Abp.Emailing;
+using workcal.Data;
+
 
 namespace workcal.Services
 {
@@ -38,7 +46,8 @@ namespace workcal.Services
         private readonly HttpClient _httpClient;
         private readonly string _bingMapsApiKey;
 
-        public EventAppService(/*EmailSender emailSender,*/ HttpClient httpClient, IConfiguration configuration, IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository, IRepository<Picture, Guid> pictureRepository, IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
+        public EventAppService(IOptions<AuthMessageSenderOptions> optionsAccessor,
+                           ILogger<EmailSender> logger, /*EmailSender emailSender,*/ HttpClient httpClient, IConfiguration configuration, IRepository<Event, Guid> eventRepository, IRepository<Label, Guid> labelRepository, IRepository<Picture, Guid> pictureRepository, IRepository<Entities.EventsUsers, Guid> eventsUsersRepository, IRepository<Volo.Abp.Identity.IdentityUser, Guid> userRepository)
 
         {
             _eventRepository = eventRepository;
@@ -48,9 +57,60 @@ namespace workcal.Services
             _userRepository = userRepository;
             _httpClient = httpClient;
             _bingMapsApiKey = configuration["BingMaps:ApiKey"];
-          //  _emailSender = emailSender;
-
+            //  _emailSender = emailSender;
+            Options = optionsAccessor.Value;
+            _logger = logger;
         }
+
+        private readonly ILogger _logger;
+        public AuthMessageSenderOptions Options { get; } //Set with Secret Manager.
+
+
+
+
+        public async Task SendEmailAsync(string toEmail, string subject, string message)
+        {
+            if (string.IsNullOrEmpty(Options.SendGridKey))
+            {
+                throw new Exception("Null SendGridKey");
+            }
+            await Execute(Options.SendGridKey, subject, message, toEmail);
+        }
+
+        public async Task Execute(string apiKey, string subject, string message, string toEmail)
+        {
+            try
+            {
+                var client = new SendGridClient(apiKey);
+                var msg = new SendGridMessage()
+                {
+                    From = new EmailAddress("admin@workcal.com", "Password Recovery"),
+                    Subject = subject,
+                    PlainTextContent = message,
+                    HtmlContent = message
+                };
+                msg.AddTo(new EmailAddress(toEmail));
+                msg.SetClickTracking(false, false);
+
+                var response = await client.SendEmailAsync(msg);
+
+                _logger.LogInformation(response.IsSuccessStatusCode
+                    ? $"Email to {toEmail} queued successfully!"
+                    : $"Failure Email to {toEmail}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error sending email: {ex.Message}");
+                // Handle the exception based on your application's logging and error handling policies
+            }
+        }
+
+
+
+
+
+
+
 
 
         [HttpPut]
@@ -218,9 +278,10 @@ namespace workcal.Services
                         UserId = userId
                     };
                     await _eventsUsersRepository.InsertAsync(eventUser);
+
                 }
 
-               /* foreach (var userId in @event.Users)
+                foreach (var userId in @event.Users)
                 {
                     var user = await _userRepository.GetAsync(userId);
                     var userEmail = user.Email; // Assuming the User entity has an Email property
@@ -232,14 +293,14 @@ namespace workcal.Services
                     // Send email
                     try
                     {
-                        await _emailSender.SendEmailAsync(userEmail, subject, message);
+                        await SendEmailAsync(userEmail, subject, message);
                     }
                     catch (Exception emailEx)
                     {
                         Logger.LogWarning($"Failed to send email: {emailEx.Message}");
                         // Do not throw; just log the exception
                     }
-                }*/
+                }
 
             }
             catch (Exception ex)
