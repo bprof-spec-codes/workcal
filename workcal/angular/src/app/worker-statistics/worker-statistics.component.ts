@@ -22,10 +22,13 @@ export class WorkerStatisticsComponent implements OnInit {
   workerHours: Array<any> = [];
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid: DxDataGridComponent;
 
+  reportTypeList: string[] = ['daily', 'weekly', 'monthly', 'yearly'];
 
   reportType: string = 'weekly';
   selectedWorkerIds: string[] = [];
   selectedWorkers: UserDto[] = [];
+
+  workerHoursSum: number;
 
   workers: UserDto[] = [];
   events: EventDto[] = [];
@@ -356,6 +359,8 @@ generateColumns(data: any[]): any[] {
     });
 
     console.log('Final workerHours:', this.workerHours);
+
+    this.workerHoursSum=this.workerHours.reduce((sum, item) => sum+item.worker.name, 0);
   }
 
 
