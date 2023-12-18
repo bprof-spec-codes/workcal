@@ -2,19 +2,22 @@
   <h2>Worker Hours Report</h2>
 
   <div>
-    <label for="reportType">Report Type:</label>
-    <select [(ngModel)]="reportType" (change)="onReportTypeChange()">
-      <option value="daily">Daily</option>
-      <option value="weekly">Weekly</option>
-      <option value="monthly">Monthly</option>
-      <option value="yearly">Yearly</option>
-    </select>
+
+    <div>
+      <label for="reportType">Report Type:</label>
+      <select [(ngModel)]="reportType" (change)="onReportTypeChange()">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+    </div>
 
     <dx-drop-down-box
       [(value)]="reportType"
       [dataSource]="reportTypeList"
       placeholder="Report type"
-    >
+      (onValueChanged)="onReportTypeChange()">
       <div *dxTemplate="let data of 'content'">
         <dx-list
           [dataSource]="reportTypeList"
@@ -28,6 +31,7 @@
       </div>
     </dx-drop-down-box>
 
+
     <h3>Users:</h3>
     <div *ngIf="isWorker">
       <div *ngFor="let worker of workers">
@@ -37,10 +41,7 @@
 
         >
         </dx-check-box>
-        <label [for]="worker.id">{{'  ' + worker.name }}</label>
-        (
-        <label>{{this.workerHoursSum}}</label>
-         óra)
+        <label [for]="worker.id">{{'  ' + worker.name + '(' + this.workerHoursSum + ' óra)'}}</label>
       </div>
     </div>
 
@@ -50,7 +51,7 @@
           (valueChange)='onWorkerSelectionChange(worker.id, $event)'
           [value]="selectedWorkerIds.includes(worker.id)">
         </dx-check-box>
-        <label [for]="worker.id">{{ worker.name }}</label>
+        <label [for]="worker.id">{{'  ' + worker.name}}</label>
       </div>
     </div>
 
