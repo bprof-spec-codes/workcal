@@ -3,7 +3,8 @@ import { UserApiService } from '../user-api.service';
 import { PictureService } from '../picture-api.service';
 import { EventDto, LabelDto, Picture, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
 import { catchError, of } from 'rxjs';
-
+import { UserService } from '../services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-picture-upload',
@@ -16,15 +17,31 @@ export class PictureUploadComponent {
   allusers: UserDto[] = [];
   pictures: Picture[] = []; // Replace Picture with your picture model
 
-  constructor(private userApiService: UserApiService, private pictureService: PictureService) {}
-
+  userRole: string;
+  constructor(private userApiService: UserApiService, private pictureService: PictureService,private userService: UserService,private router: Router) {}
+  
   ngOnInit() {
+    this.getUserRole();
     this.fetchUsers();
-
     this.fetchPictures();
 
   }
-
+ 
+  getUserRole(): void {
+    
+    this.userService.getUserRole().subscribe(
+      response => {
+        this.userRole = response.role;
+        if(this.userRole!="admin"){
+          this.router.navigate(['']); 
+         }
+      },
+      error => {
+        console.error('Error fetching user role', error);
+      }
+      );
+   
+  }
 
   fetchUsers(): void {
     this.userApiService.getAllUsers()
