@@ -1,12 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { EventApiService } from '../event-api.service';
 import { EventDto, SchedulerEvent , UserDto, UserResponse } from '../models/event-dto.model';
-import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule  } from 'devextreme-angular';
+import { DxSchedulerModule, DxDraggableModule, DxScrollViewModule, DxColorBoxModule, DxDataGridComponent  } from 'devextreme-angular';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { UserApiService } from '../user-api.service';
 import { fromEvent, of } from 'rxjs';
 import { mergeMap, delay } from 'rxjs/operators';
+import { ViewChild } from '@angular/core';
+import * as ExcelJS from 'exceljs';
+import * as FileSaver from 'file-saver';
+import { exportDataGrid } from 'devextreme/excel_exporter';
+import dxDataGrid from 'devextreme/ui/data_grid';
 
 @Component({
   selector: 'app-worker-statistics',
@@ -15,6 +20,7 @@ import { mergeMap, delay } from 'rxjs/operators';
 })
 export class WorkerStatisticsComponent implements OnInit {
   workerHours: Array<any> = [];
+  @ViewChild(DxDataGridComponent, { static: false }) dataGrid: DxDataGridComponent;
 
 
   reportType: string = 'weekly';
@@ -32,11 +38,12 @@ export class WorkerStatisticsComponent implements OnInit {
 
   filteredEvents: EventDto[] = [];
 
-
+  public gridColumns: any[];
   constructor(private eventService: EventApiService,  private userApiService: UserApiService
   ) {}
 
   ngOnInit(): void {
+    this.refreshDataGrid();
 
     let now = new Date();
     this.startDate = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -45,7 +52,105 @@ export class WorkerStatisticsComponent implements OnInit {
 
     this.fetchEvents();
     this.fetchWorkers();
+
+    this.gridColumns = this.generateColumns(this.workerHours);
+
   }
+
+  refreshDataGrid(): void {
+    if (this.dataGrid && this.dataGrid.instance) {
+      this.dataGrid.instance.refresh();
+    }  }
+
+// worker-statistics.component.ts
+
+formatDate(date) {
+  // Format the date as you prefer, e.g., YYYY-MM-DD
+  return date.toISOString().split('T')[0];
+}
+exportGrid(gridInstance: any) {
+  if (gridInstance instanceof dxDataGrid) {
+    console.log("exportGrid start");
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Main sheet');
+
+    // Get the data source and assert it as an array
+    const dataSource = gridInstance.option('dataSource') as Array<any>;
+
+    // Define the first column header as 'segment'
+    let columnHeaders = ['segment'];
+
+
+     // Example of gathering naming components
+  const selectedUsers = this.selectedWorkers.map(w => w.name).join("_");
+  const selectedLabels = this.selectedLabelNames.join("_");
+  const reportType = this.reportType;
+  const timeFrame = `${this.formatDate(this.startDate)}_to_${this.formatDate(this.endDate)}`;
+
+  // Construct the file name
+  const fileName = `Report_${reportType}_${selectedUsers}_${selectedLabels}_${timeFrame}.xlsx`;
+
+  const infoRow = `Report Type: ${reportType}, Users: ${selectedUsers}, Labels: ${selectedLabels}, Time Frame: ${timeFrame}`;
+
+
+    // If dataSource is not empty, add user columns dynamically
+    if (Array.isArray(dataSource) && dataSource.length) {
+      // Extract user columns from the first data row
+      // Skip the 'segment' key as it's already added
+      const userColumns = Object.keys(dataSource[0]).filter(key => key !== 'segment');
+      columnHeaders = columnHeaders.concat(userColumns);
+
+      worksheet.addRow([infoRow]);
+
+      // Add column headers to the worksheet
+      worksheet.addRow(columnHeaders);
+
+      // Iterate over the data and add rows to the worksheet
+      dataSource.forEach(dataRow => {
+        const row = columnHeaders.map(header => dataRow[header] || ""); // Handle undefined values
+        worksheet.addRow(row);
+      });
+    } else {
+      console.error("Data source is not an array or is empty");
+    }
+
+    // Save the workbook
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      FileSaver.saveAs(
+        new Blob([buffer], { type: 'application/octet-stream' }),
+        fileName
+      );
+      console.log("exportGrid saveAs");
+    }).catch((bufferError) => {
+      console.error("Buffer generation error:", bufferError);
+    });
+
+
+    console.log("exportGrid end");
+  }
+}
+
+
+
+
+
+
+
+// worker-statistics.component.ts
+
+generateColumns(data: any[]): any[] {
+  const columns = [];
+
+  // Assuming all data objects have the same structure
+  if (data.length > 0) {
+    Object.keys(data[0]).forEach(key => {
+      columns.push({ dataField: key, caption: key });
+    });
+  }
+
+  return columns;
+}
 
 
 
@@ -106,14 +211,21 @@ export class WorkerStatisticsComponent implements OnInit {
     this.selectedWorkers = this.workers.filter(worker => this.selectedWorkerIds.includes(worker.id));
 
     this.getWorkerStatistics();
+
   }
 
 
 
   onDateChange(): void {
     this.getWorkerStatistics();
-  }
+    this.gridColumns = this.generateColumns(this.workerHours);
 
+    this.refreshDataGrid();
+
+  }
+  triggerExport() {
+    this.exportGrid(this.dataGrid.instance);
+  }
 
   onLabelSelectionChange(labelName: string, isChecked: boolean): void {
     if (isChecked) {
@@ -126,8 +238,14 @@ export class WorkerStatisticsComponent implements OnInit {
   }
 
   onReportTypeChange(): void {
-    // Assuming the events are already filtered by worker and date
-    this.calculateStatistics(this.filteredEvents);
+    // Call the getWorkerStatistics method to calculate the worker hours
+    this.getWorkerStatistics();
+
+    // Refresh the data grid after calculating the statistics
+    this.refreshDataGrid();
+
+    // Export the data to Excel
+    this.exportGrid(this.dataGrid);
   }
 
   groupEventsByReportType(events: EventDto[], reportType: string): { [key: string]: EventDto[] } {

@@ -32,12 +32,14 @@ import { NgxPrintModule } from 'ngx-print';
 import { PictureUploadComponent } from './picture-upload/picture-upload.component';
 import { DailyEventsComponent } from './daily-events/daily-events.component';
 import { MatCardModule } from '@angular/material/card';
+import { DxDataGridModule } from 'devextreme-angular';
 
 
 @NgModule({
   imports: [
     MatCardModule,
     NgxPrintModule,
+    DxDataGridModule,
     DxDateBoxModule,
     DxChartModule,
     DxSelectBoxModule,
