@@ -17,6 +17,50 @@
       <label [for]="worker.id">{{ worker.name }}</label>
     </div>
 
+<!--    <dx-drop-down-box-->
+<!--      [(value)]="reportType"-->
+<!--      [dataSource]="reportTypeList"-->
+<!--      placeholder="Report type"-->
+<!--      (onValueChanged)="onReportTypeChange()">-->
+<!--      <div *dxTemplate="let data of 'content'">-->
+<!--        <dx-list-->
+<!--          [dataSource]="reportTypeList"-->
+<!--          selectionMode="single"-->
+<!--          [selectedItems]="[reportType]"-->
+<!--          (onSelectionChanged)="onReportTypeChange($event)">-->
+<!--          <div *dxTemplate="let data of 'content'">-->
+<!--            {{data}}-->
+<!--          </div>-->
+<!--        </dx-list>-->
+<!--      </div>-->
+<!--    </dx-drop-down-box>-->
+
+
+    <h3>Users:</h3>
+    <div *ngIf="isWorker">
+      <div *ngFor="let worker of workers">
+        <dx-check-box
+          (valueChange)='onWorkerSelectionChange(worker.id, $event)'
+          [value]="selectedWorkerIds.includes(worker.id)"
+
+        >
+        </dx-check-box>
+        <label [for]="worker.id">{{'  ' + worker.name + '(' + this.workerHoursSum + ' óra)'}}</label>
+      </div>
+    </div>
+
+    <div *ngIf="!isWorker">
+      <div *ngFor="let worker of workers">
+        <dx-check-box
+          (valueChange)='onWorkerSelectionChange(worker.id, $event)'
+          [value]="selectedWorkerIds.includes(worker.id)">
+        </dx-check-box>
+        <label [for]="worker.id">{{'  ' + worker.name}}</label>
+      </div>
+    </div>
+
+    <h3>Labels:</h3>
+
     <div *ngFor="let labelName of distinctLabelNames">
       <input type="checkbox" [id]="'label-' + labelName" [value]="labelName"
              (change)="onLabelSelectionChange(labelName, $event.target.checked)"
