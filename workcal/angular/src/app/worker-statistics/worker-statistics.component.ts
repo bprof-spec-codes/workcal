@@ -7,6 +7,8 @@ import { catchError } from 'rxjs/operators';
 import { UserApiService } from '../user-api.service';
 import { fromEvent, of } from 'rxjs';
 import { mergeMap, delay } from 'rxjs/operators';
+import { AuthService } from '@abp/ng.core';
+import { UserService} from '../services/user.service';
 import { ViewChild } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
@@ -41,6 +43,11 @@ export class WorkerStatisticsComponent implements OnInit {
 
   filteredEvents: EventDto[] = [];
 
+  userRole: string;
+  currentUserId: string;
+  isWorker: boolean;
+
+  constructor(private authService: AuthService, private userService: UserService,private eventService: EventApiService,  private userApiService: UserApiService
   public gridColumns: any[];
   constructor(private eventService: EventApiService,  private userApiService: UserApiService
   ) {}
@@ -52,6 +59,10 @@ export class WorkerStatisticsComponent implements OnInit {
     this.startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     this.endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
+    //this.getUserRole();
+
+   // this.fetchEvents();
+    this.getCurrentUser();
 
     this.fetchEvents();
     this.fetchWorkers();
@@ -60,13 +71,33 @@ export class WorkerStatisticsComponent implements OnInit {
 
   }
 
+  getCurrentUser(): void {
+    this.userService.getUserId().subscribe(
+      response => {
+        console.log('API Response:', response);
+        this.currentUserId = response.id;
   refreshDataGrid(): void {
     if (this.dataGrid && this.dataGrid.instance) {
       this.dataGrid.instance.refresh();
     }  }
 
+        // Now that you have the current user ID, fetch the user role
+        this.getUserRole();
+      },
+      error => {
+        console.error('Error fetching user ID', error);
+      }
+    );
+  }
 // worker-statistics.component.ts
 
+  getUserRole(): void {
+    console.log('Fetching user role...');
+    this.userService.getUserRole().subscribe(
+      response => {
+        console.log('API Response:', response);
+        this.userRole = response.role;
+        console.log(' this.currentUserId:', this.currentUserId);
 formatDate(date) {
   // Format the date as you prefer, e.g., YYYY-MM-DD
   return date.toISOString().split('T')[0];
@@ -74,6 +105,23 @@ formatDate(date) {
 exportGrid(gridInstance: any) {
   if (gridInstance instanceof dxDataGrid) {
     console.log("exportGrid start");
+
+        if (this.userRole === 'worker') {
+          this.isWorker = true;
+          this.selectedWorkerIds = [this.currentUserId];
+        } else {
+          this.isWorker = false;
+        }
+
+        // Fetch workers and events after getting the role
+        this.fetchWorkers();
+        this.fetchEvents();
+      },
+      error => {
+        console.error('Error fetching user role', error);
+      }
+    );
+  }
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Main sheet');
@@ -179,6 +227,10 @@ generateColumns(data: any[]): any[] {
             name: user.name,
             email: user.email
           }));
+          if (this.isWorker) {
+            this.workers = this.workers.filter(worker => worker.id === this.currentUserId);
+          }
+
         } else {
           console.error('Items key not found in response:', data);
         }
