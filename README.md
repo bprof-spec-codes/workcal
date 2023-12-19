@@ -36,7 +36,7 @@ Vagy éppen szerkeszteni
 Az aznapi eseményeket nyomtatóbarátan meg tudjuk jeleníteni
 
 <img width="696" alt="image" src="https://github.com/bprof-spec-codes/workcal/assets/92106195/18cfaa88-b16d-487a-b262-e333f5636149">
-A nyomtatás csak trükközéssel működik megfelelően (bővebben a problémáknál)
+A nyomtatás némi trükközés után megfelelően működik
 
 ![image](https://github.com/bprof-spec-codes/workcal/assets/92106195/b8699ac0-09fa-4c9b-b0d9-353832f4be32)
 Adminisztrátorként az összes dolgozó munkaóráira rálátunk
