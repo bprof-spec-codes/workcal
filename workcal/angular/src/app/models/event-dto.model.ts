@@ -76,12 +76,14 @@ export class Picture {
   title: string;
   imageData: string;
   contentType: string;
+  userId:string;
 
   constructor(data: any) {
     this.id = data.id;
     this.title = data.title;
     this.imageData = data.imageData;
     this.contentType = data.contentType;
+    this.userId=data.userId;
   }
 
   get imageUrl(): string {

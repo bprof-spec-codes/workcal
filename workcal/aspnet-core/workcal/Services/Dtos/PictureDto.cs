@@ -9,6 +9,8 @@
         public byte[] ImageData { get; set; }
 
         public string ContentType { get; set; }
+
+        public Guid UserId { get; set; }
     }
 
 }

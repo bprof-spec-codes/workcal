@@ -1,5 +1,5 @@
 <div class="picture-upload">
-  <form (submit)="uploadPicture()">
+  <form class='dx-form' (submit)="uploadPicture()">
     <div>
       <label for="picture">Select Picture:</label>
       <input type="file" id="picture" (change)="onFileSelected($event)">
@@ -10,16 +10,16 @@
         <option *ngFor="let user of allusers" [value]="user.id">{{user.name}}</option>
       </select>
     </div>
-    <button type="submit">Upload Picture</button>
+    <dx-button [useSubmitBehavior]='true' text='Upload Picture'></dx-button>
   </form>
 </div>
 <div class="image-list">
 
   <div *ngFor="let picture of pictures" class="picture-item">
     <img [src]="picture.imageUrl" alt="{{ picture.title }}" class="picture-thumbnail">
-    <input type="file" (change)="updatePicture(picture.id, $event)"> <!-- Update option -->
-
-    <button (click)="deletePicture(picture.id)">Delete</button> <!-- Delete option -->
-</div>
+<!--    <input type="file" (change)="updatePicture(picture.id, $event)">-->
+    <label>{{ userIdToUserNameMap[picture.userId] }}</label> <!-- Use user name here -->
+    <dx-button (onClick)="deletePicture(picture.id)">Delete</dx-button>
+  </div>
 
 </div>
