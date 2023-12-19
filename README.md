@@ -9,6 +9,10 @@
 |Full stack|Juhász Márton Bendegúz|
 |Full stack|Varga Márk|
 
+## Bejelentkezés
+Minden tesztfelhasználónak a jelszava: Almafa12. (ponttal együtt, de ezen zárójeles szöveg nélkül)
+A root felhasználóba a root felhasználónévvel lehet bejelentkezni.
+
 ## Kezdőoldal
 ![image](https://github.com/bprof-spec-codes/workcal/assets/92106195/26b2a09f-bdb1-410d-8c50-4ed768fd3779)
 Alapból ezt az ablakot látjuk, a Log in gombra rákattintva bejelentkezhetünk (vagy regisztrálhatunk)
@@ -62,3 +66,15 @@ Normál dolgozóként csak a saját statisztikánkhoz és csak a hozzánk (is) r
 ![image](https://github.com/bprof-spec-codes/workcal/assets/92106195/291d1373-b5ef-4ab4-afbc-9cc6ece1f601)
 Ugyan tudhatunk arról, hogy kik a kollégáink, szerkeszteni senkinek sem tudunk az adatlapján.
 
+## API
+Az abp által biztosított végpontokon kívül a következőkre volt szükség:
+### Event
+ - A worker calendar alkalmazás legfontosabb objektuma egy event, és ezekhez különböző endpointok szükségesek (a normál CRUD műveleteken kívül le kell kérdezni kifejezetten az esemény koordinátáit, hogy igazoljuk, hogy a helyszínen vagyunk, illetve a hozzá tartozó kép lekérdezésére is kellett lehetőség.
+
+### Identity
+ - Hogy a megfelelő role-ú emberek a megfelelő dolgokat lássák, frontend és backend oldalon a validációhoz szükség volt arra, hogy lekérdezzük a konkrét szerepkörünket (erre direkt endpointot nem találtunk abp szinten, és egyszerűbb volt készíteni endpoint-ot, mint bonyolult lekérdezésekkel eljutni a kívánt célhoz)
+ - Például a statisztika oldalon szükség van a saját user id-nkra, hogyha sima workerként vagyunk bejelentkezve, rá tudjon szűrni a ránk releváns munkaórákra
+
+### Picture
+ - A felhasználókhoz tartozó képek feltöltésére, frissítésére és törlésére használjuk (ehhez csak admin fér hozzá)
+ - Valószínűleg szebb lett volna az abp által biztosított user-t kiterjeszteni a profilkép tulajdonsággal, azonban ennek módját nem sikerült megtalálnunk.
