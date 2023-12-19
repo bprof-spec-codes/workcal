@@ -14,7 +14,7 @@ export class HomeComponent  implements OnInit{
 
   userRole: string;
 
-  constructor(private authService: AuthService, private userService: UserService) {}
+  constructor(private authService: AuthService, public userService: UserService) {}
 
   ngOnInit(): void {
     this.getUserRole();
@@ -41,6 +41,14 @@ if (this.userRole=="admin") {
 }else{
   return false;
 }
+  }
+
+  IsLoggedIn():boolean{
+    if(this.userRole=="admin"||this.userRole=="manager"||this.userRole=="worker"){
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }

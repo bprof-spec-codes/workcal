@@ -92,7 +92,8 @@ namespace workcal.Services
                 Id = image.Id,
                 Title = image.Title,
                 ImageData = image.ImageData,
-                ContentType = image.ContentType
+                ContentType = image.ContentType,
+                UserId=image.UserId,
             };
 
             return p;
@@ -109,7 +110,8 @@ namespace workcal.Services
                 Id = image.Id,
                 Title = image.Title,
                 ImageData = image.ImageData,
-                ContentType = image.ContentType
+                ContentType = image.ContentType,
+                UserId = image.UserId,
             });
         }
 
@@ -126,6 +128,7 @@ namespace workcal.Services
             picture.Title = pictureDto.Title;
             picture.ImageData = pictureDto.ImageData;
             picture.ContentType = pictureDto.ContentType;
+            picture.UserId=pictureDto.UserId;
 
             await _pictureRepository.UpdateAsync(picture);
         }

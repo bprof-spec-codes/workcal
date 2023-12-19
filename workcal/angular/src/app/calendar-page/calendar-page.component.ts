@@ -10,6 +10,7 @@ import { Location } from '@angular/common';
 import notify from 'devextreme/ui/notify';
 import { PictureService } from '../picture-api.service';
 import { BingMapsService } from '../geocoding.service';
+import { UserService } from '../services/user.service';
 
 
 
@@ -34,6 +35,10 @@ export class CalendarPageComponent implements OnInit {
   selectedEvent: EventDto;
 
   dynamicUniqueLabels: LabelDto[] = [];
+
+  userRole: string;
+  currentUserId: string;
+  isWorker: boolean;
 
   currentDate: Date = new Date();
   currentView: string = 'day';
@@ -65,13 +70,14 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
 
 
   constructor(private eventApiService: EventApiService, private userApiService: UserApiService , private bingMapsService: BingMapsService,   private renderer: Renderer2
-,  private pictureService: PictureService ,private router: Router )
+,  private pictureService: PictureService ,private router: Router, private userService: UserService )
   {   this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.router.onSameUrlNavigation = 'reload';}
 
   ngOnInit(): void {
     this.fetchUsers();
     this.fetchUniqueLabels();
+    this.getUserRole();
   }
 
   refreshPage() {
@@ -84,6 +90,29 @@ IdLabels: Array<{ name: string, color: string,eventId: string }> = [
     if (button) {
       button.addEventListener('click', () => this.captureCurrentLocation());
     }
+  }
+
+  getUserRole(): void {
+    console.log('Fetching user role...');
+    this.userService.getUserRole().subscribe(
+      response => {
+        console.log('API Response:', response);
+        this.userRole = response.role;
+        console.log(' this.currentUserId:', this.currentUserId);
+
+        if (this.userRole === 'worker') {
+          this.isWorker = true;
+        } else {
+          this.isWorker = false;
+        }
+
+        // Fetch workers and events after getting the role
+        this.fetchEvents();
+      },
+      error => {
+        console.error('Error fetching user role', error);
+      }
+    );
   }
 
   fetchUsers(): void {

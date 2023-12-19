@@ -19,7 +19,9 @@
       <p><strong>Location:</strong> {{ event.locationString }}</p>
       <p><strong>Labels:</strong> {{ event.labelNames }}</p>
       <p><strong>Participants:</strong> {{ event.userNames }}</p>
-      <p><strong>Description:</strong> {{ event.description }}</p>
+      <div class="markdown-body" [innerHTML]="getHtmlContent(event.description)"></div>
     </mat-card-content>
   </mat-card>
 </div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">

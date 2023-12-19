@@ -100,20 +100,21 @@ type="month"
 </div>
 
 
-
-<div class="label-list">
-  <div *ngFor="let label of dynamicUniqueLabels">
-    {{ label.name }} ({{ label.color }})
-    <button (click)="deleteLabelPermanent(label.name, label.color)">Delete</button>
+<div *ngIf='!isWorker'>
+  <div class="label-list">
+    <div *ngFor="let label of dynamicUniqueLabels">
+      {{ label.name }} ({{ label.color }})
+      <button (click)="deleteLabelPermanent(label.name, label.color)">Delete</button>
+    </div>
   </div>
-</div>
-<img  [src]="selectedEventPicture" class="event-user-image" alt="User Image"/>
+  <img  [src]="selectedEventPicture" class="event-user-image" alt="User Image"/>
 
 
-</div>
+  </div>
 
-<div>
-  <span>Latitude: {{ latitude }}</span>
-  <span>Longitude: {{ longitude }}</span>
-  <button id="capture-location-button" type="button">Capture Location</button>
+  <div>
+    <span>Latitude: {{ latitude }}</span>
+    <span>Longitude: {{ longitude }}</span>
+    <button id="capture-location-button" type="button">Capture Location</button>
+  </div>
 </div>
